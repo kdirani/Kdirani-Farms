@@ -133,7 +133,7 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
                   <TableCell>{format(new Date(material.created_at), 'MMM dd, yyyy')}</TableCell>
                   <TableCell>{format(new Date(material.updated_at), 'MMM dd, yyyy')}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-start gap-2">
                       <Button
                         variant="ghost"
                         size="icon"

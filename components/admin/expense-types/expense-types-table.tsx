@@ -134,7 +134,7 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
                   <TableCell>{format(new Date(expenseType.created_at), 'MMM dd, yyyy')}</TableCell>
                   <TableCell>{format(new Date(expenseType.updated_at), 'MMM dd, yyyy')}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-start gap-2">
                       <Button
                         variant="ghost"
                         size="icon"
