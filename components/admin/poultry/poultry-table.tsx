@@ -49,13 +49,13 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
     const mortalityRate = (poultry.dead_chicks / poultry.opening_chicks) * 100;
     
     if (mortalityRate === 0) {
-      return <Badge variant="success">Excellent</Badge>;
+      return <Badge variant="success">ممتاز</Badge>;
     } else if (mortalityRate < 5) {
-      return <Badge variant="success">Good</Badge>;
+      return <Badge variant="success">جيد</Badge>;
     } else if (mortalityRate < 10) {
-      return <Badge variant="warning">Fair</Badge>;
+      return <Badge variant="warning">مقبول</Badge>;
     } else {
-      return <Badge variant="destructive">Poor</Badge>;
+      return <Badge variant="destructive">ضعيف</Badge>;
     }
   };
 
@@ -66,7 +66,7 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search batches..."
+            placeholder="البحث في الدفعات..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -74,7 +74,7 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Poultry Batch
+          إضافة دفعة قطعان
         </Button>
       </div>
 
@@ -82,22 +82,22 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Batch Name</TableHead>
-              <TableHead>Farm</TableHead>
-              <TableHead>Farmer</TableHead>
-              <TableHead className="text-right">Opening</TableHead>
-              <TableHead className="text-right">Dead</TableHead>
-              <TableHead className="text-right">Remaining</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم الدفعة</TableHead>
+              <TableHead>المزرعة</TableHead>
+              <TableHead>المزارع</TableHead>
+              <TableHead className="text-right">البداية</TableHead>
+              <TableHead className="text-right">الميت</TableHead>
+              <TableHead className="text-right">المتبقي</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredPoultry.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} className="text-center text-muted-foreground">
-                  No poultry batches found
+                  لم يتم العثور على دفعات قطعان
                 </TableCell>
               </TableRow>
             ) : (
@@ -106,7 +106,7 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       <UserCog className="h-4 w-4 text-muted-foreground" />
-                      {poultry.batch_name || 'Unnamed Batch'}
+                      {poultry.batch_name || 'دفعة غير مسماة'}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -118,12 +118,12 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
                         )}
                       </div>
                     ) : (
-                      <span className="text-muted-foreground">No farm</span>
+                      <span className="text-muted-foreground">لا توجد مزرعة</span>
                     )}
                   </TableCell>
                   <TableCell>
                     {poultry.farm?.user_name || (
-                      <span className="text-muted-foreground">Unassigned</span>
+                      <span className="text-muted-foreground">غير معين</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right font-medium">
@@ -146,11 +146,11 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
+                          <span className="sr-only">فتح القائمة</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => {
@@ -158,7 +158,7 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
                             setEditDialogOpen(true);
                           }}
                         >
-                          Edit Batch
+                          تعديل الدفعة
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -168,7 +168,7 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
                           }}
                           className="text-destructive"
                         >
-                          Delete Batch
+                          حذف الدفعة
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

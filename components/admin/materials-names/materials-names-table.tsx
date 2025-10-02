@@ -44,18 +44,18 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
 
   const handleCreate = async () => {
     if (!materialName.trim()) {
-      toast.error('Material name is required');
+      toast.error('اسم اسم المادة مطلوب');
       return;
     }
     setIsLoading(true);
     const result = await createMaterialName({ material_name: materialName });
     if (result.success) {
-      toast.success('Material name created successfully');
+      toast.success('تم إنشاء اسم المادة بنجاح');
       setMaterialName('');
       setCreateDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to create material name');
+      toast.error(result.error || 'فشل في إنشاء اسم المادة');
     }
     setIsLoading(false);
   };
@@ -65,11 +65,11 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
     setIsLoading(true);
     const result = await updateMaterialName({ id: selectedMaterial.id, material_name: materialName });
     if (result.success) {
-      toast.success('Material name updated successfully');
+      toast.success('تم تحديث اسم المادة بنجاح');
       setEditDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to update material name');
+      toast.error(result.error || 'فشل في تحديث اسم المادة');
     }
     setIsLoading(false);
   };
@@ -79,11 +79,11 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
     setIsLoading(true);
     const result = await deleteMaterialName(selectedMaterial.id);
     if (result.success) {
-      toast.success('Material name deleted successfully');
+      toast.success('تم حذف اسم المادة بنجاح');
       setDeleteDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete material name');
+      toast.error(result.error || 'فشل في حذف اسم المادة');
     }
     setIsLoading(false);
   };
@@ -95,7 +95,7 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search materials..."
+            placeholder="البحث في المواد..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -106,25 +106,24 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
           setCreateDialogOpen(true);
         }}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Material Name
+          إضافة اسم مادة
         </Button>
       </div>
-
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Material Name</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Updated</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم المادة</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead>تاريخ التحديث</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredMaterials.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  No material names found
+                  لم يتم العثور على أسماء مواد
                 </TableCell>
               </TableRow>
             ) : (
@@ -169,13 +168,12 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Material Name</DialogTitle>
-            <DialogDescription>Enter a new material name to add to the system</DialogDescription>
+            <DialogTitle>تعديل اسم المادة</DialogTitle>
+            <DialogDescription>أدخل اسم مادة جديد لإضافته للنظام</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="material_name">Material Name</Label>
+            <Label htmlFor="material_name">اسم المادة</Label>
             <Input
-              id="material_name"
               placeholder="e.g., Corn, Wheat, Feed Mix"
               value={materialName}
               onChange={(e) => setMaterialName(e.target.value)}
@@ -197,11 +195,11 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Material Name</DialogTitle>
-            <DialogDescription>Update the material name</DialogDescription>
+            <DialogTitle>تعديل اسم المادة</DialogTitle>
+            <DialogDescription>تحديث اسم المادة</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="edit_material_name">Material Name</Label>
+            <Label htmlFor="edit_material_name">اسم المادة</Label>
             <Input
               id="edit_material_name"
               placeholder="e.g., Corn, Wheat, Feed Mix"
@@ -225,9 +223,9 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Material Name</DialogTitle>
+            <DialogTitle>حذف اسم المادة</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{selectedMaterial?.material_name}"? This action cannot be undone.
+هل أنت متأكد من حذف "{selectedMaterial?.material_name}"؟ هذا الإجراء لا يمكن التراجع عنه.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

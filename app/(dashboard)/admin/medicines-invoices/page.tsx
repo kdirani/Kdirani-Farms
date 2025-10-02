@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Medicine Consumption Invoices - Admin Dashboard',
-  description: 'Manage medicine and vaccine consumption invoices',
+  title: 'فواتير استهلاك الأدوية - لوحة التحكم الإدارية',
+  description: 'إدارة فواتير استهلاك الأدوية واللقاحات',
 };
 
 async function MedicineInvoicesContent() {
@@ -19,7 +19,7 @@ async function MedicineInvoicesContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load medicine invoices'}
+          {result.error || 'فشل في تحميل فواتير الأدوية'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function MedicineInvoicesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Medicine Consumption Invoices</h1>
+        <h1 className="text-3xl font-bold tracking-tight">فواتير استهلاك الأدوية</h1>
         <p className="text-muted-foreground mt-2">
-          Manage medicine and vaccine consumption with automatic inventory tracking
+          إدارة استهلاك الأدوية واللقاحات مع تتبع المخزون التلقائي
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Medicine Invoices</CardTitle>
+          <CardTitle>فواتير الأدوية</CardTitle>
           <CardDescription>
-            Track medicine usage and automatically deduct from warehouse inventory
+            تتبع استخدام الأدوية وخصمها تلقائيًا من مخزون المستودعات
           </CardDescription>
         </CardHeader>
         <CardContent>

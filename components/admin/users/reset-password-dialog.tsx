@@ -20,10 +20,10 @@ import { toast } from 'sonner';
 import { Loader2, KeyRound } from 'lucide-react';
 
 const passwordSchema = z.object({
-  newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+  newPassword: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
   confirmPassword: z.string(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: "كلمات المرور غير متطابقة",
   path: ["confirmPassword"],
 });
 
@@ -52,14 +52,14 @@ export function ResetPasswordDialog({ user, open, onOpenChange }: ResetPasswordD
       const result = await resetUserPassword(user.id, data.newPassword);
       
       if (result.success) {
-        toast.success('Password reset successfully');
+        toast.success('تم إعادة تعيين كلمة المرور بنجاح');
         reset();
         onOpenChange(false);
       } else {
-        toast.error(result.error || 'Failed to reset password');
+        toast.error(result.error || 'فشل في إعادة تعيين كلمة المرور');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -71,21 +71,21 @@ export function ResetPasswordDialog({ user, open, onOpenChange }: ResetPasswordD
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <KeyRound className="h-5 w-5" />
-            Reset Password
+            إعادة تعيين كلمة المرور
           </DialogTitle>
           <DialogDescription>
-            Set a new password for {user.fname}
+            تعيين كلمة مرور جديدة لـ {user.fname}
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="bg-muted p-4 rounded-lg space-y-1">
-            <div className="text-sm font-medium">User: {user.fname}</div>
+            <div className="text-sm font-medium">المستخدم: {user.fname}</div>
             <div className="text-sm text-muted-foreground">{user.email}</div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="newPassword">New Password</Label>
+            <Label htmlFor="newPassword">كلمة المرور الجديدة</Label>
             <Input
               id="newPassword"
               type="password"
@@ -99,7 +99,7 @@ export function ResetPasswordDialog({ user, open, onOpenChange }: ResetPasswordD
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -119,11 +119,11 @@ export function ResetPasswordDialog({ user, open, onOpenChange }: ResetPasswordD
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Reset Password
+              إعادة تعيين كلمة المرور
             </Button>
           </DialogFooter>
         </form>

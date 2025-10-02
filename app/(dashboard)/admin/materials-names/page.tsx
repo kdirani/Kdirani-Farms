@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Material Names - Admin Dashboard',
-  description: 'Manage material names lookup table',
+  title: 'أسماء المواد - لوحة التحكم الإدارية',
+  description: 'إدارة جدول أسماء المواد',
 };
 
 async function MaterialNamesContent() {
@@ -19,7 +19,7 @@ async function MaterialNamesContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load material names'}
+          {result.error || 'فشل في تحميل أسماء المواد'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function MaterialNamesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Material Names</h1>
+        <h1 className="text-3xl font-bold tracking-tight">أسماء المواد</h1>
         <p className="text-muted-foreground mt-2">
-          Manage material names used in inventory and invoices
+          إدارة أسماء المواد المستخدمة في المخزون والفواتير
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Material Names</CardTitle>
+          <CardTitle>جميع أسماء المواد</CardTitle>
           <CardDescription>
-            Add, edit, or remove material names from the system
+            إضافة أو تعديل أو حذف أسماء المواد من النظام
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -27,8 +27,8 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const userSchema = z.object({
-  fname: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
+  fname: z.string().min(2, 'الاسم يجب أن يكون حرفين على الأقل'),
+  email: z.string().email('البريد الإلكتروني غير صالح'),
   user_role: z.enum(['admin', 'sub_admin', 'farmer']),
 });
 
@@ -76,13 +76,13 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
       });
       
       if (result.success) {
-        toast.success('User updated successfully');
+        toast.success('تم تحديث المستخدم بنجاح');
         onOpenChange(false);
       } else {
-        toast.error(result.error || 'Failed to update user');
+        toast.error(result.error || 'فشل في تحديث المستخدم');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -92,17 +92,17 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit User</DialogTitle>
+          <DialogTitle>تعديل المستخدم</DialogTitle>
           <DialogDescription>
-            Update user information and permissions.
+            تحديث معلومات المستخدم والصلاحيات.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="fname">Full Name</Label>
+            <Label htmlFor="fname">الاسم الكامل</Label>
             <Input
               id="fname"
-              placeholder="John Doe"
+              placeholder="أحمد محمد"
               {...register('fname')}
               disabled={isLoading}
             />
@@ -112,11 +112,11 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">البريد الإلكتروني</Label>
             <Input
               id="email"
               type="email"
-              placeholder="john@example.com"
+              placeholder="ahmed@example.com"
               {...register('email')}
               disabled={isLoading}
             />
@@ -126,19 +126,19 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="user_role">Role</Label>
+            <Label htmlFor="user_role">الدور</Label>
             <Select
               value={userRole}
               onValueChange={(value) => setValue('user_role', value as any)}
               disabled={isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
+                <SelectValue placeholder="اختر دورًا" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="farmer">Farmer</SelectItem>
-                <SelectItem value="sub_admin">Sub Admin</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="farmer">مزارع</SelectItem>
+                <SelectItem value="sub_admin">مدير مساعد</SelectItem>
+                <SelectItem value="admin">مدير</SelectItem>
               </SelectContent>
             </Select>
             {errors.user_role && (
@@ -153,11 +153,11 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
+              حفظ التغييرات
             </Button>
           </DialogFooter>
         </form>

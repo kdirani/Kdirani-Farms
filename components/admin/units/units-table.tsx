@@ -44,18 +44,18 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
 
   const handleCreate = async () => {
     if (!unitName.trim()) {
-      toast.error('Unit name is required');
+      toast.error('اسم الوحدة مطلوب');
       return;
     }
     setIsLoading(true);
     const result = await createMeasurementUnit({ unit_name: unitName });
     if (result.success) {
-      toast.success('Measurement unit created successfully');
+      toast.success('تم إنشاء وحدة القياس بنجاح');
       setUnitName('');
       setCreateDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to create measurement unit');
+      toast.error(result.error || 'فشل في إنشاء وحدة القياس');
     }
     setIsLoading(false);
   };
@@ -65,11 +65,11 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
     setIsLoading(true);
     const result = await updateMeasurementUnit({ id: selectedUnit.id, unit_name: unitName });
     if (result.success) {
-      toast.success('Measurement unit updated successfully');
+      toast.success('تم تحديث وحدة القياس بنجاح');
       setEditDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to update measurement unit');
+      toast.error(result.error || 'فشل في تحديث وحدة القياس');
     }
     setIsLoading(false);
   };
@@ -79,11 +79,11 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
     setIsLoading(true);
     const result = await deleteMeasurementUnit(selectedUnit.id);
     if (result.success) {
-      toast.success('Measurement unit deleted successfully');
+      toast.success('تم حذف وحدة القياس بنجاح');
       setDeleteDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete measurement unit');
+      toast.error(result.error || 'فشل في حذف وحدة القياس');
     }
     setIsLoading(false);
   };
@@ -95,7 +95,7 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search units..."
+            placeholder="البحث في الوحدات..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -106,7 +106,7 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
           setCreateDialogOpen(true);
         }}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Unit
+          إضافة وحدة
         </Button>
       </div>
 
@@ -114,17 +114,17 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Unit Name</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Updated</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم الوحدة</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead>تاريخ التحديث</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredUnits.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  No measurement units found
+                  لم يتم العثور على وحدات قياس
                 </TableCell>
               </TableRow>
             ) : (
@@ -169,11 +169,11 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Measurement Unit</DialogTitle>
-            <DialogDescription>Enter a new measurement unit to add to the system</DialogDescription>
+            <DialogTitle>إضافة وحدة قياس</DialogTitle>
+            <DialogDescription>أدخل وحدة قياس جديدة لإضافتها للنظام</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="unit_name">Unit Name</Label>
+            <Label htmlFor="unit_name">اسم الوحدة</Label>
             <Input
               id="unit_name"
               placeholder="e.g., kg, ton, liter, piece"
@@ -197,11 +197,11 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Measurement Unit</DialogTitle>
-            <DialogDescription>Update the measurement unit</DialogDescription>
+            <DialogTitle>تعديل وحدة القياس</DialogTitle>
+            <DialogDescription>تحديث وحدة القياس</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="edit_unit_name">Unit Name</Label>
+            <Label htmlFor="edit_unit_name">اسم الوحدة</Label>
             <Input
               id="edit_unit_name"
               placeholder="e.g., kg, ton, liter, piece"
@@ -225,9 +225,9 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Measurement Unit</DialogTitle>
+            <DialogTitle>حذف وحدة القياس</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{selectedUnit?.unit_name}"? This action cannot be undone.
+هل أنت متأكد من حذف "{selectedUnit?.unit_name}"؟ هذا الإجراء لا يمكن التراجع عنه.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

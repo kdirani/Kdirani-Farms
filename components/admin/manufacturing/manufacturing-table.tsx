@@ -1,18 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
 import { ManufacturingInvoice, deleteManufacturingInvoice } from '@/actions/manufacturing.actions';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+
+import { format } from 'date-fns';
+import { CreateManufacturingDialog } from './create-manufacturing-dialog';
+import { MoreHorizontal, Search, Plus } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,15 +14,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Search, Plus } from 'lucide-react';
-import { CreateManufacturingDialog } from './create-manufacturing-dialog';
-import { format } from 'date-fns';
-import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import Link from 'next/link';
+import { useState } from 'react';
 
 interface ManufacturingTableProps {
   invoices: ManufacturingInvoice[];
 }
-
 export function ManufacturingTable({ invoices }: ManufacturingTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -43,14 +43,14 @@ export function ManufacturingTable({ invoices }: ManufacturingTableProps) {
   });
 
   const handleDelete = async (id: string, invoiceNumber: string) => {
-    if (!confirm(`Are you sure you want to delete invoice ${invoiceNumber}?`)) return;
+    if (!confirm(`هل أنت متأكد من حذف فاتورة ${invoiceNumber}؟`)) return;
 
     const result = await deleteManufacturingInvoice(id);
     if (result.success) {
-      toast.success('Manufacturing invoice deleted successfully');
+      toast.success('تم حذف فاتورة التصنيع بنجاح');
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete invoice');
+      toast.error(result.error || 'فشل في حذف الفاتورة');
     }
   };
 
@@ -61,7 +61,7 @@ export function ManufacturingTable({ invoices }: ManufacturingTableProps) {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search invoices..."
+            placeholder="البحث في الفواتير..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -69,7 +69,7 @@ export function ManufacturingTable({ invoices }: ManufacturingTableProps) {
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Create Manufacturing Invoice
+          إنشاء فاتورة تصنيع
         </Button>
       </div>
 
@@ -77,20 +77,20 @@ export function ManufacturingTable({ invoices }: ManufacturingTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Invoice #</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Warehouse</TableHead>
-              <TableHead>Blend Name</TableHead>
-              <TableHead>Output Material</TableHead>
-              <TableHead className="text-right">Quantity</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>رقم الفاتورة</TableHead>
+              <TableHead>التاريخ</TableHead>
+              <TableHead>المستودع</TableHead>
+              <TableHead>اسم الخلطة</TableHead>
+              <TableHead>المادة المنتجة</TableHead>
+              <TableHead className="text-right">الكمية</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredInvoices.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-muted-foreground">
-                  No manufacturing invoices found
+                  لم يتم العثور على فواتير تصنيع
                 </TableCell>
               </TableRow>
             ) : (
@@ -126,17 +126,17 @@ export function ManufacturingTable({ invoices }: ManufacturingTableProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                          <Link href={`/admin/manufacturing/${invoice.id}`}>View Details</Link>
+                          <Link href={`/admin/manufacturing/${invoice.id}`}>عرض التفاصيل</Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => handleDelete(invoice.id, invoice.invoice_number)}
                           className="text-destructive"
                         >
-                          Delete Invoice
+                          حذف الفاتورة
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

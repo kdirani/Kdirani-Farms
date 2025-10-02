@@ -57,9 +57,9 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
 
   const getTypeBadge = (type: 'buy' | 'sell') => {
     return type === 'buy' ? (
-      <Badge variant="default">Buy</Badge>
+      <Badge variant="default">شراء</Badge>
     ) : (
-      <Badge variant="secondary">Sell</Badge>
+      <Badge variant="secondary">بيع</Badge>
     );
   };
 
@@ -67,12 +67,12 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
     return checked ? (
       <Badge variant="success" className="gap-1">
         <CheckCircle className="h-3 w-3" />
-        Checked
+        مدقق
       </Badge>
     ) : (
       <Badge variant="warning" className="gap-1">
         <XCircle className="h-3 w-3" />
-        Unchecked
+        غير مدقق
       </Badge>
     );
   };
@@ -85,7 +85,7 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search invoices..."
+              placeholder="البحث في الفواتير..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -96,15 +96,15 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="buy">Buy</SelectItem>
-              <SelectItem value="sell">Sell</SelectItem>
+              <SelectItem value="all">جميع الأنواع</SelectItem>
+              <SelectItem value="buy">شراء</SelectItem>
+              <SelectItem value="sell">بيع</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Invoice
+          إضافة فاتورة
         </Button>
       </div>
 
@@ -112,21 +112,21 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Invoice #</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Warehouse</TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead className="text-right">Net Value</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>رقم الفاتورة</TableHead>
+              <TableHead>النوع</TableHead>
+              <TableHead>التاريخ</TableHead>
+              <TableHead>المستودع</TableHead>
+              <TableHead>العميل</TableHead>
+              <TableHead className="text-right">القيمة الصافية</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredInvoices.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center text-muted-foreground">
-                  No invoices found
+                  لم يتم العثور على فواتير
                 </TableCell>
               </TableRow>
             ) : (
@@ -165,14 +165,14 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
+                          <span className="sr-only">فتح القائمة</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                          <Link href={`/admin/invoices/${invoice.id}`}>View Details</Link>
+                          <Link href={`/admin/invoices/${invoice.id}`}>عرض التفاصيل</Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -182,7 +182,7 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
                           }}
                           className="text-destructive"
                         >
-                          Delete Invoice
+                          حذف الفاتورة
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

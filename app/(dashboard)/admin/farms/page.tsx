@@ -7,8 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Farm Management - Admin Dashboard',
-  description: 'Manage farms and assignments',
+  title: 'إدارة المزارع - لوحة التحكم الإدارية',
+  description: 'إدارة المزارع والمهام',
 };
 
 async function FarmsContent() {
@@ -19,7 +19,7 @@ async function FarmsContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load farms'}
+          {result.error || 'فشل في تحميل المزارع'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function FarmsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Farm Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">إدارة المزارع</h1>
         <p className="text-muted-foreground mt-2">
-          Manage farms and assign them to farmers
+          إدارة المزارع وتعيينها للمزارعين
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Farms</CardTitle>
+          <CardTitle>جميع المزارع</CardTitle>
           <CardDescription>
-            View and manage all farms in the system
+            عرض وإدارة جميع المزارع في النظام
           </CardDescription>
         </CardHeader>
         <CardContent>

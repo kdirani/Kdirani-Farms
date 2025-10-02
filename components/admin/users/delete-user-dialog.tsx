@@ -29,13 +29,13 @@ export function DeleteUserDialog({ user, open, onOpenChange }: DeleteUserDialogP
       const result = await deleteUser(user.id);
       
       if (result.success) {
-        toast.success('User deleted successfully');
+        toast.success('تم حذف المستخدم بنجاح');
         onOpenChange(false);
       } else {
-        toast.error(result.error || 'Failed to delete user');
+        toast.error(result.error || 'فشل في حذف المستخدم');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -50,21 +50,21 @@ export function DeleteUserDialog({ user, open, onOpenChange }: DeleteUserDialogP
             Delete User
           </DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete this user? This action cannot be undone.
+هل أنت متأكد من حذف هذا المستخدم؟ هذا الإجراء لا يمكن التراجع عنه.
           </DialogDescription>
         </DialogHeader>
         
         <div className="bg-muted p-4 rounded-lg space-y-2">
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Name:</span>
+            <span className="text-sm font-medium">الاسم:</span>
             <span className="text-sm">{user.fname}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Email:</span>
+            <span className="text-sm font-medium">البريد الإلكتروني:</span>
             <span className="text-sm">{user.email}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Role:</span>
+            <span className="text-sm font-medium">الدور:</span>
             <span className="text-sm capitalize">{user.user_role.replace('_', ' ')}</span>
           </div>
         </div>
@@ -76,7 +76,7 @@ export function DeleteUserDialog({ user, open, onOpenChange }: DeleteUserDialogP
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
-            Cancel
+            إلغاء
           </Button>
           <Button
             type="button"

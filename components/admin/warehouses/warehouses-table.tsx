@@ -51,7 +51,7 @@ export function WarehousesTable({ warehouses }: WarehousesTableProps) {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search warehouses..."
+            placeholder="البحث في المستودعات..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -59,7 +59,7 @@ export function WarehousesTable({ warehouses }: WarehousesTableProps) {
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Warehouse
+          إضافة مستودع
         </Button>
       </div>
 
@@ -67,19 +67,19 @@ export function WarehousesTable({ warehouses }: WarehousesTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Warehouse Name</TableHead>
-              <TableHead>Farm</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Farmer</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم المستودع</TableHead>
+              <TableHead>المزرعة</TableHead>
+              <TableHead>الموقع</TableHead>
+              <TableHead>المزارع</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredWarehouses.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  No warehouses found
+                  لم يتم العثور على مستودعات
                 </TableCell>
               </TableRow>
             ) : (
@@ -95,7 +95,7 @@ export function WarehousesTable({ warehouses }: WarehousesTableProps) {
                     {warehouse.farm ? (
                       <span className="font-medium">{warehouse.farm.name}</span>
                     ) : (
-                      <span className="text-muted-foreground">No farm</span>
+                      <span className="text-muted-foreground">لا توجد مزرعة</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -103,7 +103,7 @@ export function WarehousesTable({ warehouses }: WarehousesTableProps) {
                   </TableCell>
                   <TableCell>
                     {warehouse.farm?.user_name || (
-                      <span className="text-muted-foreground">Unassigned</span>
+                      <span className="text-muted-foreground">غير معين</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -114,11 +114,11 @@ export function WarehousesTable({ warehouses }: WarehousesTableProps) {
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
+                          <span className="sr-only">فتح القائمة</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => {
@@ -126,7 +126,7 @@ export function WarehousesTable({ warehouses }: WarehousesTableProps) {
                             setEditDialogOpen(true);
                           }}
                         >
-                          Edit Warehouse
+                          تعديل المستودع
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -136,7 +136,7 @@ export function WarehousesTable({ warehouses }: WarehousesTableProps) {
                           }}
                           className="text-destructive"
                         >
-                          Delete Warehouse
+                          حذف المستودع
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

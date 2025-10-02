@@ -52,7 +52,7 @@ export function FarmsTable({ farms }: FarmsTableProps) {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search farms..."
+            placeholder="البحث في المزارع..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -60,7 +60,7 @@ export function FarmsTable({ farms }: FarmsTableProps) {
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Farm
+          إضافة مزرعة
         </Button>
       </div>
 
@@ -68,19 +68,19 @@ export function FarmsTable({ farms }: FarmsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Farm Name</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Assigned Farmer</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم المزرعة</TableHead>
+              <TableHead>الموقع</TableHead>
+              <TableHead>المزارع المعين</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredFarms.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  No farms found
+                  لم يتم العثور على مزارع
                 </TableCell>
               </TableRow>
             ) : (
@@ -100,12 +100,12 @@ export function FarmsTable({ farms }: FarmsTableProps) {
                         <div className="text-xs text-muted-foreground">{farm.user.email}</div>
                       </div>
                     ) : (
-                      <span className="text-muted-foreground">Unassigned</span>
+                      <span className="text-muted-foreground">غير معين</span>
                     )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={farm.is_active ? 'success' : 'secondary'}>
-                      {farm.is_active ? 'Active' : 'Inactive'}
+                      {farm.is_active ? 'نشطة' : 'غير نشطة'}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -116,11 +116,11 @@ export function FarmsTable({ farms }: FarmsTableProps) {
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
+                          <span className="sr-only">فتح القائمة</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => {
@@ -128,7 +128,7 @@ export function FarmsTable({ farms }: FarmsTableProps) {
                             setEditDialogOpen(true);
                           }}
                         >
-                          Edit Farm
+                          تعديل المزرعة
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -138,7 +138,7 @@ export function FarmsTable({ farms }: FarmsTableProps) {
                           }}
                           className="text-destructive"
                         >
-                          Delete Farm
+                          حذف المزرعة
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

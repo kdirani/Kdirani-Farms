@@ -7,8 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Warehouse Management - Admin Dashboard',
-  description: 'Manage warehouses and farm assignments',
+  title: 'إدارة المستودعات - لوحة التحكم الإدارية',
+  description: 'إدارة المستودعات ومهام المزارع',
 };
 
 async function WarehousesContent() {
@@ -19,7 +19,7 @@ async function WarehousesContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load warehouses'}
+          {result.error || 'فشل في تحميل المستودعات'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function WarehousesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Warehouse Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">إدارة المستودعات</h1>
         <p className="text-muted-foreground mt-2">
-          Manage warehouses and their farm assignments
+          إدارة المستودعات ومهام المزارع الخاصة بها
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Warehouses</CardTitle>
+          <CardTitle>جميع المستودعات</CardTitle>
           <CardDescription>
-            View and manage all warehouses in the system
+            عرض وإدارة جميع المستودعات في النظام
           </CardDescription>
         </CardHeader>
         <CardContent>

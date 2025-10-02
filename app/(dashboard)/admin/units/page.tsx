@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Measurement Units - Admin Dashboard',
-  description: 'Manage measurement units lookup table',
+  title: 'وحدات القياس - لوحة التحكم الإدارية',
+  description: 'إدارة جدول وحدات القياس',
 };
 
 async function UnitsContent() {
@@ -19,7 +19,7 @@ async function UnitsContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load measurement units'}
+          {result.error || 'فشل في تحميل وحدات القياس'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function UnitsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Measurement Units</h1>
+        <h1 className="text-3xl font-bold tracking-tight">وحدات القياس</h1>
         <p className="text-muted-foreground mt-2">
-          Manage measurement units used in inventory and invoices
+          إدارة وحدات القياس المستخدمة في المخزون والفواتير
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Measurement Units</CardTitle>
+          <CardTitle>جميع وحدات القياس</CardTitle>
           <CardDescription>
-            Add, edit, or remove measurement units from the system
+            إضافة أو تعديل أو حذف وحدات القياس من النظام
           </CardDescription>
         </CardHeader>
         <CardContent>

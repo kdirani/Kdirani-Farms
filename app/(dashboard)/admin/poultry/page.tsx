@@ -7,8 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Poultry Management - Admin Dashboard',
-  description: 'Manage poultry batches and track chick counts',
+  title: 'إدارة القطعان - لوحة التحكم الإدارية',
+  description: 'إدارة دفعات القطعان وتتبع أعداد الكتاكيت',
 };
 
 async function PoultryContent() {
@@ -19,7 +19,7 @@ async function PoultryContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load poultry statuses'}
+          {result.error || 'فشل في تحميل حالات القطعان'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function PoultryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Poultry Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">إدارة القطعان</h1>
         <p className="text-muted-foreground mt-2">
-          Manage poultry batches and track chick counts across farms
+          إدارة دفعات القطعان وتتبع أعداد الكتاكيت في جميع المزارع
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Poultry Batches</CardTitle>
+          <CardTitle>جميع دفعات القطعان</CardTitle>
           <CardDescription>
-            View and manage all poultry batches in the system
+            عرض وإدارة جميع دفعات القطعان في النظام
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -7,8 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'User Management - Admin Dashboard',
-  description: 'Manage system users and permissions',
+  title: 'إدارة المستخدمين - لوحة التحكم الإدارية',
+  description: 'إدارة المستخدمين والصلاحيات في النظام',
 };
 
 async function UsersContent() {
@@ -19,7 +19,7 @@ async function UsersContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load users'}
+          {result.error || 'فشل في تحميل المستخدمين'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function UsersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">إدارة المستخدمين</h1>
         <p className="text-muted-foreground mt-2">
-          Manage system users, roles, and permissions
+          إدارة المستخدمين والأدوار والصلاحيات
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Users</CardTitle>
+          <CardTitle>جميع المستخدمين</CardTitle>
           <CardDescription>
-            View and manage all users in the system
+            عرض وإدارة جميع المستخدمين في النظام
           </CardDescription>
         </CardHeader>
         <CardContent>

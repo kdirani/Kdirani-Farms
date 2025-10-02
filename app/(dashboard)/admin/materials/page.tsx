@@ -7,8 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Materials Inventory - Admin Dashboard',
-  description: 'Manage materials inventory and track balances',
+  title: 'إدارة المواد - لوحة التحكم الإدارية',
+  description: 'إدارة مخزون المواد وتتبع الأرصدة',
 };
 
 async function MaterialsContent() {
@@ -19,7 +19,7 @@ async function MaterialsContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load materials'}
+          {result.error || 'فشل في تحميل المواد'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function MaterialsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Materials Inventory</h1>
+        <h1 className="text-3xl font-bold tracking-tight">مخزون المواد</h1>
         <p className="text-muted-foreground mt-2">
-          Manage materials inventory and track stock levels across warehouses
+          إدارة مخزون المواد وتتبع مستويات المخزون في المستودعات
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Materials</CardTitle>
+          <CardTitle>جميع المواد</CardTitle>
           <CardDescription>
-            View and manage all materials in warehouse inventory
+            عرض وإدارة جميع المواد في مخزون المستودعات
           </CardDescription>
         </CardHeader>
         <CardContent>

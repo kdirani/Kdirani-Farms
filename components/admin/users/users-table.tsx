@@ -60,11 +60,11 @@ export function UsersTable({ users }: UsersTableProps) {
   const getRoleLabel = (role: string) => {
     switch (role) {
       case 'admin':
-        return 'Admin';
+        return 'مدير';
       case 'sub_admin':
-        return 'Sub Admin';
+        return 'مدير مساعد';
       case 'farmer':
-        return 'Farmer';
+        return 'مزارع';
       default:
         return role;
     }
@@ -77,7 +77,7 @@ export function UsersTable({ users }: UsersTableProps) {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search users..."
+            placeholder="البحث في المستخدمين..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -85,7 +85,7 @@ export function UsersTable({ users }: UsersTableProps) {
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <UserPlus className="h-4 w-4 mr-2" />
-          Add User
+          إضافة مستخدم
         </Button>
       </div>
 
@@ -93,19 +93,19 @@ export function UsersTable({ users }: UsersTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Last Sign In</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>الاسم</TableHead>
+              <TableHead>البريد الإلكتروني</TableHead>
+              <TableHead>الدور</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead>آخر دخول</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  No users found
+                  لم يتم العثور على مستخدمين
                 </TableCell>
               </TableRow>
             ) : (
@@ -124,18 +124,18 @@ export function UsersTable({ users }: UsersTableProps) {
                   <TableCell>
                     {user.last_sign_in_at
                       ? format(new Date(user.last_sign_in_at), 'MMM dd, yyyy HH:mm')
-                      : 'Never'}
+                      : 'لم يسجل دخول بعد'}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
+                          <span className="sr-only">فتح القائمة</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => {
@@ -143,7 +143,7 @@ export function UsersTable({ users }: UsersTableProps) {
                             setEditDialogOpen(true);
                           }}
                         >
-                          Edit User
+                          تعديل المستخدم
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => {
@@ -151,7 +151,7 @@ export function UsersTable({ users }: UsersTableProps) {
                             setResetPasswordDialogOpen(true);
                           }}
                         >
-                          Reset Password
+                          إعادة تعيين كلمة المرور
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -161,7 +161,7 @@ export function UsersTable({ users }: UsersTableProps) {
                           }}
                           className="text-destructive"
                         >
-                          Delete User
+                          حذف المستخدم
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

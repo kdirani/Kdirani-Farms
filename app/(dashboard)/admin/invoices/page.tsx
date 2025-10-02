@@ -7,8 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Invoices - Admin Dashboard',
-  description: 'Manage buy and sell invoices',
+  title: 'إدارة الفواتير - لوحة التحكم الإدارية',
+  description: 'إدارة فواتير البيع والشراء',
 };
 
 async function InvoicesContent() {
@@ -19,7 +19,7 @@ async function InvoicesContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load invoices'}
+          {result.error || 'فشل في تحميل الفواتير'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function InvoicesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Invoices Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">إدارة الفواتير</h1>
         <p className="text-muted-foreground mt-2">
-          Manage buy and sell invoices for materials and products
+          إدارة فواتير البيع والشراء للمواد والمنتجات
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Invoices</CardTitle>
+          <CardTitle>جميع الفواتير</CardTitle>
           <CardDescription>
-            View and manage all invoices in the system
+            عرض وإدارة جميع الفواتير في النظام
           </CardDescription>
         </CardHeader>
         <CardContent>

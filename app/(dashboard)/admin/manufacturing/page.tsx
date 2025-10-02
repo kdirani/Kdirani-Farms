@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Manufacturing - Admin Dashboard',
-  description: 'Manage manufacturing invoices',
+  title: 'إدارة التصنيع - لوحة التحكم الإدارية',
+  description: 'إدارة فواتير التصنيع',
 };
 
 async function ManufacturingContent() {
@@ -19,7 +19,7 @@ async function ManufacturingContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load manufacturing invoices'}
+          {result.error || 'فشل في تحميل فواتير التصنيع'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function ManufacturingPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Manufacturing Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">إدارة التصنيع</h1>
         <p className="text-muted-foreground mt-2">
-          Manage manufacturing invoices, items, and expenses
+          إدارة فواتير التصنيع والمواد والمصاريف
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Manufacturing Invoices</CardTitle>
+          <CardTitle>فواتير التصنيع</CardTitle>
           <CardDescription>
-            View and manage all manufacturing invoices in the system
+            عرض وإدارة جميع فواتير التصنيع في النظام
           </CardDescription>
         </CardHeader>
         <CardContent>

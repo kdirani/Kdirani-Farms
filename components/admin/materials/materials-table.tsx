@@ -45,11 +45,11 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
   );
 
   const getStockStatus = (current: number, opening: number) => {
-    if (current === 0) return <Badge variant="destructive">Out of Stock</Badge>;
+    if (current === 0) return <Badge variant="destructive">نفد من المخزون</Badge>;
     const percentage = (current / opening) * 100;
-    if (percentage < 20) return <Badge variant="destructive">Low Stock</Badge>;
-    if (percentage < 50) return <Badge variant="warning">Medium Stock</Badge>;
-    return <Badge variant="success">In Stock</Badge>;
+    if (percentage < 20) return <Badge variant="destructive">مخزون قليل</Badge>;
+    if (percentage < 50) return <Badge variant="warning">مخزون متوسط</Badge>;
+    return <Badge variant="success">متوفر في المخزون</Badge>;
   };
 
   return (
@@ -59,7 +59,7 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search materials..."
+            placeholder="البحث في المواد..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -67,7 +67,7 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Material
+          إضافة مادة
         </Button>
       </div>
 
@@ -75,24 +75,24 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Material Name</TableHead>
-              <TableHead>Warehouse</TableHead>
-              <TableHead>Farm</TableHead>
-              <TableHead>Unit</TableHead>
-              <TableHead className="text-right">Opening</TableHead>
-              <TableHead className="text-right">Purchases</TableHead>
-              <TableHead className="text-right">Sales</TableHead>
-              <TableHead className="text-right">Consumption</TableHead>
-              <TableHead className="text-right">Current</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم المادة</TableHead>
+              <TableHead>المستودع</TableHead>
+              <TableHead>المزرعة</TableHead>
+              <TableHead>الوحدة</TableHead>
+              <TableHead className="text-right">البداية</TableHead>
+              <TableHead className="text-right">المشتريات</TableHead>
+              <TableHead className="text-right">المبيعات</TableHead>
+              <TableHead className="text-right">الاستهلاك</TableHead>
+              <TableHead className="text-right">الحالي</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredMaterials.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={11} className="text-center text-muted-foreground">
-                  No materials found
+                  لم يتم العثور على مواد
                 </TableCell>
               </TableRow>
             ) : (
@@ -118,11 +118,11 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
+                          <span className="sr-only">فتح القائمة</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => {
@@ -130,7 +130,7 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
                             setEditDialogOpen(true);
                           }}
                         >
-                          Edit Material
+                          تعديل المادة
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -140,7 +140,7 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
                           }}
                           className="text-destructive"
                         >
-                          Delete Material
+                          حذف المادة
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

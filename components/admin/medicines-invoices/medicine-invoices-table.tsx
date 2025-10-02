@@ -1,18 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
 import { MedicineInvoice, deleteMedicineInvoice } from '@/actions/medicine-invoice.actions';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { CreateMedicineInvoiceDialog } from './create-medicine-invoice-dialog';
+import { MoreHorizontal, Search, Plus } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,15 +13,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Search, Plus } from 'lucide-react';
-import { CreateMedicineInvoiceDialog } from './create-medicine-invoice-dialog';
-import { format } from 'date-fns';
-import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import Link from 'next/link';
+import { useState } from 'react';
 
 interface MedicineInvoicesTableProps {
   invoices: MedicineInvoice[];
 }
-
 export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -43,14 +42,14 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
   });
 
   const handleDelete = async (id: string, invoiceNumber: string) => {
-    if (!confirm(`Are you sure you want to delete invoice ${invoiceNumber}?`)) return;
+    if (!confirm(`هل أنت متأكد من حذف فاتورة ${invoiceNumber}؟`)) return;
 
     const result = await deleteMedicineInvoice(id);
     if (result.success) {
-      toast.success('Medicine invoice deleted successfully');
+      toast.success('تم حذف فاتورة الأدوية بنجاح');
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete invoice');
+      toast.error(result.error || 'فشل في حذف الفاتورة');
     }
   };
 
@@ -61,7 +60,7 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search invoices..."
+            placeholder="البحث في الفواتير..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -69,7 +68,7 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Create Medicine Invoice
+          إنشاء فاتورة أدوية
         </Button>
       </div>
 
@@ -77,19 +76,19 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Invoice #</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Warehouse</TableHead>
-              <TableHead>Poultry Status</TableHead>
-              <TableHead className="text-right">Total Value</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>رقم الفاتورة</TableHead>
+              <TableHead>التاريخ</TableHead>
+              <TableHead>المستودع</TableHead>
+              <TableHead>حالة القطيع</TableHead>
+              <TableHead className="text-right">القيمة الإجمالية</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredInvoices.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  No medicine invoices found
+                  لم يتم العثور على فواتير أدوية
                 </TableCell>
               </TableRow>
             ) : (
@@ -121,17 +120,17 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                          <Link href={`/admin/medicines-invoices/${invoice.id}`}>View Details</Link>
+                          <Link href={`/admin/medicines-invoices/${invoice.id}`}>عرض التفاصيل</Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => handleDelete(invoice.id, invoice.invoice_number)}
                           className="text-destructive"
                         >
-                          Delete Invoice
+                          حذف الفاتورة
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
