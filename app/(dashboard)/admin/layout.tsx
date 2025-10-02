@@ -39,7 +39,7 @@ export default async function AdminLayout({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <MobileNav />
-                    <HeaderLogo href="/admin" width={100} height={35} />
+                    <HeaderLogo href="/admin" width={140} height={45} />
                   </div>
                   <UserNav user={session.user} />
                 </div>
