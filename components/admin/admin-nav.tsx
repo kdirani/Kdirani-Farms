@@ -21,6 +21,7 @@ import {
   Tag,
   UserCog,
   LogOut,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
@@ -33,6 +34,11 @@ const navSections = [
         title: "لوحة التحكم",
         href: "/admin",
         icon: Home,
+      },
+      {
+        title: "إعداد مزرعة كاملة",
+        href: "/admin/setup",
+        icon: Zap,
       },
       {
         title: "التقارير والإحصائيات",

@@ -1,0 +1,94 @@
+import { Suspense } from 'react';
+import { getMaterialNames } from '@/actions/material-name.actions';
+import { getMeasurementUnits } from '@/actions/unit.actions';
+import { CompleteFarmSetupForm } from '@/components/admin/setup/complete-farm-setup-form';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, Loader2 } from 'lucide-react';
+
+export const metadata = {
+  title: 'إعداد مزرعة كاملة - لوحة التحكم',
+  description: 'إنشاء إعداد مزرعة كامل مع المستخدم والمزرعة والمستودع والقطيع والمواد',
+};
+
+async function SetupFormContent() {
+  const [materialNamesResult, unitsResult] = await Promise.all([
+    getMaterialNames(),
+    getMeasurementUnits(),
+  ]);
+
+  if (!materialNamesResult.success || !materialNamesResult.data) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          فشل تحميل أسماء المواد: {materialNamesResult.error || 'خطأ غير معروف'}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!unitsResult.success || !unitsResult.data) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          فشل تحميل وحدات القياس: {unitsResult.error || 'خطأ غير معروف'}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  return (
+    <CompleteFarmSetupForm
+      materialNames={materialNamesResult.data}
+      units={unitsResult.data}
+    />
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+    </div>
+  );
+}
+
+export default function CompleteFarmSetupPage() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">إعداد مزرعة كاملة</h1>
+        <p className="text-muted-foreground mt-2">
+          إنشاء تكوين مزرعة كامل في مكان واحد: المزارع، المزرعة، المستودع، القطيع، والمواد
+        </p>
+      </div>
+
+      <Card className="border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-4">
+            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-blue-900">سير العمل السريع</h3>
+              <p className="text-sm text-blue-800 mt-1">
+                تسهل هذه الصفحة عملية إنشاء مزرعة جديدة. سيتم إنشاء جميع الكيانات بالتسلسل:
+              </p>
+              <ol className="text-sm text-blue-800 mt-2 mr-4 space-y-1 list-decimal">
+                <li>حساب مستخدم مزارع جديد مع بيانات الدخول</li>
+                <li>مزرعة مخصصة للمزارع</li>
+                <li>مستودع للمزرعة</li>
+                <li>قطيع أولي (دجاج)</li>
+                <li>مواد الرصيد الافتتاحي في المستودع (اختياري)</li>
+              </ol>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Suspense fallback={<LoadingSkeleton />}>
+        <SetupFormContent />
+      </Suspense>
+    </div>
+  );
+}

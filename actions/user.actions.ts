@@ -191,30 +191,36 @@ export async function createUser(input: CreateUserInput): Promise<ActionResult<U
     }
 
     // Create user in auth
+    // Note: A database trigger automatically creates a profile with default values
     const adminClient = await createAdminClient();
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
       email: input.email,
       password: input.password,
       email_confirm: true,
+      user_metadata: {
+        fname: input.fname,
+      },
     });
 
     if (authError || !authData.user) {
       return { success: false, error: authError?.message || 'Failed to create user' };
     }
 
-    // Create profile
+    // Update the auto-created profile with correct values
+    // The trigger creates a profile with default role 'farmer' and fname from metadata
     const { data: newProfile, error: profileError } = await supabase
       .from('profiles')
-      .insert({
-        id: authData.user.id,
+      .update({
         fname: input.fname,
         user_role: input.user_role,
+        updated_at: new Date().toISOString(),
       })
+      .eq('id', authData.user.id)
       .select()
       .single();
 
     if (profileError) {
-      // Rollback: delete auth user if profile creation fails
+      // Rollback: delete auth user if profile update fails
       await adminClient.auth.admin.deleteUser(authData.user.id);
       return { success: false, error: profileError.message };
     }
