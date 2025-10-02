@@ -93,13 +93,13 @@ export default async function FarmerDashboardPage() {
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+        <Card className="border-slate-200 hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-blue-900">
-              <Calendar className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-slate-800">
+              <Calendar className="h-5 w-5 text-primary" />
               التقرير اليومي
             </CardTitle>
-            <CardDescription className="text-blue-700">
+            <CardDescription className="text-slate-600">
               {todayReport
                 ? "تم إضافة التقرير اليوم"
                 : "لم يتم إضافة تقرير اليوم بعد"}
@@ -114,13 +114,13 @@ export default async function FarmerDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+        <Card className="border-slate-200 hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-900">
-              <Package className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-slate-800">
+              <Package className="h-5 w-5 text-primary" />
               فاتورة تصنيع
             </CardTitle>
-            <CardDescription className="text-green-700">
+            <CardDescription className="text-slate-600">
               إنشاء فاتورة تصنيع علف جديدة
             </CardDescription>
           </CardHeader>
