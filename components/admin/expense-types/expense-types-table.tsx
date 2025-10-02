@@ -44,18 +44,18 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      toast.error('Expense type name is required');
+      toast.error('اسم نوع المصروف مطلوب');
       return;
     }
     setIsLoading(true);
     const result = await createExpenseType({ name });
     if (result.success) {
-      toast.success('Expense type created successfully');
+      toast.success('تم إنشاء نوع المصروف بنجاح');
       setName('');
       setCreateDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to create expense type');
+      toast.error(result.error || 'فشل في إنشاء نوع المصروف');
     }
     setIsLoading(false);
   };
@@ -65,11 +65,11 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
     setIsLoading(true);
     const result = await updateExpenseType({ id: selectedExpenseType.id, name });
     if (result.success) {
-      toast.success('Expense type updated successfully');
+      toast.success('تم تحديث نوع المصروف بنجاح');
       setEditDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to update expense type');
+      toast.error(result.error || 'فشل في تحديث نوع المصروف');
     }
     setIsLoading(false);
   };
@@ -79,11 +79,11 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
     setIsLoading(true);
     const result = await deleteExpenseType(selectedExpenseType.id);
     if (result.success) {
-      toast.success('Expense type deleted successfully');
+      toast.success('تم حذف نوع المصروف بنجاح');
       setDeleteDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete expense type');
+      toast.error(result.error || 'فشل في حذف نوع المصروف');
     }
     setIsLoading(false);
   };
@@ -95,7 +95,7 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search expense types..."
+            placeholder="البحث في أنواع المصروفات..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -106,7 +106,7 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
           setCreateDialogOpen(true);
         }}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Expense Type
+          إضافة نوع مصروف
         </Button>
       </div>
 
@@ -114,17 +114,17 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Expense Type Name</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Updated</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم نوع المصروف</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead>تاريخ التعديل</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredExpenseTypes.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  No expense types found
+                  لم يتم العثور على أنواع مصروفات
                 </TableCell>
               </TableRow>
             ) : (
@@ -169,14 +169,14 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Expense Type</DialogTitle>
-            <DialogDescription>Enter a new expense type to add to the system</DialogDescription>
+            <DialogTitle>إضافة نوع مصروف</DialogTitle>
+            <DialogDescription>أدخل نوع مصروف جديد لإضافته إلى النظام</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="name">Expense Type Name</Label>
+            <Label htmlFor="name">اسم نوع المصروف</Label>
             <Input
               id="name"
-              placeholder="e.g., Transportation, Labor, Utilities"
+              placeholder="مثال: النقل، العمالة، المرافق"
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={isLoading}
@@ -184,10 +184,10 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button onClick={handleCreate} disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create'}
+              {isLoading ? 'جاري الإنشاء...' : 'إنشاء'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -197,14 +197,14 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Expense Type</DialogTitle>
-            <DialogDescription>Update the expense type name</DialogDescription>
+            <DialogTitle>تعديل نوع المصروف</DialogTitle>
+            <DialogDescription>حدث اسم نوع المصروف</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="edit_name">Expense Type Name</Label>
+            <Label htmlFor="edit_name">اسم نوع المصروف</Label>
             <Input
               id="edit_name"
-              placeholder="e.g., Transportation, Labor, Utilities"
+              placeholder="مثال: النقل، العمالة، المرافق"
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={isLoading}
@@ -212,10 +212,10 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button onClick={handleEdit} disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Update'}
+              {isLoading ? 'جاري التحديث...' : 'تحديث'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -225,17 +225,17 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Expense Type</DialogTitle>
+            <DialogTitle>حذف نوع المصروف</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{selectedExpenseType?.name}"? This action cannot be undone.
+              هل أنت متأكد من حذف "{selectedExpenseType?.name}"؟ هذا الإجراء لا يمكن التراجع عنه.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
-              {isLoading ? 'Deleting...' : 'Delete'}
+              {isLoading ? 'جاري الحذف...' : 'حذف'}
             </Button>
           </DialogFooter>
         </DialogContent>

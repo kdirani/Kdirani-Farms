@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Expense Types - Admin Dashboard',
-  description: 'Manage expense types lookup table',
+  title: 'أنواع المصروفات - لوحة التحكم الإدارية',
+  description: 'إدارة جدول أنواع المصروفات',
 };
 
 async function ExpenseTypesContent() {
@@ -19,7 +19,7 @@ async function ExpenseTypesContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load expense types'}
+          {result.error || 'فشل في تحميل أنواع المصروفات'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function ExpenseTypesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Expense Types</h1>
+        <h1 className="text-3xl font-bold tracking-tight">أنواع المصروفات</h1>
         <p className="text-muted-foreground mt-2">
-          Manage expense types used in invoices and financial tracking
+          إدارة أنواع المصروفات المستخدمة في الفواتير والتتبع المالي
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Expense Types</CardTitle>
+          <CardTitle>جميع أنواع المصروفات</CardTitle>
           <CardDescription>
-            Add, edit, or remove expense types from the system
+            إضافة، تعديل، أو حذف أنواع المصروفات من النظام
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Medicines & Vaccines - Admin Dashboard',
-  description: 'Manage medicines and vaccines lookup table',
+  title: 'الأدوية واللقاحات - لوحة التحكم الإدارية',
+  description: 'إدارة جدول الأدوية واللقاحات',
 };
 
 async function MedicinesContent() {
@@ -19,7 +19,7 @@ async function MedicinesContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load medicines'}
+          {result.error || 'فشل في تحميل الأدوية'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function MedicinesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Medicines & Vaccines</h1>
+        <h1 className="text-3xl font-bold tracking-tight">الأدوية واللقاحات</h1>
         <p className="text-muted-foreground mt-2">
-          Manage medicines and vaccines used in poultry care
+          إدارة الأدوية واللقاحات المستخدمة في رعاية الدواجن
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Medicines & Vaccines</CardTitle>
+          <CardTitle>جميع الأدوية واللقاحات</CardTitle>
           <CardDescription>
-            Add, edit, or remove medicines and vaccines from the system
+            إضافة، تعديل، أو حذف الأدوية واللقاحات من النظام
           </CardDescription>
         </CardHeader>
         <CardContent>

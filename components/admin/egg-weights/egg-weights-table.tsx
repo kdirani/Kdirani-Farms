@@ -44,18 +44,18 @@ export function EggWeightsTable({ eggWeights: initialEggWeights }: EggWeightsTab
 
   const handleCreate = async () => {
     if (!weightRange.trim()) {
-      toast.error('Weight range is required');
+      toast.error('نطاق الوزن مطلوب');
       return;
     }
     setIsLoading(true);
     const result = await createEggWeight({ weight_range: weightRange });
     if (result.success) {
-      toast.success('Egg weight created successfully');
+      toast.success('تم إنشاء وزن البيض بنجاح');
       setWeightRange('');
       setCreateDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to create egg weight');
+      toast.error(result.error || 'فشل في إنشاء وزن البيض');
     }
     setIsLoading(false);
   };
@@ -65,11 +65,11 @@ export function EggWeightsTable({ eggWeights: initialEggWeights }: EggWeightsTab
     setIsLoading(true);
     const result = await updateEggWeight({ id: selectedEggWeight.id, weight_range: weightRange });
     if (result.success) {
-      toast.success('Egg weight updated successfully');
+      toast.success('تم تحديث وزن البيض بنجاح');
       setEditDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to update egg weight');
+      toast.error(result.error || 'فشل في تحديث وزن البيض');
     }
     setIsLoading(false);
   };
@@ -79,11 +79,11 @@ export function EggWeightsTable({ eggWeights: initialEggWeights }: EggWeightsTab
     setIsLoading(true);
     const result = await deleteEggWeight(selectedEggWeight.id);
     if (result.success) {
-      toast.success('Egg weight deleted successfully');
+      toast.success('تم حذف وزن البيض بنجاح');
       setDeleteDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete egg weight');
+      toast.error(result.error || 'فشل في حذف وزن البيض');
     }
     setIsLoading(false);
   };
@@ -95,7 +95,7 @@ export function EggWeightsTable({ eggWeights: initialEggWeights }: EggWeightsTab
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search egg weights..."
+            placeholder="البحث في أوزان البيض..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -106,7 +106,7 @@ export function EggWeightsTable({ eggWeights: initialEggWeights }: EggWeightsTab
           setCreateDialogOpen(true);
         }}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Egg Weight
+          إضافة وزن بيض
         </Button>
       </div>
 
@@ -114,17 +114,17 @@ export function EggWeightsTable({ eggWeights: initialEggWeights }: EggWeightsTab
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Weight Range</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Updated</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>نطاق الوزن</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead>تاريخ التعديل</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredEggWeights.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  No egg weights found
+                  لم يتم العثور على أوزان بيض
                 </TableCell>
               </TableRow>
             ) : (
@@ -169,28 +169,28 @@ export function EggWeightsTable({ eggWeights: initialEggWeights }: EggWeightsTab
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Egg Weight</DialogTitle>
-            <DialogDescription>Enter a new egg weight range to add to the system</DialogDescription>
+            <DialogTitle>إضافة وزن بيض</DialogTitle>
+            <DialogDescription>أدخل نطاق وزن بيض جديد لإضافته إلى النظام</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="weight_range">Weight Range</Label>
+            <Label htmlFor="weight_range">نطاق الوزن</Label>
             <Input
               id="weight_range"
-              placeholder="e.g., Large, Medium, 60-65g, 1850/1800"
+              placeholder="مثال: كبير، متوسط، 60-65جم، 1850/1800"
               value={weightRange}
               onChange={(e) => setWeightRange(e.target.value)}
               disabled={isLoading}
             />
             <p className="text-xs text-muted-foreground">
-              Examples: Large, Medium, Small, 60-65g, 1850/1800
+              أمثلة: كبير، متوسط، صغير، 60-65جم، 1850/1800
             </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button onClick={handleCreate} disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create'}
+              {isLoading ? 'جاري الإنشاء...' : 'إنشاء'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -200,14 +200,14 @@ export function EggWeightsTable({ eggWeights: initialEggWeights }: EggWeightsTab
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Egg Weight</DialogTitle>
-            <DialogDescription>Update the egg weight range</DialogDescription>
+            <DialogTitle>تعديل وزن البيض</DialogTitle>
+            <DialogDescription>حدث نطاق وزن البيض</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="edit_weight_range">Weight Range</Label>
+            <Label htmlFor="edit_weight_range">نطاق الوزن</Label>
             <Input
               id="edit_weight_range"
-              placeholder="e.g., Large, Medium, 60-65g, 1850/1800"
+              placeholder="مثال: كبير، متوسط، 60-65جم، 1850/1800"
               value={weightRange}
               onChange={(e) => setWeightRange(e.target.value)}
               disabled={isLoading}
@@ -215,10 +215,10 @@ export function EggWeightsTable({ eggWeights: initialEggWeights }: EggWeightsTab
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button onClick={handleEdit} disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Update'}
+              {isLoading ? 'جاري التحديث...' : 'تحديث'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -228,17 +228,17 @@ export function EggWeightsTable({ eggWeights: initialEggWeights }: EggWeightsTab
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Egg Weight</DialogTitle>
+            <DialogTitle>حذف وزن البيض</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{selectedEggWeight?.weight_range}"? This action cannot be undone.
+              هل أنت متأكد من حذف "{selectedEggWeight?.weight_range}"؟ هذا الإجراء لا يمكن التراجع عنه.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
-              {isLoading ? 'Deleting...' : 'Delete'}
+              {isLoading ? 'جاري الحذف...' : 'حذف'}
             </Button>
           </DialogFooter>
         </DialogContent>

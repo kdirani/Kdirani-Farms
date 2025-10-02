@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Egg Weights - Admin Dashboard',
-  description: 'Manage egg weight ranges lookup table',
+  title: 'أوزان البيض - لوحة التحكم الإدارية',
+  description: 'إدارة جدول أوزان البيض',
 };
 
 async function EggWeightsContent() {
@@ -19,7 +19,7 @@ async function EggWeightsContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load egg weights'}
+          {result.error || 'فشل في تحميل أوزان البيض'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function EggWeightsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Egg Weights</h1>
+        <h1 className="text-3xl font-bold tracking-tight">أوزان البيض</h1>
         <p className="text-muted-foreground mt-2">
-          Manage egg weight ranges used in inventory and invoices
+          إدارة أوزان البيض المستخدمة في المخزون والفواتير
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Egg Weight Ranges</CardTitle>
+          <CardTitle>جميع أوزان البيض</CardTitle>
           <CardDescription>
-            Add, edit, or remove egg weight ranges from the system
+            إضافة، تعديل، أو حذف أوزان البيض من النظام
           </CardDescription>
         </CardHeader>
         <CardContent>

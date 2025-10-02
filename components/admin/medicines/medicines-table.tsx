@@ -45,18 +45,18 @@ export function MedicinesTable({ medicines: initialMedicines }: MedicinesTablePr
 
   const handleCreate = async () => {
     if (!formData.name.trim() || !formData.day_of_age.trim()) {
-      toast.error('Name and day of age are required');
+      toast.error('الاسم ويوم العمر مطلوبين');
       return;
     }
     setIsLoading(true);
     const result = await createMedicine(formData);
     if (result.success) {
-      toast.success('Medicine created successfully');
+      toast.success('تم إنشاء الدواء بنجاح');
       setFormData({ name: '', description: '', day_of_age: '' });
       setCreateDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to create medicine');
+      toast.error(result.error || 'فشل في إنشاء الدواء');
     }
     setIsLoading(false);
   };
@@ -66,11 +66,11 @@ export function MedicinesTable({ medicines: initialMedicines }: MedicinesTablePr
     setIsLoading(true);
     const result = await updateMedicine({ id: selectedMedicine.id, ...formData });
     if (result.success) {
-      toast.success('Medicine updated successfully');
+      toast.success('تم تحديث الدواء بنجاح');
       setEditDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to update medicine');
+      toast.error(result.error || 'فشل في تحديث الدواء');
     }
     setIsLoading(false);
   };
@@ -80,11 +80,11 @@ export function MedicinesTable({ medicines: initialMedicines }: MedicinesTablePr
     setIsLoading(true);
     const result = await deleteMedicine(selectedMedicine.id);
     if (result.success) {
-      toast.success('Medicine deleted successfully');
+      toast.success('تم حذف الدواء بنجاح');
       setDeleteDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete medicine');
+      toast.error(result.error || 'فشل في حذف الدواء');
     }
     setIsLoading(false);
   };
@@ -96,7 +96,7 @@ export function MedicinesTable({ medicines: initialMedicines }: MedicinesTablePr
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search medicines..."
+            placeholder="البحث في الأدوية..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -107,7 +107,7 @@ export function MedicinesTable({ medicines: initialMedicines }: MedicinesTablePr
           setCreateDialogOpen(true);
         }}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Medicine
+          إضافة دواء
         </Button>
       </div>
 
@@ -115,18 +115,18 @@ export function MedicinesTable({ medicines: initialMedicines }: MedicinesTablePr
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Medicine Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Day of Age</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم الدواء</TableHead>
+              <TableHead>الوصف</TableHead>
+              <TableHead>يوم العمر</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredMedicines.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground">
-                  No medicines found
+                  لم يتم العثور على أدوية
                 </TableCell>
               </TableRow>
             ) : (
@@ -176,35 +176,35 @@ export function MedicinesTable({ medicines: initialMedicines }: MedicinesTablePr
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Add Medicine</DialogTitle>
-            <DialogDescription>Enter medicine or vaccine details</DialogDescription>
+            <DialogTitle>إضافة دواء</DialogTitle>
+            <DialogDescription>أدخل تفاصيل الدواء أو اللقاح</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Medicine Name *</Label>
+              <Label htmlFor="name">اسم الدواء *</Label>
               <Input
                 id="name"
-                placeholder="e.g., Newcastle Disease Vaccine"
+                placeholder="مثال: لقاح مرض نيوكاسل"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">الوصف</Label>
               <Input
                 id="description"
-                placeholder="Optional description"
+                placeholder="وصف اختياري"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="day_of_age">Day of Age *</Label>
+              <Label htmlFor="day_of_age">يوم العمر *</Label>
               <Input
                 id="day_of_age"
-                placeholder="e.g., Day 1, Day 7, Week 2"
+                placeholder="مثال: اليوم الأول، الأسبوع الثاني"
                 value={formData.day_of_age}
                 onChange={(e) => setFormData({ ...formData, day_of_age: e.target.value })}
                 disabled={isLoading}
@@ -213,10 +213,10 @@ export function MedicinesTable({ medicines: initialMedicines }: MedicinesTablePr
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button onClick={handleCreate} disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create'}
+              {isLoading ? 'جاري الإنشاء...' : 'إنشاء'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -226,35 +226,35 @@ export function MedicinesTable({ medicines: initialMedicines }: MedicinesTablePr
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Edit Medicine</DialogTitle>
-            <DialogDescription>Update medicine or vaccine details</DialogDescription>
+            <DialogTitle>تعديل الدواء</DialogTitle>
+            <DialogDescription>حدث تفاصيل الدواء أو اللقاح</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="edit_name">Medicine Name *</Label>
+              <Label htmlFor="edit_name">اسم الدواء *</Label>
               <Input
                 id="edit_name"
-                placeholder="e.g., Newcastle Disease Vaccine"
+                placeholder="مثال: لقاح مرض نيوكاسل"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit_description">Description</Label>
+              <Label htmlFor="edit_description">الوصف</Label>
               <Input
                 id="edit_description"
-                placeholder="Optional description"
+                placeholder="وصف اختياري"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit_day_of_age">Day of Age *</Label>
+              <Label htmlFor="edit_day_of_age">يوم العمر *</Label>
               <Input
                 id="edit_day_of_age"
-                placeholder="e.g., Day 1, Day 7, Week 2"
+                placeholder="مثال: اليوم الأول، الأسبوع الثاني"
                 value={formData.day_of_age}
                 onChange={(e) => setFormData({ ...formData, day_of_age: e.target.value })}
                 disabled={isLoading}
@@ -263,10 +263,10 @@ export function MedicinesTable({ medicines: initialMedicines }: MedicinesTablePr
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button onClick={handleEdit} disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Update'}
+              {isLoading ? 'جاري التحديث...' : 'تحديث'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -276,17 +276,17 @@ export function MedicinesTable({ medicines: initialMedicines }: MedicinesTablePr
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Medicine</DialogTitle>
+            <DialogTitle>حذف الدواء</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{selectedMedicine?.name}"? This action cannot be undone.
+              هل أنت متأكد من حذف "{selectedMedicine?.name}"؟ هذا الإجراء لا يمكن التراجع عنه.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
-              {isLoading ? 'Deleting...' : 'Delete'}
+              {isLoading ? 'جاري الحذف...' : 'حذف'}
             </Button>
           </DialogFooter>
         </DialogContent>
