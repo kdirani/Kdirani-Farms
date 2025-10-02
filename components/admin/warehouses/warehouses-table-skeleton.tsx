@@ -20,12 +20,12 @@ export function WarehousesTableSkeleton() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Warehouse Name</TableHead>
-              <TableHead>Farm</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Farmer</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم المستودع</TableHead>
+              <TableHead>المزرعة</TableHead>
+              <TableHead>الموقع</TableHead>
+              <TableHead>المزارع</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

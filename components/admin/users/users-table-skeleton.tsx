@@ -20,12 +20,12 @@ export function UsersTableSkeleton() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Last Sign In</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>الاسم</TableHead>
+              <TableHead>البريد الإلكتروني</TableHead>
+              <TableHead>الدور</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead>آخر دخول</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

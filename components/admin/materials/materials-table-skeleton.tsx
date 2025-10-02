@@ -20,17 +20,17 @@ export function MaterialsTableSkeleton() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Material Name</TableHead>
-              <TableHead>Warehouse</TableHead>
-              <TableHead>Farm</TableHead>
-              <TableHead>Unit</TableHead>
-              <TableHead className="text-right">Opening</TableHead>
-              <TableHead className="text-right">Purchases</TableHead>
-              <TableHead className="text-right">Sales</TableHead>
-              <TableHead className="text-right">Consumption</TableHead>
-              <TableHead className="text-right">Current</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم المادة</TableHead>
+              <TableHead>المستودع</TableHead>
+              <TableHead>المزرعة</TableHead>
+              <TableHead>الوحدة</TableHead>
+              <TableHead className="text-right">البداية</TableHead>
+              <TableHead className="text-right">المشتريات</TableHead>
+              <TableHead className="text-right">المبيعات</TableHead>
+              <TableHead className="text-right">الاستهلاك</TableHead>
+              <TableHead className="text-right">الحالي</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
