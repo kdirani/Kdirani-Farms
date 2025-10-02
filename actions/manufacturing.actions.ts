@@ -51,10 +51,35 @@ export async function getManufacturingInvoices(): Promise<ActionResult<Manufactu
       return { success: false, error: 'Unauthorized' };
     }
 
-    const { data: invoices, error } = await supabase
+    // Check if user is farmer to filter by their farm
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_role')
+      .eq('id', user.id)
+      .single();
+
+    let query = supabase
       .from('manufacturing_invoices')
       .select('*')
       .order('manufacturing_date', { ascending: false });
+
+    // If farmer, only show invoices from their farm's warehouse
+    if (profile?.user_role === 'farmer') {
+      const { data: farm } = await supabase
+        .from('farms')
+        .select('id, warehouses(id)')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!farm || !farm.warehouses || farm.warehouses.length === 0) {
+        return { success: true, data: [] };
+      }
+
+      const warehouseIds = farm.warehouses.map((w: any) => w.id);
+      query = query.in('warehouse_id', warehouseIds);
+    }
+
+    const { data: invoices, error } = await query;
 
     if (error) {
       return { success: false, error: error.message };
@@ -210,8 +235,31 @@ export async function createManufacturingInvoice(input: CreateManufacturingInvoi
       .eq('id', user.id)
       .single();
 
-    if (!profile || profile.user_role !== 'admin') {
-      return { success: false, error: 'Unauthorized - Admin access required' };
+    if (!profile || !['admin', 'farmer'].includes(profile.user_role)) {
+      return { success: false, error: 'Unauthorized - Access denied' };
+    }
+
+    // If farmer, verify warehouse belongs to their farm
+    if (profile.user_role === 'farmer') {
+      const { data: farm } = await supabase
+        .from('farms')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!farm) {
+        return { success: false, error: 'No farm assigned to your account' };
+      }
+
+      const { data: warehouse } = await supabase
+        .from('warehouses')
+        .select('farm_id')
+        .eq('id', input.warehouse_id)
+        .single();
+
+      if (!warehouse || warehouse.farm_id !== farm.id) {
+        return { success: false, error: 'Invalid warehouse - not assigned to your farm' };
+      }
     }
 
     const { data: newInvoice, error } = await supabase
@@ -244,6 +292,8 @@ export async function createManufacturingInvoice(input: CreateManufacturingInvoi
     }
 
     revalidatePath('/admin/manufacturing');
+    revalidatePath('/farmer');
+    revalidatePath('/farmer/manufacturing');
     return { success: true, data: newInvoice };
   } catch (error) {
     console.error('Error creating manufacturing invoice:', error);
