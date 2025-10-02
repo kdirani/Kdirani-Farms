@@ -54,11 +54,12 @@ async function DailyReportsContent({ warehouseId, page }: { warehouseId?: string
 }
 
 interface DailyReportsPageProps {
-  searchParams: { warehouse?: string; page?: string };
+  searchParams: Promise<{ warehouse?: string; page?: string }>;
 }
 
-export default function DailyReportsPage({ searchParams }: DailyReportsPageProps) {
-  const page = parseInt(searchParams.page || '1');
+export default async function DailyReportsPage({ searchParams }: DailyReportsPageProps) {
+  const params = await searchParams;
+  const page = parseInt(params.page || '1');
   
   return (
     <div className="space-y-6">
@@ -78,7 +79,7 @@ export default function DailyReportsPage({ searchParams }: DailyReportsPageProps
         </CardHeader>
         <CardContent>
           <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-            <DailyReportsContent warehouseId={searchParams.warehouse} page={page} />
+            <DailyReportsContent warehouseId={params.warehouse} page={page} />
           </Suspense>
         </CardContent>
       </Card>

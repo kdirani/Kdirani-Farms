@@ -13,7 +13,7 @@ export const metadata = {
 };
 
 interface MedicineInvoiceDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function MedicineInvoiceContent({ invoiceId }: { invoiceId: string }) {
@@ -43,11 +43,12 @@ async function MedicineInvoiceContent({ invoiceId }: { invoiceId: string }) {
   );
 }
 
-export default function MedicineInvoiceDetailPage({ params }: MedicineInvoiceDetailPageProps) {
+export default async function MedicineInvoiceDetailPage({ params }: MedicineInvoiceDetailPageProps) {
+  const { id } = await params;
   return (
     <div className="space-y-6">
       <Suspense fallback={<Skeleton className="h-screen w-full" />}>
-        <MedicineInvoiceContent invoiceId={params.id} />
+        <MedicineInvoiceContent invoiceId={id} />
       </Suspense>
     </div>
   );

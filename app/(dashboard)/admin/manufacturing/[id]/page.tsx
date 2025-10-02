@@ -13,7 +13,7 @@ export const metadata = {
 };
 
 interface ManufacturingDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function ManufacturingContent({ invoiceId }: { invoiceId: string }) {
@@ -43,11 +43,12 @@ async function ManufacturingContent({ invoiceId }: { invoiceId: string }) {
   );
 }
 
-export default function ManufacturingDetailPage({ params }: ManufacturingDetailPageProps) {
+export default async function ManufacturingDetailPage({ params }: ManufacturingDetailPageProps) {
+  const { id } = await params;
   return (
     <div className="space-y-6">
       <Suspense fallback={<Skeleton className="h-screen w-full" />}>
-        <ManufacturingContent invoiceId={params.id} />
+        <ManufacturingContent invoiceId={id} />
       </Suspense>
     </div>
   );

@@ -15,7 +15,7 @@ export const metadata = {
 };
 
 interface InvoiceDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function InvoiceContent({ invoiceId }: { invoiceId: string }) {
@@ -45,11 +45,12 @@ async function InvoiceContent({ invoiceId }: { invoiceId: string }) {
   );
 }
 
-export default function InvoiceDetailPage({ params }: InvoiceDetailPageProps) {
+export default async function InvoiceDetailPage({ params }: InvoiceDetailPageProps) {
+  const { id } = await params;
   return (
     <div className="space-y-6">
       <Suspense fallback={<Skeleton className="h-screen w-full" />}>
-        <InvoiceContent invoiceId={params.id} />
+        <InvoiceContent invoiceId={id} />
       </Suspense>
     </div>
   );
