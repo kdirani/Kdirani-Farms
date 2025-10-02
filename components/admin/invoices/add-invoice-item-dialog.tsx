@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -135,44 +136,40 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="material_name_id">Material/Product</Label>
-            <Select
-              value={materialId}
+            <Combobox
+              options={[
+                { value: 'none', label: 'No material' },
+                ...materials.map((material) => ({
+                  value: material.id,
+                  label: material.material_name,
+                }))
+              ]}
+              value={materialId || 'none'}
               onValueChange={(value) => setValue('material_name_id', value === 'none' ? undefined : value)}
+              placeholder="Select material"
+              searchPlaceholder="Search materials..."
+              emptyText="No materials found"
               disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select material" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No material</SelectItem>
-                {materials.map((material) => (
-                  <SelectItem key={material.id} value={material.id}>
-                    {material.material_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="egg_weight_id">Egg Weight (Optional)</Label>
-            <Select
-              value={eggWeightId}
+            <Combobox
+              options={[
+                { value: 'none', label: 'No egg weight' },
+                ...eggWeights.map((weight) => ({
+                  value: weight.id,
+                  label: weight.weight_range,
+                }))
+              ]}
+              value={eggWeightId || 'none'}
               onValueChange={(value) => setValue('egg_weight_id', value === 'none' ? undefined : value)}
+              placeholder="Select egg weight"
+              searchPlaceholder="Search egg weights..."
+              emptyText="No egg weights found"
               disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select egg weight" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No egg weight</SelectItem>
-                {eggWeights.map((weight) => (
-                  <SelectItem key={weight.id} value={weight.id}>
-                    {weight.weight_range}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -205,22 +202,18 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="unit_id">Unit *</Label>
-              <Select
+              <Combobox
+                options={units.map((unit) => ({
+                  value: unit.id,
+                  label: unit.unit_name,
+                }))}
                 value={unitId}
                 onValueChange={(value) => setValue('unit_id', value)}
+                placeholder="Select unit"
+                searchPlaceholder="Search units..."
+                emptyText="No units found"
                 disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select unit" />
-                </SelectTrigger>
-                <SelectContent>
-                  {units.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
-                      {unit.unit_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
               {errors.unit_id && (
                 <p className="text-sm text-destructive">{errors.unit_id.message}</p>
               )}

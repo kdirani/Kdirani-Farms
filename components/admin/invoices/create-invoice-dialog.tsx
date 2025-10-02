@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
@@ -339,22 +340,18 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
 
           <div className="space-y-2">
             <Label htmlFor="warehouse_id">Warehouse *</Label>
-            <Select
+            <Combobox
+              options={warehouses.map((warehouse) => ({
+                value: warehouse.id,
+                label: `${warehouse.name} (${warehouse.farm_name})`,
+              }))}
               value={warehouseId}
               onValueChange={(value) => setValue('warehouse_id', value)}
+              placeholder="Select warehouse"
+              searchPlaceholder="Search warehouses..."
+              emptyText="No warehouses found"
               disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select warehouse" />
-              </SelectTrigger>
-              <SelectContent>
-                {warehouses.map((warehouse) => (
-                  <SelectItem key={warehouse.id} value={warehouse.id}>
-                    {warehouse.name} ({warehouse.farm_name})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
             {errors.warehouse_id && (
               <p className="text-sm text-destructive">{errors.warehouse_id.message}</p>
             )}
@@ -362,23 +359,21 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
 
           <div className="space-y-2">
             <Label htmlFor="client_id">Client (Optional)</Label>
-            <Select
-              value={clientId}
+            <Combobox
+              options={[
+                { value: 'none', label: 'No client' },
+                ...clients.map((client) => ({
+                  value: client.id,
+                  label: `${client.name} (${client.type})`,
+                }))
+              ]}
+              value={clientId || 'none'}
               onValueChange={(value) => setValue('client_id', value === 'none' ? undefined : value)}
+              placeholder="Select client"
+              searchPlaceholder="Search clients..."
+              emptyText="No clients found"
               disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select client" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No client</SelectItem>
-                {clients.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name} ({client.type})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </div>
 
           <div className="space-y-2">
@@ -398,39 +393,39 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
               
               {/* Add Item Form */}
               <div className="grid grid-cols-6 gap-2 mb-4">
-                <Select
-                  value={newItem.material_name_id || 'none'}
-                  onValueChange={(value) => setNewItem({ ...newItem, material_name_id: value === 'none' ? undefined : value })}
-                >
-                  <SelectTrigger className="col-span-2">
-                    <SelectValue placeholder="Material" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">-</SelectItem>
-                    {materials.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>{m.material_name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="col-span-2">
+                  <Combobox
+                    options={[
+                      { value: 'none', label: '-' },
+                      ...materials.map((m) => ({
+                        value: m.id,
+                        label: m.material_name,
+                      }))
+                    ]}
+                    value={newItem.material_name_id || 'none'}
+                    onValueChange={(value) => setNewItem({ ...newItem, material_name_id: value === 'none' ? undefined : value })}
+                    placeholder="Material"
+                    searchPlaceholder="Search materials..."
+                    emptyText="No materials found"
+                  />
+                </div>
                 <Input
                   type="number"
                   placeholder="Qty"
                   value={newItem.quantity || ''}
                   onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
                 />
-                <Select
+                <Combobox
+                  options={units.map((u) => ({
+                    value: u.id,
+                    label: u.unit_name,
+                  }))}
                   value={newItem.unit_id || ''}
                   onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Unit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {units.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>{u.unit_name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Unit"
+                  searchPlaceholder="Search units..."
+                  emptyText="No units found"
+                />
                 <Input
                   type="number"
                   placeholder="Price"
@@ -475,19 +470,17 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
               {/* Add Expense Form */}
               <div className="grid grid-cols-4 gap-2 mb-4">
                 <div className="col-span-2">
-                  <Select
+                  <Combobox
+                    options={expenseTypes.map((e) => ({
+                      value: e.id,
+                      label: e.name,
+                    }))}
                     value={newExpense.expense_type_id || ''}
                     onValueChange={(value) => setNewExpense({ ...newExpense, expense_type_id: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Expense Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {expenseTypes.map((e) => (
-                        <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Expense Type"
+                    searchPlaceholder="Search expense types..."
+                    emptyText="No expense types found"
+                  />
                 </div>
                 <Input
                   type="number"

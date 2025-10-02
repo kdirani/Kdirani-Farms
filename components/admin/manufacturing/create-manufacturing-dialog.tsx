@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
@@ -281,22 +282,18 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
 
           <div className="space-y-2">
             <Label htmlFor="warehouse_id">Warehouse *</Label>
-            <Select
+            <Combobox
+              options={warehouses.map((warehouse) => ({
+                value: warehouse.id,
+                label: `${warehouse.name} (${warehouse.farm_name})`,
+              }))}
               value={warehouseId}
               onValueChange={(value) => setValue('warehouse_id', value)}
+              placeholder="Select warehouse"
+              searchPlaceholder="Search warehouses..."
+              emptyText="No warehouses found"
               disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select warehouse" />
-              </SelectTrigger>
-              <SelectContent>
-                {warehouses.map((warehouse) => (
-                  <SelectItem key={warehouse.id} value={warehouse.id}>
-                    {warehouse.name} ({warehouse.farm_name})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
             {errors.warehouse_id && (
               <p className="text-sm text-destructive">{errors.warehouse_id.message}</p>
             )}
@@ -315,44 +312,40 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="material_name_id">Output Material</Label>
-              <Select
-                value={materialNameId}
+              <Combobox
+                options={[
+                  { value: 'none', label: 'No material' },
+                  ...materials.map((material) => ({
+                    value: material.id,
+                    label: material.material_name,
+                  }))
+                ]}
+                value={materialNameId || 'none'}
                 onValueChange={(value) => setValue('material_name_id', value === 'none' ? undefined : value)}
+                placeholder="Select material"
+                searchPlaceholder="Search materials..."
+                emptyText="No materials found"
                 disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select material" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No material</SelectItem>
-                  {materials.map((material) => (
-                    <SelectItem key={material.id} value={material.id}>
-                      {material.material_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="unit_id">Unit</Label>
-              <Select
-                value={unitId}
+              <Combobox
+                options={[
+                  { value: 'none', label: 'No unit' },
+                  ...units.map((unit) => ({
+                    value: unit.id,
+                    label: unit.unit_name,
+                  }))
+                ]}
+                value={unitId || 'none'}
                 onValueChange={(value) => setValue('unit_id', value === 'none' ? undefined : value)}
+                placeholder="Select unit"
+                searchPlaceholder="Search units..."
+                emptyText="No units found"
                 disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select unit" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No unit</SelectItem>
-                  {units.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
-                      {unit.unit_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
@@ -384,19 +377,17 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
               
               <div className="grid grid-cols-6 gap-2 mb-4">
                 <div className="col-span-2">
-                  <Select
+                  <Combobox
+                    options={materials.map((m) => ({
+                      value: m.id,
+                      label: m.material_name,
+                    }))}
                     value={newItem.material_name_id || ''}
                     onValueChange={(value) => setNewItem({ ...newItem, material_name_id: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Material" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {materials.map((m) => (
-                        <SelectItem key={m.id} value={m.id}>{m.material_name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Material"
+                    searchPlaceholder="Search materials..."
+                    emptyText="No materials found"
+                  />
                 </div>
                 <Input
                   type="number"
@@ -404,19 +395,17 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                   value={newItem.quantity || ''}
                   onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
                 />
-                <Select
+                <Combobox
+                  options={units.map((u) => ({
+                    value: u.id,
+                    label: u.unit_name,
+                  }))}
                   value={newItem.unit_id || ''}
                   onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Unit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {units.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>{u.unit_name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Unit"
+                  searchPlaceholder="Search units..."
+                  emptyText="No units found"
+                />
                 <Input
                   type="number"
                   placeholder="Blend Count"
@@ -459,19 +448,17 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
               
               <div className="grid grid-cols-4 gap-2 mb-4">
                 <div className="col-span-2">
-                  <Select
+                  <Combobox
+                    options={expenseTypes.map((e) => ({
+                      value: e.id,
+                      label: e.name,
+                    }))}
                     value={newExpense.expense_type_id || ''}
                     onValueChange={(value) => setNewExpense({ ...newExpense, expense_type_id: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Expense Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {expenseTypes.map((e) => (
-                        <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Expense Type"
+                    searchPlaceholder="Search expense types..."
+                    emptyText="No expense types found"
+                  />
                 </div>
                 <Input
                   type="number"

@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { Separator } from '@/components/ui/separator';
 import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
@@ -239,22 +240,18 @@ export function ManufacturingForm({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="material_name_id">المادة الناتجة *</Label>
-            <Select
+            <Combobox
+              options={materialsNames.map((material) => ({
+                value: material.id,
+                label: material.material_name,
+              }))}
               value={materialNameId}
               onValueChange={(value) => setValue('material_name_id', value)}
+              placeholder="اختر المادة"
+              searchPlaceholder="ابحث عن المادة..."
+              emptyText="لا توجد مواد"
               disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="اختر المادة" />
-              </SelectTrigger>
-              <SelectContent>
-                {materialsNames.map((material) => (
-                  <SelectItem key={material.id} value={material.id}>
-                    {material.material_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
             {errors.material_name_id && (
               <p className="text-sm text-destructive">{errors.material_name_id.message}</p>
             )}
@@ -279,22 +276,18 @@ export function ManufacturingForm({
 
           <div className="space-y-2">
             <Label htmlFor="unit_id">الوحدة *</Label>
-            <Select
+            <Combobox
+              options={units.map((unit) => ({
+                value: unit.id,
+                label: unit.unit_name,
+              }))}
               value={unitId}
               onValueChange={(value) => setValue('unit_id', value)}
+              placeholder="اختر الوحدة"
+              searchPlaceholder="ابحث عن الوحدة..."
+              emptyText="لا توجد وحدات"
               disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="اختر الوحدة" />
-              </SelectTrigger>
-              <SelectContent>
-                {units.map((unit) => (
-                  <SelectItem key={unit.id} value={unit.id}>
-                    {unit.unit_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
             {errors.unit_id && (
               <p className="text-sm text-destructive">{errors.unit_id.message}</p>
             )}
@@ -332,22 +325,18 @@ export function ManufacturingForm({
             <div key={field.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg">
               <div className="space-y-2">
                 <Label>المادة *</Label>
-                <Select
+                <Combobox
+                  options={materialsNames.map((material) => ({
+                    value: material.id,
+                    label: material.material_name,
+                  }))}
                   value={watch(`inputItems.${index}.material_name_id`)}
                   onValueChange={(value) => setValue(`inputItems.${index}.material_name_id`, value)}
+                  placeholder="اختر المادة"
+                  searchPlaceholder="ابحث عن المادة..."
+                  emptyText="لا توجد مواد"
                   disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر المادة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {materialsNames.map((material) => (
-                      <SelectItem key={material.id} value={material.id}>
-                        {material.material_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
                 {errors.inputItems?.[index]?.material_name_id && (
                   <p className="text-sm text-destructive">
                     {errors.inputItems[index]?.material_name_id?.message}
@@ -372,22 +361,18 @@ export function ManufacturingForm({
 
               <div className="space-y-2">
                 <Label>الوحدة *</Label>
-                <Select
+                <Combobox
+                  options={units.map((unit) => ({
+                    value: unit.id,
+                    label: unit.unit_name,
+                  }))}
                   value={watch(`inputItems.${index}.unit_id`)}
                   onValueChange={(value) => setValue(`inputItems.${index}.unit_id`, value)}
+                  placeholder="اختر الوحدة"
+                  searchPlaceholder="ابحث عن الوحدة..."
+                  emptyText="لا توجد وحدات"
                   disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر الوحدة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {units.map((unit) => (
-                      <SelectItem key={unit.id} value={unit.id}>
-                        {unit.unit_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
                 {errors.inputItems?.[index]?.unit_id && (
                   <p className="text-sm text-destructive">
                     {errors.inputItems[index]?.unit_id?.message}
@@ -454,22 +439,18 @@ export function ManufacturingForm({
             <div key={field.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg">
               <div className="space-y-2">
                 <Label>نوع المصروف *</Label>
-                <Select
+                <Combobox
+                  options={expenseTypes.map((type) => ({
+                    value: type.id,
+                    label: type.name,
+                  }))}
                   value={watch(`expenses.${index}.expense_type_id`)}
                   onValueChange={(value) => setValue(`expenses.${index}.expense_type_id`, value)}
+                  placeholder="اختر نوع المصروف"
+                  searchPlaceholder="ابحث عن نوع المصروف..."
+                  emptyText="لا توجد أنواع مصروفات"
                   disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر نوع المصروف" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {expenseTypes.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
                 {errors.expenses?.[index]?.expense_type_id && (
                   <p className="text-sm text-destructive">
                     {errors.expenses[index]?.expense_type_id?.message}

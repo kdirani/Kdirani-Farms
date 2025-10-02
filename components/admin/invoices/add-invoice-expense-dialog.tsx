@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -111,22 +112,18 @@ export function AddInvoiceExpenseDialog({ invoiceId, open, onOpenChange }: AddIn
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="expense_type_id">Expense Type *</Label>
-            <Select
+            <Combobox
+              options={expenseTypes.map((type) => ({
+                value: type.id,
+                label: type.name,
+              }))}
               value={expenseTypeId}
               onValueChange={(value) => setValue('expense_type_id', value)}
+              placeholder="Select expense type"
+              searchPlaceholder="Search expense types..."
+              emptyText="No expense types found"
               disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select expense type" />
-              </SelectTrigger>
-              <SelectContent>
-                {expenseTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
             {errors.expense_type_id && (
               <p className="text-sm text-destructive">{errors.expense_type_id.message}</p>
             )}
