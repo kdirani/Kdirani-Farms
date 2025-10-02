@@ -18,6 +18,7 @@ import {
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { MedicineAttachmentsSection } from './medicine-attachments-section';
 
 interface MedicineInvoiceDetailViewProps {
   invoice: MedicineInvoice;
@@ -227,6 +228,9 @@ export function MedicineInvoiceDetailView({ invoice, items, expenses }: Medicine
           )}
         </CardContent>
       </Card>
+
+      {/* Medicine Attachments */}
+      <MedicineAttachmentsSection invoiceId={invoice.id} />
     </div>
   );
 }

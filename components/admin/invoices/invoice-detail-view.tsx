@@ -13,6 +13,7 @@ import { ArrowLeft, FileText, CheckCircle, XCircle } from 'lucide-react';
 import { format } from 'date-fns'; 
 import { InvoiceItemsSection } from './invoice-items-section';
 import { InvoiceExpensesSection } from './invoice-expenses-section';
+import { InvoiceAttachmentsSection } from './invoice-attachments-section';
 
 interface InvoiceDetailViewProps {
   invoice: Invoice;
@@ -131,6 +132,9 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
 
       {/* Invoice Expenses */}
       <InvoiceExpensesSection invoiceId={invoice.id} expenses={expenses} />
+
+      {/* Invoice Attachments */}
+      <InvoiceAttachmentsSection invoiceId={invoice.id} />
 
       {/* Totals */}
       <Card>

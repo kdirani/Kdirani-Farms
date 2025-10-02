@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { createMedicineInvoice } from '@/actions/medicine-invoice.actions';
 import { createMedicineItem } from '@/actions/medicine-item.actions';
 import { createMedicineExpense } from '@/actions/medicine-expense.actions';
+import { createMedicineConsumptionAttachment } from '@/actions/medicine-consumption-attachment.actions';
 import { getWarehousesForMaterials } from '@/actions/material.actions';
 import { getMedicines } from '@/actions/medicine.actions';
 import { getMeasurementUnits } from '@/actions/unit.actions';
@@ -30,6 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 
@@ -72,6 +74,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
   
   const [items, setItems] = useState<MedicineItemInput[]>([]);
   const [expenses, setExpenses] = useState<MedicineExpenseInput[]>([]);
+  const [attachmentFiles, setAttachmentFiles] = useState<UploadedFile[]>([]);
   
   const {
     register,
@@ -150,10 +153,25 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
         });
       }
 
+      // Upload attachments
+      if (attachmentFiles.length > 0) {
+        for (const uploadedFile of attachmentFiles) {
+          const attachmentResult = await createMedicineConsumptionAttachment(
+            invoiceId,
+            uploadedFile.file
+          );
+
+          if (!attachmentResult.success) {
+            toast.warning(`Invoice saved but failed to upload file: ${uploadedFile.file.name}`);
+          }
+        }
+      }
+
       toast.success('Medicine invoice created successfully');
       reset();
       setItems([]);
       setExpenses([]);
+      setAttachmentFiles([]);
       onOpenChange(false);
       window.location.reload();
     } catch (error) {
@@ -424,6 +442,22 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
               </div>
             </div>
           )}
+
+          {/* File Attachments */}
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-2">Attachments</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Upload related files (images, PDFs, documents)
+              </p>
+              <FileUpload
+                onFilesSelected={setAttachmentFiles}
+                maxFiles={5}
+                maxSizeMB={10}
+                disabled={isLoading}
+              />
+            </CardContent>
+          </Card>
 
           <DialogFooter>
             <Button

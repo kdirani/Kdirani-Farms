@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { createInvoice } from '@/actions/invoice.actions';
 import { createInvoiceItem } from '@/actions/invoice-item.actions';
 import { createInvoiceExpense } from '@/actions/invoice-expense.actions';
+import { createInvoiceAttachment } from '@/actions/invoice-attachment.actions';
 import { getWarehousesForMaterials } from '@/actions/material.actions';
 import { getClients } from '@/actions/client.actions';
 import { getMaterialNames } from '@/actions/material-name.actions';
@@ -32,6 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 
@@ -77,6 +79,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
   
   const [items, setItems] = useState<InvoiceItemInput[]>([]);
   const [expenses, setExpenses] = useState<InvoiceExpenseInput[]>([]);
+  const [attachmentFiles, setAttachmentFiles] = useState<UploadedFile[]>([]);
   const [activeTab, setActiveTab] = useState('info');
   
   const {
@@ -179,10 +182,26 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
         });
       }
 
-      toast.success('Invoice created successfully with items and expenses');
+      // Upload attachments
+      if (attachmentFiles.length > 0) {
+        for (const uploadedFile of attachmentFiles) {
+          const attachmentResult = await createInvoiceAttachment(
+            invoiceId,
+            uploadedFile.file,
+            data.invoice_type
+          );
+
+          if (!attachmentResult.success) {
+            toast.warning(`Invoice saved but failed to upload file: ${uploadedFile.file.name}`);
+          }
+        }
+      }
+
+      toast.success('Invoice created successfully with items, expenses, and attachments');
       reset();
       setItems([]);
       setExpenses([]);
+      setAttachmentFiles([]);
       setActiveTab('info');
       onOpenChange(false);
       window.location.reload();
@@ -514,6 +533,22 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
               </div>
             </div>
           )}
+
+          {/* File Attachments */}
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-2">Attachments</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Upload related files (images, PDFs, documents)
+              </p>
+              <FileUpload
+                onFilesSelected={setAttachmentFiles}
+                maxFiles={5}
+                maxSizeMB={10}
+                disabled={isLoading}
+              />
+            </CardContent>
+          </Card>
 
           <DialogFooter>
             <Button

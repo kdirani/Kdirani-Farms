@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { createManufacturingInvoice } from '@/actions/manufacturing.actions';
 import { createManufacturingItem } from '@/actions/manufacturing-item.actions';
 import { createManufacturingExpense } from '@/actions/manufacturing-expense.actions';
+import { createManufacturingAttachment } from '@/actions/manufacturing-attachment.actions';
 import { getWarehousesForMaterials } from '@/actions/material.actions';
 import { getMaterialNames } from '@/actions/material-name.actions';
 import { getMeasurementUnits } from '@/actions/unit.actions';
@@ -30,6 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 
@@ -74,6 +76,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
   
   const [items, setItems] = useState<ManufacturingItemInput[]>([]);
   const [expenses, setExpenses] = useState<ManufacturingExpenseInput[]>([]);
+  const [attachmentFiles, setAttachmentFiles] = useState<UploadedFile[]>([]);
   
   const {
     register,
@@ -155,10 +158,25 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
         });
       }
 
+      // Upload attachments
+      if (attachmentFiles.length > 0) {
+        for (const uploadedFile of attachmentFiles) {
+          const attachmentResult = await createManufacturingAttachment(
+            invoiceId,
+            uploadedFile.file
+          );
+
+          if (!attachmentResult.success) {
+            toast.warning(`Invoice saved but failed to upload file: ${uploadedFile.file.name}`);
+          }
+        }
+      }
+
       toast.success('Manufacturing invoice created successfully');
       reset();
       setItems([]);
       setExpenses([]);
+      setAttachmentFiles([]);
       onOpenChange(false);
       window.location.reload();
     } catch (error) {
@@ -486,6 +504,22 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* File Attachments */}
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-2">Attachments</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Upload related files (images, PDFs, documents)
+              </p>
+              <FileUpload
+                onFilesSelected={setAttachmentFiles}
+                maxFiles={5}
+                maxSizeMB={10}
+                disabled={isLoading}
+              />
             </CardContent>
           </Card>
 

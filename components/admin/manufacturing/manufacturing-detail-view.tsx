@@ -18,6 +18,7 @@ import { ArrowLeft, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { ManufacturingAttachmentsSection } from './manufacturing-attachments-section';
 
 interface ManufacturingDetailViewProps {
   invoice: ManufacturingInvoice;
@@ -232,6 +233,9 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
           )}
         </CardContent>
       </Card>
+
+      {/* Manufacturing Attachments */}
+      <ManufacturingAttachmentsSection invoiceId={invoice.id} />
 
       {/* Summary */}
       {expenses.length > 0 && (
