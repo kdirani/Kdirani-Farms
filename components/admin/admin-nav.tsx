@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 import {
   Users,
   Building2,
@@ -22,143 +22,133 @@ import {
   UserCog,
   LogOut,
   Zap,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { signOut } from "next-auth/react";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { signOut } from 'next-auth/react';
 
 const navSections = [
   {
-    title: "الرئيسية",
+    title: 'الرئيسية',
     items: [
       {
-        title: "لوحة التحكم",
-        href: "/admin",
+        title: 'لوحة التحكم',
+        href: '/admin',
         icon: Home,
       },
       {
-        title: "إعداد مزرعة كاملة",
-        href: "/admin/setup",
+        title: 'إعداد مزرعة كاملة',
+        href: '/admin/setup',
         icon: Zap,
       },
       {
-        title: "التقارير والإحصائيات",
-        href: "/admin/analytics",
+        title: 'التقارير والإحصائيات',
+        href: '/admin/analytics',
         icon: BarChart3,
       },
     ],
   },
   {
-    title: "إدارة النظام",
+    title: 'إدارة النظام',
     items: [
       {
-        title: "المستخدمين",
-        href: "/admin/users",
+        title: 'المستخدمين',
+        href: '/admin/users',
         icon: Users,
       },
       {
-        title: "المزارع",
-        href: "/admin/farms",
+        title: 'المزارع',
+        href: '/admin/farms',
         icon: Building2,
       },
       {
-        title: "المستودعات",
-        href: "/admin/warehouses",
+        title: 'المستودعات',
+        href: '/admin/warehouses',
         icon: Warehouse,
       },
       {
-        title: "القطعان",
-        href: "/admin/poultry",
+        title: 'القطعان',
+        href: '/admin/poultry',
         icon: UserCog,
       },
     ],
   },
   {
-    title: "المخزون والمواد",
+    title: 'المخزون والمواد',
     items: [
       {
-        title: "المواد",
-        href: "/admin/materials",
+        title: 'المواد',
+        href: '/admin/materials',
         icon: Package,
-      },
-      {
-        title: "أسماء المواد",
-        href: "/admin/materials-names",
-        icon: Tag,
-      },
-      {
-        title: "وحدات القياس",
-        href: "/admin/units",
-        icon: Scale,
       },
     ],
   },
   {
-    title: "الفواتير والعمليات",
+    title: 'الفواتير والعمليات',
     items: [
       {
-        title: "فواتير البيع والشراء",
-        href: "/admin/invoices",
+        title: 'فواتير البيع والشراء',
+        href: '/admin/invoices',
         icon: Receipt,
       },
       {
-        title: "فواتير التصنيع",
-        href: "/admin/manufacturing",
+        title: 'فواتير التصنيع',
+        href: '/admin/manufacturing',
         icon: Factory,
       },
       {
-        title: "فواتير الأدوية",
-        href: "/admin/medicines-invoices",
+        title: 'فواتير الأدوية',
+        href: '/admin/medicines-invoices',
         icon: Pill,
       },
     ],
   },
   {
-    title: "التقارير",
+    title: 'التقارير',
     items: [
       {
-        title: "التقارير اليومية",
-        href: "/admin/daily-reports",
+        title: 'التقارير اليومية',
+        href: '/admin/daily-reports',
         icon: FileText,
       },
       {
-        title: "تقارير المخزون",
-        href: "/admin/inventory-reports",
+        title: 'تقارير المخزون',
+        href: '/admin/inventory-reports',
         icon: Database,
       },
     ],
   },
   {
-    title: "القوائم الأساسية",
+    title: 'القوائم الأساسية',
     items: [
       {
-        title: "أوزان البيض",
-        href: "/admin/egg-weights",
-        icon: Layers,
-      },
-      {
-        title: "الأدوية واللقاحات",
-        href: "/admin/medicines",
-        icon: Pill,
-      },
-      {
-        title: "أنواع المصاريف",
-        href: "/admin/expense-types",
+        title: 'أسماء المواد',
+        href: '/admin/materials-names',
         icon: Tag,
       },
       {
-        title: "العملاء والموردين",
-        href: "/admin/clients",
-        icon: Users,
+        title: 'وحدات القياس',
+        href: '/admin/units',
+        icon: Scale,
       },
-    ],
-  },
-  {
-    title: "الإعدادات",
-    items: [
       {
-        title: "إعدادات النظام",
-        href: "/admin/settings",
-        icon: Settings,
+        title: 'أوزان البيض',
+        href: '/admin/egg-weights',
+        icon: Layers,
+      },
+      {
+        title: 'الأدوية واللقاحات',
+        href: '/admin/medicines',
+        icon: Pill,
+      },
+      {
+        title: 'أنواع المصاريف',
+        href: '/admin/expense-types',
+        icon: Tag,
+      },
+      {
+        title: 'العملاء والموردين',
+        href: '/admin/clients',
+        icon: Users,
       },
     ],
   },
@@ -176,20 +166,21 @@ export function AdminNav() {
               {section.title}
             </h3>
             <div className="space-y-1">
-              {section.items.map((item) => {
+              {section.items.map(item => {
                 const Icon = item.icon;
                 const isActive =
-                  pathname === item.href || pathname.startsWith(item.href + "/");
+                  pathname === item.href ||
+                  pathname.startsWith(item.href + '/');
 
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-primary/10",
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-primary/10',
                       isActive
-                        ? "bg-primary text-white hover:bg-primary hover:text-white"
-                        : "text-gray-700 hover:text-primary",
+                        ? 'bg-primary text-white hover:bg-primary hover:text-white'
+                        : 'text-gray-700 hover:text-primary'
                     )}
                   >
                     <Icon className="h-4 w-4" />
@@ -201,12 +192,12 @@ export function AdminNav() {
           </div>
         ))}
       </div>
-      
+
       <div className="pt-4 mt-4 border-t">
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50"
-          onClick={() => signOut({ callbackUrl: "/login" })}
+          onClick={() => signOut({ callbackUrl: '/login' })}
         >
           <LogOut className="h-5 w-5" />
           <span>تسجيل الخروج</span>
