@@ -113,7 +113,11 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
         toast.success('Item added successfully');
         reset();
         onOpenChange(false);
-        window.location.reload();
+
+        // Delay page reload to allow user to see success message
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
       } else {
         toast.error(result.error || 'Failed to add item');
       }

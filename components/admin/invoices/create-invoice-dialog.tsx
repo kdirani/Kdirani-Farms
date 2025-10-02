@@ -205,7 +205,11 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
       setAttachmentFiles([]);
       setActiveTab('info');
       onOpenChange(false);
-      window.location.reload();
+
+      // Delay page reload to allow user to see success message
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (error) {
       toast.error('An unexpected error occurred');
     } finally {

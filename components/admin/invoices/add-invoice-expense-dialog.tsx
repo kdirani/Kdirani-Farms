@@ -89,7 +89,11 @@ export function AddInvoiceExpenseDialog({ invoiceId, open, onOpenChange }: AddIn
         toast.success('Expense added successfully');
         reset();
         onOpenChange(false);
-        window.location.reload();
+
+        // Delay page reload to allow user to see success message
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
       } else {
         toast.error(result.error || 'Failed to add expense');
       }

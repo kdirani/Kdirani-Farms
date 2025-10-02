@@ -32,7 +32,11 @@ export function DeleteInvoiceDialog({ invoice, open, onOpenChange }: DeleteInvoi
       if (result.success) {
         toast.success('Invoice deleted successfully');
         onOpenChange(false);
-        window.location.reload();
+
+        // Delay page reload to allow user to see success message
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
       } else {
         toast.error(result.error || 'Failed to delete invoice');
       }
