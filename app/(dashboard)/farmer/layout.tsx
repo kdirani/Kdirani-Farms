@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { FarmerNav } from "@/components/farmer/farmer-nav";
+import { MobileNav } from "@/components/farmer/mobile-nav";
 import { UserNav } from "@/components/layout/user-nav";
 
 export default async function FarmerLayout({
@@ -24,6 +25,7 @@ export default async function FarmerLayout({
       <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4">
+            <MobileNav />
             <h1 className="text-xl font-bold text-primary">
               نظام المزارع - {session.user.name}
             </h1>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminNav } from "@/components/admin/admin-nav";
+import { MobileNav } from "@/components/admin/mobile-nav";
 import { UserNav } from "@/components/layout/user-nav";
 
 export default async function AdminLayout({
@@ -24,6 +25,7 @@ export default async function AdminLayout({
       <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4">
+            <MobileNav />
             <h1 className="text-xl font-bold text-primary">
               لوحة التحكم - الإدارة
             </h1>
