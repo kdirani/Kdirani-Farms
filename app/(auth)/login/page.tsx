@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import LoginForm from "@/components/auth/login-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { HeaderLogo } from "@/components/layout/header-logo";
 
 export const metadata: Metadata = {
   title: "تسجيل الدخول - نظام إدارة المزارع",
@@ -23,10 +24,8 @@ export default async function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-900 mb-2">
-            شركة القديراني
-          </h1>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <HeaderLogo href={null} width={200} height={200} className="mb-4" />
           <p className="text-lg text-blue-700">
             نظام إدارة مزارع الدواجن
           </p>

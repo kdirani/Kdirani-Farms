@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { AdminNav } from "@/components/admin/admin-nav";
 import { MobileNav } from "@/components/admin/mobile-nav";
 import { UserNav } from "@/components/layout/user-nav";
+import { HeaderLogo } from "@/components/layout/header-logo";
 
 export default async function AdminLayout({
   children,
@@ -26,6 +27,7 @@ export default async function AdminLayout({
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <MobileNav />
+            <HeaderLogo href="/admin" width={100} height={40} />
             <h1 className="text-xl font-bold text-primary">
               لوحة التحكم - الإدارة
             </h1>

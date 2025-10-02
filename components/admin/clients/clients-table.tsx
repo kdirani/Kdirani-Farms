@@ -54,18 +54,18 @@ export function ClientsTable({ clients: initialClients }: ClientsTableProps) {
 
   const handleCreate = async () => {
     if (!formData.name.trim()) {
-      toast.error('Client name is required');
+      toast.error('اسم العميل مطلوب');
       return;
     }
     setIsLoading(true);
     const result = await createClient(formData);
     if (result.success) {
-      toast.success('Client created successfully');
+      toast.success('تم إنشاء العميل بنجاح');
       setFormData({ name: '', type: 'customer' });
       setCreateDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to create client');
+      toast.error(result.error || 'فشل في إنشاء العميل');
     }
     setIsLoading(false);
   };
@@ -75,11 +75,11 @@ export function ClientsTable({ clients: initialClients }: ClientsTableProps) {
     setIsLoading(true);
     const result = await updateClient({ id: selectedClient.id, ...formData });
     if (result.success) {
-      toast.success('Client updated successfully');
+      toast.success('تم تحديث العميل بنجاح');
       setEditDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to update client');
+      toast.error(result.error || 'فشل في تحديث العميل');
     }
     setIsLoading(false);
   };
@@ -89,20 +89,20 @@ export function ClientsTable({ clients: initialClients }: ClientsTableProps) {
     setIsLoading(true);
     const result = await deleteClient(selectedClient.id);
     if (result.success) {
-      toast.success('Client deleted successfully');
+      toast.success('تم حذف العميل بنجاح');
       setDeleteDialogOpen(false);
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete client');
+      toast.error(result.error || 'فشل في حذف العميل');
     }
     setIsLoading(false);
   };
 
   const getTypeBadge = (type: 'customer' | 'provider') => {
     return type === 'customer' ? (
-      <Badge variant="default">Customer</Badge>
+      <Badge variant="default">عميل</Badge>
     ) : (
-      <Badge variant="secondary">Provider</Badge>
+      <Badge variant="secondary">مورد</Badge>
     );
   };
 
@@ -114,7 +114,7 @@ export function ClientsTable({ clients: initialClients }: ClientsTableProps) {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search clients..."
+              placeholder="البحث في العملاء..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -125,9 +125,9 @@ export function ClientsTable({ clients: initialClients }: ClientsTableProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="customer">Customers</SelectItem>
-              <SelectItem value="provider">Providers</SelectItem>
+              <SelectItem value="all">جميع الأنواع</SelectItem>
+              <SelectItem value="customer">العملاء</SelectItem>
+              <SelectItem value="provider">الموردين</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -136,7 +136,7 @@ export function ClientsTable({ clients: initialClients }: ClientsTableProps) {
           setCreateDialogOpen(true);
         }}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Client
+          إضافة عميل
         </Button>
       </div>
 
@@ -144,16 +144,16 @@ export function ClientsTable({ clients: initialClients }: ClientsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Client Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم العميل</TableHead>
+              <TableHead>النوع</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredClients.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={3} className="text-center text-muted-foreground">
-                  No clients found
+                  لم يتم العثور على عملاء
                 </TableCell>
               </TableRow>
             ) : (
@@ -197,22 +197,22 @@ export function ClientsTable({ clients: initialClients }: ClientsTableProps) {
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Client</DialogTitle>
-            <DialogDescription>Enter client details</DialogDescription>
+            <DialogTitle>إضافة عميل</DialogTitle>
+            <DialogDescription>أدخل تفاصيل العميل</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Client Name *</Label>
+              <Label htmlFor="name">اسم العميل *</Label>
               <Input
                 id="name"
-                placeholder="e.g., ABC Company"
+                placeholder="مثال: شركة ABC"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="type">Client Type *</Label>
+              <Label htmlFor="type">نوع العميل *</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value: 'customer' | 'provider') => setFormData({ ...formData, type: value })}
@@ -222,18 +222,18 @@ export function ClientsTable({ clients: initialClients }: ClientsTableProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="customer">Customer</SelectItem>
-                  <SelectItem value="provider">Provider</SelectItem>
+                  <SelectItem value="customer">عميل</SelectItem>
+                  <SelectItem value="provider">مورد</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button onClick={handleCreate} disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create'}
+              {isLoading ? 'جاري الإنشاء...' : 'إنشاء'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -243,22 +243,22 @@ export function ClientsTable({ clients: initialClients }: ClientsTableProps) {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Client</DialogTitle>
-            <DialogDescription>Update client details</DialogDescription>
+            <DialogTitle>تعديل العميل</DialogTitle>
+            <DialogDescription>حدث تفاصيل العميل</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="edit_name">Client Name *</Label>
+              <Label htmlFor="edit_name">اسم العميل *</Label>
               <Input
                 id="edit_name"
-                placeholder="e.g., ABC Company"
+                placeholder="مثال: شركة ABC"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit_type">Client Type *</Label>
+              <Label htmlFor="edit_type">نوع العميل *</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value: 'customer' | 'provider') => setFormData({ ...formData, type: value })}
@@ -268,18 +268,18 @@ export function ClientsTable({ clients: initialClients }: ClientsTableProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="customer">Customer</SelectItem>
-                  <SelectItem value="provider">Provider</SelectItem>
+                  <SelectItem value="customer">عميل</SelectItem>
+                  <SelectItem value="provider">مورد</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button onClick={handleEdit} disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Update'}
+              {isLoading ? 'جاري التحديث...' : 'تحديث'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -289,17 +289,17 @@ export function ClientsTable({ clients: initialClients }: ClientsTableProps) {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Client</DialogTitle>
+            <DialogTitle>حذف العميل</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{selectedClient?.name}"? This action cannot be undone.
+              هل أنت متأكد من حذف "{selectedClient?.name}"؟ هذا الإجراء لا يمكن التراجع عنه.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
-              {isLoading ? 'Deleting...' : 'Delete'}
+              {isLoading ? 'جاري الحذف...' : 'حذف'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { FarmerNav } from "@/components/farmer/farmer-nav";
 import { MobileNav } from "@/components/farmer/mobile-nav";
 import { UserNav } from "@/components/layout/user-nav";
+import { HeaderLogo } from "@/components/layout/header-logo";
 
 export default async function FarmerLayout({
   children,
@@ -26,6 +27,7 @@ export default async function FarmerLayout({
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <MobileNav />
+            <HeaderLogo href="/farmer" width={100} height={40} />
           </div>
           <UserNav user={session.user}  />
         </div>

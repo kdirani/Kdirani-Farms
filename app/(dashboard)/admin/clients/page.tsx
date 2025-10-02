@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Clients - Admin Dashboard',
-  description: 'Manage customers and providers',
+  title: 'العملاء - لوحة التحكم الإدارية',
+  description: 'إدارة العملاء والموردين',
 };
 
 async function ClientsContent() {
@@ -19,7 +19,7 @@ async function ClientsContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load clients'}
+          {result.error || 'فشل في تحميل العملاء'}
         </AlertDescription>
       </Alert>
     );
@@ -32,17 +32,17 @@ export default function ClientsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Clients Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">إدارة العملاء</h1>
         <p className="text-muted-foreground mt-2">
-          Manage customers and providers for invoices
+          إدارة العملاء والموردين للفواتير
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Clients</CardTitle>
+          <CardTitle>جميع العملاء</CardTitle>
           <CardDescription>
-            View and manage all customers and providers in the system
+            عرض وإدارة جميع العملاء والموردين في النظام
           </CardDescription>
         </CardHeader>
         <CardContent>
