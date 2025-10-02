@@ -97,7 +97,7 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
       <div className="flex items-center justify-between">
         <Select value={selectedWarehouseId} onValueChange={handleWarehouseChange}>
           <SelectTrigger className="w-64">
-            <SelectValue placeholder="Select warehouse" />
+            <SelectValue placeholder="اختر المستودع" />
           </SelectTrigger>
           <SelectContent>
             {warehouses.map((warehouse) => (
@@ -110,14 +110,14 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
         
         {pagination && (
           <div className="text-sm text-muted-foreground">
-            Showing {reports.length} of {pagination.total} reports
+            عرض {reports.length} من {pagination.total} تقرير
           </div>
         )}
       </div>
 
       {reports.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          No daily reports found for this warehouse
+          لم يتم العثور على تقارير يومية لهذا المستودع
         </div>
       ) : (
         <>
@@ -125,14 +125,14 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead className="text-right">Egg Production</TableHead>
-                  <TableHead className="text-right">Eggs Sold</TableHead>
-                  <TableHead className="text-right">Current Balance</TableHead>
-                  <TableHead className="text-right">Chicks (B/D/A)</TableHead>
-                  <TableHead className="text-right">Feed (kg)</TableHead>
+                  <TableHead>التاريخ والوقت</TableHead>
+                  <TableHead className="text-right">إنتاج البيض</TableHead>
+                  <TableHead className="text-right">البيض المباع</TableHead>
+                  <TableHead className="text-right">الرصيد الحالي</TableHead>
+                  <TableHead className="text-right">الكتاكيت (قبل/مات/بعد)</TableHead>
+                  <TableHead className="text-right">العلف (كيلو)</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -175,12 +175,12 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                         {report.checked ? (
                           <Badge variant="success" className="gap-1">
                             <CheckCircle className="h-3 w-3" />
-                            Checked
+                            مُتحقق
                           </Badge>
                         ) : (
                           <Badge variant="warning" className="gap-1">
                             <XCircle className="h-3 w-3" />
-                            Pending
+                            في الانتظار
                           </Badge>
                         )}
                       </TableCell>
@@ -190,7 +190,7 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                           size="sm"
                           onClick={() => toggleExpand(report.id)}
                         >
-                          {expandedRow === report.id ? 'Hide' : 'Details'}
+                          {expandedRow === report.id ? 'إخفاء' : 'التفاصيل'}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -202,24 +202,24 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                               <CardHeader className="pb-2">
                                 <CardTitle className="text-sm flex items-center gap-2">
                                   <Egg className="h-4 w-4" />
-                                  Egg Details
+                                  تفاصيل البيض
                                 </CardTitle>
                               </CardHeader>
                               <CardContent className="text-sm space-y-1">
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Healthy:</span>
+                                  <span className="text-muted-foreground">صحيح:</span>
                                   <span className="font-medium">{report.production_eggs_healthy}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Deformed:</span>
+                                  <span className="text-muted-foreground">مشوه:</span>
                                   <span className="font-medium">{report.production_eggs_deformed}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Gift:</span>
+                                  <span className="text-muted-foreground">هدية:</span>
                                   <span className="font-medium">{report.eggs_gift}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Previous Balance:</span>
+                                  <span className="text-muted-foreground">الرصيد السابق:</span>
                                   <span className="font-medium">{report.previous_eggs_balance}</span>
                                 </div>
                               </CardContent>
@@ -229,24 +229,24 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                               <CardHeader className="pb-2">
                                 <CardTitle className="text-sm flex items-center gap-2">
                                   <Activity className="h-4 w-4" />
-                                  Flock Status
+                                  حالة القطيع
                                 </CardTitle>
                               </CardHeader>
                               <CardContent className="text-sm space-y-1">
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Before:</span>
+                                  <span className="text-muted-foreground">قبل:</span>
                                   <span className="font-medium">{report.chicks_before}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Dead:</span>
+                                  <span className="text-muted-foreground">مات:</span>
                                   <span className="font-medium text-destructive">{report.chicks_dead}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">After:</span>
+                                  <span className="text-muted-foreground">بعد:</span>
                                   <span className="font-medium">{report.chicks_after}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Mortality Rate:</span>
+                                  <span className="text-muted-foreground">معدل الوفيات:</span>
                                   <span className="font-medium">
                                     {report.chicks_before > 0 
                                       ? ((report.chicks_dead / report.chicks_before) * 100).toFixed(2) 
@@ -260,20 +260,20 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                               <CardHeader className="pb-2">
                                 <CardTitle className="text-sm flex items-center gap-2">
                                   <TrendingUp className="h-4 w-4" />
-                                  Feed Consumption
+                                  استهلاك العلف
                                 </CardTitle>
                               </CardHeader>
                               <CardContent className="text-sm space-y-1">
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Daily (kg):</span>
+                                  <span className="text-muted-foreground">يومي (كيلو):</span>
                                   <span className="font-medium">{report.feed_daily_kg}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Monthly (kg):</span>
+                                  <span className="text-muted-foreground">شهري (كيلو):</span>
                                   <span className="font-medium">{report.feed_monthly_kg}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Feed Ratio:</span>
+                                  <span className="text-muted-foreground">نسبة العلف:</span>
                                   <span className="font-medium">{report.feed_ratio}</span>
                                 </div>
                               </CardContent>
@@ -283,21 +283,21 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                               <CardHeader className="pb-2">
                                 <CardTitle className="text-sm flex items-center gap-2">
                                   <Package className="h-4 w-4" />
-                                  Other
+                                  أخرى
                                 </CardTitle>
                               </CardHeader>
                               <CardContent className="text-sm space-y-1">
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Carton Used:</span>
+                                  <span className="text-muted-foreground">الكرتون المستخدم:</span>
                                   <span className="font-medium">{report.carton_consumption}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Droppings (kg):</span>
+                                  <span className="text-muted-foreground">السماد (كيلو):</span>
                                   <span className="font-medium">{report.production_droppings}</span>
                                 </div>
                                 {report.notes && (
                                   <div className="pt-2">
-                                    <span className="text-muted-foreground">Notes:</span>
+                                    <span className="text-muted-foreground">ملاحظات:</span>
                                     <p className="text-xs mt-1">{report.notes}</p>
                                   </div>
                                 )}
@@ -316,7 +316,7 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
           {pagination && pagination.totalPages > 1 && (
             <div className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
-                Page {pagination.page} of {pagination.totalPages}
+                الصفحة {pagination.page} من {pagination.totalPages}
               </div>
               <div className="flex gap-2">
                 <Button
@@ -326,7 +326,7 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                   disabled={pagination.page === 1}
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" />
-                  Previous
+                  السابق
                 </Button>
                 <Button
                   variant="outline"
@@ -334,7 +334,7 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={pagination.page === pagination.totalPages}
                 >
-                  Next
+                  التالي
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>

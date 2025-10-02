@@ -8,8 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Daily Reports - Admin Dashboard',
-  description: 'View daily operational reports from all warehouses',
+  title: 'التقارير اليومية - لوحة الإدارة',
+  description: 'عرض التقارير التشغيلية اليومية من جميع المستودعات',
 };
 
 async function DailyReportsContent({ warehouseId, page }: { warehouseId?: string; page: number }) {
@@ -21,7 +21,7 @@ async function DailyReportsContent({ warehouseId, page }: { warehouseId?: string
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          No warehouses found. Please create a warehouse first.
+          لم يتم العثور على مستودعات. يرجى إنشاء مستودع أولاً.
         </AlertDescription>
       </Alert>
     );
@@ -37,7 +37,7 @@ async function DailyReportsContent({ warehouseId, page }: { warehouseId?: string
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load daily reports'}
+          {result.error || 'فشل في تحميل التقارير اليومية'}
         </AlertDescription>
       </Alert>
     );
@@ -64,17 +64,17 @@ export default async function DailyReportsPage({ searchParams }: DailyReportsPag
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Daily Reports</h1>
+        <h1 className="text-3xl font-bold tracking-tight">التقارير اليومية</h1>
         <p className="text-muted-foreground mt-2">
-          View comprehensive daily operational reports including production, sales, and inventory
+          عرض التقارير التشغيلية اليومية الشاملة بما في ذلك الإنتاج والمبيعات والمخزون
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Daily Operational Reports</CardTitle>
+          <CardTitle>التقارير التشغيلية اليومية</CardTitle>
           <CardDescription>
-            Track egg production, feed consumption, medicine usage, and sales activity
+            تتبع إنتاج البيض واستهلاك العلف واستخدام الأدوية ونشاط المبيعات
           </CardDescription>
         </CardHeader>
         <CardContent>

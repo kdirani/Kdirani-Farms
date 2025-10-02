@@ -56,11 +56,11 @@ export function InventoryReportTable({ inventory }: InventoryReportTableProps) {
 
   const getStockBadge = (balance: number) => {
     if (balance === 0) {
-      return <Badge variant="destructive">Out of Stock</Badge>;
+      return <Badge variant="destructive">نفد المخزون</Badge>;
     } else if (balance < 100) {
-      return <Badge variant="warning">Low Stock</Badge>;
+      return <Badge variant="warning">مخزون قليل</Badge>;
     } else {
-      return <Badge variant="success">In Stock</Badge>;
+      return <Badge variant="success">متوفر</Badge>;
     }
   };
 
@@ -71,7 +71,7 @@ export function InventoryReportTable({ inventory }: InventoryReportTableProps) {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search materials..."
+            placeholder="البحث في المواد..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -82,7 +82,7 @@ export function InventoryReportTable({ inventory }: InventoryReportTableProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Warehouses</SelectItem>
+            <SelectItem value="all">جميع المستودعات</SelectItem>
             {warehouses.map((warehouse) => (
               <SelectItem key={warehouse} value={warehouse}>
                 {warehouse}
@@ -95,10 +95,10 @@ export function InventoryReportTable({ inventory }: InventoryReportTableProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="good">In Stock</SelectItem>
-            <SelectItem value="low">Low Stock</SelectItem>
-            <SelectItem value="out">Out of Stock</SelectItem>
+            <SelectItem value="all">جميع الحالات</SelectItem>
+            <SelectItem value="good">متوفر</SelectItem>
+            <SelectItem value="low">مخزون قليل</SelectItem>
+            <SelectItem value="out">نفد المخزون</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -107,25 +107,25 @@ export function InventoryReportTable({ inventory }: InventoryReportTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Material</TableHead>
-              <TableHead>Warehouse</TableHead>
-              <TableHead>Farm</TableHead>
-              <TableHead className="text-right">Opening</TableHead>
-              <TableHead className="text-right">Purchases</TableHead>
-              <TableHead className="text-right">Sales</TableHead>
-              <TableHead className="text-right">Consumption</TableHead>
-              <TableHead className="text-right">Manufacturing</TableHead>
-              <TableHead className="text-right">Current Balance</TableHead>
-              <TableHead>Unit</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Last Updated</TableHead>
+              <TableHead>المادة</TableHead>
+              <TableHead>المستودع</TableHead>
+              <TableHead>المزرعة</TableHead>
+              <TableHead className="text-right">الرصيد الافتتاحي</TableHead>
+              <TableHead className="text-right">المشتريات</TableHead>
+              <TableHead className="text-right">المبيعات</TableHead>
+              <TableHead className="text-right">الاستهلاك</TableHead>
+              <TableHead className="text-right">التصنيع</TableHead>
+              <TableHead className="text-right">الرصيد الحالي</TableHead>
+              <TableHead>الوحدة</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead>آخر تحديث</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredInventory.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={12} className="text-center text-muted-foreground">
-                  No inventory records found
+                  لم يتم العثور على سجلات مخزون
                 </TableCell>
               </TableRow>
             ) : (
@@ -153,19 +153,19 @@ export function InventoryReportTable({ inventory }: InventoryReportTableProps) {
       </div>
 
       <div className="flex justify-between items-center text-sm text-muted-foreground">
-        <span>Showing {filteredInventory.length} of {inventory.length} items</span>
+        <span>عرض {filteredInventory.length} من {inventory.length} مادة</span>
         <div className="flex gap-4">
           <span className="flex items-center gap-2">
-            <span className="text-green-600">●</span> Purchases add stock
+            <span className="text-green-600">●</span> المشتريات تضيف للمخزون
           </span>
           <span className="flex items-center gap-2">
-            <span className="text-red-600">●</span> Sales reduce stock
+            <span className="text-red-600">●</span> المبيعات تقلل المخزون
           </span>
           <span className="flex items-center gap-2">
-            <span className="text-orange-600">●</span> Consumption reduces stock
+            <span className="text-orange-600">●</span> الاستهلاك يقلل المخزون
           </span>
           <span className="flex items-center gap-2">
-            <span className="text-blue-600">●</span> Manufacturing adds stock
+            <span className="text-blue-600">●</span> التصنيع يضيف للمخزون
           </span>
         </div>
       </div>

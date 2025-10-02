@@ -8,8 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Inventory Reports - Admin Dashboard',
-  description: 'View comprehensive inventory reports and analytics',
+  title: 'تقارير المخزون - لوحة الإدارة',
+  description: 'عرض تقارير وتحليلات المخزون الشاملة',
 };
 
 async function InventorySummaryContent() {
@@ -30,7 +30,7 @@ async function InventoryReportContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {result.error || 'Failed to load inventory report'}
+          {result.error || 'فشل في تحميل تقرير المخزون'}
         </AlertDescription>
       </Alert>
     );
@@ -43,9 +43,9 @@ export default function InventoryReportsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Inventory Reports</h1>
+        <h1 className="text-3xl font-bold tracking-tight">تقارير المخزون</h1>
         <p className="text-muted-foreground mt-2">
-          Comprehensive inventory tracking and analytics across all warehouses
+          تتبع وتحليل المخزون الشامل عبر جميع المستودعات
         </p>
       </div>
 
@@ -55,9 +55,9 @@ export default function InventoryReportsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Inventory Overview</CardTitle>
+          <CardTitle>نظرة عامة على المخزون</CardTitle>
           <CardDescription>
-            Real-time stock levels and movements for all materials
+            مستويات المخزون والحركات في الوقت الفعلي لجميع المواد
           </CardDescription>
         </CardHeader>
         <CardContent>
