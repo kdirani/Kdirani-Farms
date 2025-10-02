@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Table,
@@ -137,8 +137,8 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
               </TableHeader>
               <TableBody>
                 {reports.map((report) => (
-                  <>
-                    <TableRow key={report.id}>
+                  <React.Fragment key={report.id}>
+                    <TableRow>
                       <TableCell>
                         <div>
                           <div className="font-medium">
@@ -307,7 +307,7 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </React.Fragment>
                 ))}
               </TableBody>
             </Table>

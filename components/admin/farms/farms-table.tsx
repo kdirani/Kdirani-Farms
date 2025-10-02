@@ -70,7 +70,7 @@ export function FarmsTable({ farms }: FarmsTableProps) {
             <TableRow>
               <TableHead>اسم المزرعة</TableHead>
               <TableHead>الموقع</TableHead>
-              <TableHead>المزارع المعين</TableHead>
+              <TableHead>لوجستي </TableHead>
               <TableHead>الحالة</TableHead>
               <TableHead>تاريخ الإنشاء</TableHead>
               <TableHead className="text-right">الإجراءات</TableHead>
