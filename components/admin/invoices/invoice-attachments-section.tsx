@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getInvoiceAttachments, deleteInvoiceAttachment, InvoiceAttachment } from '@/actions/invoice-attachment.actions';
@@ -15,6 +16,7 @@ export function InvoiceAttachmentsSection({ invoiceId }: InvoiceAttachmentsSecti
   const [attachments, setAttachments] = useState<InvoiceAttachment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadAttachments();
@@ -42,6 +44,10 @@ export function InvoiceAttachmentsSection({ invoiceId }: InvoiceAttachmentsSecti
       toast.error(result.error || 'Failed to delete attachment');
     }
     setDeletingId(null);
+  };
+
+  const handleImageError = (attachmentId: string) => {
+    setImageErrors(prev => new Set(prev).add(attachmentId));
   };
 
   const isImage = (fileType: string) => {
@@ -95,16 +101,20 @@ export function InvoiceAttachmentsSection({ invoiceId }: InvoiceAttachmentsSecti
               key={attachment.id}
               className="flex items-center gap-3 p-4 border rounded-lg bg-muted/50"
             >
-              {isImage(attachment.file_type) ? (
-                <div className="relative w-16 h-16 rounded overflow-hidden bg-background">
-                  <img
+              {isImage(attachment.file_type) && !imageErrors.has(attachment.id) ? (
+                <div className="relative w-16 h-16 rounded overflow-hidden bg-background border">
+                  <Image
                     src={attachment.file_url}
                     alt={attachment.file_name}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="64px"
+                    onError={() => handleImageError(attachment.id)}
+                    unoptimized
                   />
                 </div>
               ) : (
-                <div className="w-16 h-16 rounded bg-background flex items-center justify-center">
+                <div className="w-16 h-16 rounded bg-background flex items-center justify-center border">
                   <FileIcon className="h-8 w-8 text-muted-foreground" />
                 </div>
               )}
