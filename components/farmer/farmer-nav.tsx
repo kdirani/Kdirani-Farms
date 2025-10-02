@@ -7,8 +7,6 @@ import {
   ClipboardList,
   Factory,
   Home,
-  FileText,
-  Package,
 } from "lucide-react";
 
 const navItems = [
@@ -26,16 +24,6 @@ const navItems = [
     title: "فاتورة تصنيع",
     href: "/farmer/manufacturing",
     icon: Factory,
-  },
-  {
-    title: "التقارير",
-    href: "/farmer/reports",
-    icon: FileText,
-  },
-  {
-    title: "المخزون",
-    href: "/farmer/inventory",
-    icon: Package,
   },
 ];
 

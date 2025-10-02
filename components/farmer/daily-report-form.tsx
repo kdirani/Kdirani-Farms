@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { createDailyReport } from '@/actions/daily-report.actions';
+import { createDailyReportAttachment } from '@/actions/daily-report-attachment.actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +20,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner'; 
 import { Loader2, Plus, Trash2 } from 'lucide-react'; 
 import { useRouter } from 'next/navigation';
@@ -70,6 +72,7 @@ export default function DailyReportForm({
 }: DailyReportFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [attachmentFiles, setAttachmentFiles] = useState<UploadedFile[]>([]);
   
   const {
     register,
@@ -140,7 +143,21 @@ export default function DailyReportForm({
 
       const result = await createDailyReport(reportData);
 
-      if (result.success) {
+      if (result.success && result.data) {
+        // Upload attachments
+        if (attachmentFiles.length > 0) {
+          for (const uploadedFile of attachmentFiles) {
+            const attachmentResult = await createDailyReportAttachment(
+              result.data.id,
+              uploadedFile.file
+            );
+
+            if (!attachmentResult.success) {
+              toast.warning(`تم حفظ التقرير لكن فشل رفع الملف: ${uploadedFile.file.name}`);
+            }
+          }
+        }
+
         toast.success('تم إنشاء التقرير اليومي بنجاح');
         router.push('/farmer/reports');
       } else {
@@ -378,6 +395,24 @@ export default function DailyReportForm({
             {...register('notes')}
             disabled={isLoading}
             rows={3}
+          />
+        </div>
+
+        <Separator />
+
+        {/* File Attachments */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold mb-2">المرفقات</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              قم بإرفاق الملفات ذات الصلة (صور، PDF، مستندات)
+            </p>
+          </div>
+          <FileUpload
+            onFilesSelected={setAttachmentFiles}
+            maxFiles={5}
+            maxSizeMB={10}
+            disabled={isLoading}
           />
         </div>
       </div>

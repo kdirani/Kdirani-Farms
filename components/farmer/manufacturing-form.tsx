@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { createManufacturingInvoice } from '@/actions/manufacturing.actions';
 import { createManufacturingItem } from '@/actions/manufacturing-item.actions';
 import { createManufacturingExpense } from '@/actions/manufacturing-expense.actions';
+import { createManufacturingAttachment } from '@/actions/manufacturing-attachment.actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -95,6 +97,8 @@ export function ManufacturingForm({
     name: 'expenses',
   });
 
+  const [attachmentFiles, setAttachmentFiles] = useState<UploadedFile[]>([]);
+
   const materialNameId = watch('material_name_id');
   const unitId = watch('unit_id');
 
@@ -152,6 +156,20 @@ export function ManufacturingForm({
           if (!expenseResult.success) {
             toast.error(`فشل في إضافة المصروف: ${expenseResult.error}`);
             return;
+          }
+        }
+      }
+
+      // Upload attachments
+      if (attachmentFiles.length > 0) {
+        for (const uploadedFile of attachmentFiles) {
+          const attachmentResult = await createManufacturingAttachment(
+            invoiceId,
+            uploadedFile.file
+          );
+
+          if (!attachmentResult.success) {
+            toast.warning(`تم حفظ الفاتورة لكن فشل رفع الملف: ${uploadedFile.file.name}`);
           }
         }
       }
@@ -509,6 +527,24 @@ export function ManufacturingForm({
             {...register('notes')}
             disabled={isLoading}
             rows={3}
+          />
+        </div>
+
+        <Separator />
+
+        {/* File Attachments */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold mb-2">المرفقات</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              قم بإرفاق الملفات ذات الصلة (صور، PDF، مستندات)
+            </p>
+          </div>
+          <FileUpload
+            onFilesSelected={setAttachmentFiles}
+            maxFiles={5}
+            maxSizeMB={10}
+            disabled={isLoading}
           />
         </div>
 
