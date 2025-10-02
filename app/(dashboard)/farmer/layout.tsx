@@ -26,11 +26,8 @@ export default async function FarmerLayout({
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <MobileNav />
-            <h1 className="text-xl font-bold text-primary">
-              نظام المزارع - {session.user.name}
-            </h1>
           </div>
-          <UserNav user={session.user} />
+          <UserNav user={session.user}  />
         </div>
       </header>
 

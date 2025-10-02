@@ -86,9 +86,6 @@ export default async function FarmerDashboardPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">مرحباً، {session.user.name}</h1>
-        <p className="text-muted-foreground mt-1">
-          مزرعة {farm.name} - {farm.location || "لم يتم تحديد الموقع"}
-        </p>
       </div>
 
       {/* Quick Actions */}
