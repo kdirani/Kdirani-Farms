@@ -20,12 +20,12 @@ export function FarmsTableSkeleton() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Farm Name</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Assigned Farmer</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم المزرعة</TableHead>
+              <TableHead>الموقع</TableHead>
+              <TableHead>لوجستي </TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
