@@ -131,8 +131,8 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
               filteredUnits.map((unit) => (
                 <TableRow key={unit.id}>
                   <TableCell className="font-medium">{unit.unit_name}</TableCell>
-                  <TableCell>{format(new Date(unit.created_at), 'MMM dd, yyyy')}</TableCell>
-                  <TableCell>{format(new Date(unit.updated_at), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>{format(new Date(unit.created_at), 'د MMM، yyyy')}</TableCell>
+                  <TableCell>{format(new Date(unit.updated_at), 'د MMM، yyyy')}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-start gap-2">
                       <Button
@@ -176,7 +176,7 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
             <Label htmlFor="unit_name">اسم الوحدة</Label>
             <Input
               id="unit_name"
-              placeholder="e.g., kg, ton, liter, piece"
+              placeholder="مثال: كجم، طن، لتر، قطعة"
               value={unitName}
               onChange={(e) => setUnitName(e.target.value)}
               disabled={isLoading}
@@ -184,10 +184,10 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button onClick={handleCreate} disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create'}
+              {isLoading ? 'جاري الإنشاء...' : 'إنشاء'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -204,7 +204,7 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
             <Label htmlFor="edit_unit_name">اسم الوحدة</Label>
             <Input
               id="edit_unit_name"
-              placeholder="e.g., kg, ton, liter, piece"
+              placeholder="مثال: كجم، طن، لتر، قطعة"
               value={unitName}
               onChange={(e) => setUnitName(e.target.value)}
               disabled={isLoading}
@@ -212,10 +212,10 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button onClick={handleEdit} disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Update'}
+              {isLoading ? 'جاري التحديث...' : 'تحديث'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -232,10 +232,10 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
-              {isLoading ? 'Deleting...' : 'Delete'}
+              {isLoading ? 'جاري الحذف...' : 'حذف'}
             </Button>
           </DialogFooter>
         </DialogContent>

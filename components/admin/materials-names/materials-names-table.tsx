@@ -130,8 +130,8 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
               filteredMaterials.map((material) => (
                 <TableRow key={material.id}>
                   <TableCell className="font-medium">{material.material_name}</TableCell>
-                  <TableCell>{format(new Date(material.created_at), 'MMM dd, yyyy')}</TableCell>
-                  <TableCell>{format(new Date(material.updated_at), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>{format(new Date(material.created_at), 'د MMM، yyyy')}</TableCell>
+                  <TableCell>{format(new Date(material.updated_at), 'د MMM، yyyy')}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-start gap-2">
                       <Button
@@ -168,24 +168,25 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>تعديل اسم المادة</DialogTitle>
-            <DialogDescription>أدخل اسم مادة جديد لإضافته للنظام</DialogDescription>
+            <DialogTitle>إنشاء اسم مادة</DialogTitle>
+            <DialogDescription>إضافة اسم مادة جديد إلى النظام.</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             <Label htmlFor="material_name">اسم المادة</Label>
             <Input
-              placeholder="e.g., Corn, Wheat, Feed Mix"
+              id="material_name"
               value={materialName}
               onChange={(e) => setMaterialName(e.target.value)}
+              placeholder="أدخل اسم المادة"
               disabled={isLoading}
             />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button onClick={handleCreate} disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create'}
+              {isLoading ? 'جاري الإنشاء...' : 'إنشاء'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -196,13 +197,13 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
         <DialogContent>
           <DialogHeader>
             <DialogTitle>تعديل اسم المادة</DialogTitle>
-            <DialogDescription>تحديث اسم المادة</DialogDescription>
+            <DialogDescription>قم بتعديل اسم المادة الحالي.</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             <Label htmlFor="edit_material_name">اسم المادة</Label>
             <Input
               id="edit_material_name"
-              placeholder="e.g., Corn, Wheat, Feed Mix"
+              placeholder="أدخل اسم المادة"
               value={materialName}
               onChange={(e) => setMaterialName(e.target.value)}
               disabled={isLoading}
@@ -210,10 +211,10 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button onClick={handleEdit} disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Update'}
+              {isLoading ? 'جاري التحديث...' : 'تحديث'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -224,16 +225,14 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
         <DialogContent>
           <DialogHeader>
             <DialogTitle>حذف اسم المادة</DialogTitle>
-            <DialogDescription>
-هل أنت متأكد من حذف "{selectedMaterial?.material_name}"؟ هذا الإجراء لا يمكن التراجع عنه.
-            </DialogDescription>
+            <DialogDescription>هل أنت متأكد من رغبتك في حذف هذا العنصر؟</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={isLoading}>
-              Cancel
+              إلغاء
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
-              {isLoading ? 'Deleting...' : 'Delete'}
+              {isLoading ? 'جاري الحذف...' : 'حذف'}
             </Button>
           </DialogFooter>
         </DialogContent>
