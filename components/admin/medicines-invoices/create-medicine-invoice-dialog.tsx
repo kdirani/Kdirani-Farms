@@ -282,16 +282,6 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notes">ملاحظات</Label>
-            <Input
-              id="notes"
-              placeholder="ملاحظات اختيارية"
-              {...register('notes')}
-              disabled={isLoading}
-            />
-          </div>
-
           {/* Medicine Items Section */}
           <Card>
             <CardContent className="pt-6">
@@ -430,6 +420,21 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Notes Section */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-2">
+                <Label htmlFor="notes">ملاحظات</Label>
+                <Input
+                  id="notes"
+                  placeholder="ملاحظات اختيارية"
+                  {...register('notes')}
+                  disabled={isLoading}
+                />
+              </div>
             </CardContent>
           </Card>
 
