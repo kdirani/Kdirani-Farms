@@ -25,7 +25,7 @@ import { Building2, MoreHorizontal, Search, Plus } from 'lucide-react';
 import { CreateFarmDialog } from './create-farm-dialog';
 import { EditFarmDialog } from './edit-farm-dialog';
 import { DeleteFarmDialog } from './delete-farm-dialog';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 interface FarmsTableProps {
   farms: Farm[];
@@ -109,7 +109,7 @@ export function FarmsTable({ farms }: FarmsTableProps) {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {format(new Date(farm.created_at), 'MMM dd, yyyy')}
+                    {formatDate(new Date(farm.created_at))}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
