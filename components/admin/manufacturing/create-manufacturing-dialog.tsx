@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { createManufacturingInvoice } from '@/actions/manufacturing.actions';
-import { createManufacturingItem } from '@/actions/manufacturing-item.actions';
+import { createManufacturingInvoice, addOutputMaterialToInventory, rollbackManufacturingInvoice } from '@/actions/manufacturing.actions';
+import { createManufacturingItem, validateInputMaterialsStock } from '@/actions/manufacturing-item.actions';
 import { createManufacturingExpense } from '@/actions/manufacturing-expense.actions';
 import { createManufacturingAttachment } from '@/actions/manufacturing-attachment.actions';
 import { getWarehousesForMaterials } from '@/actions/material.actions';
@@ -43,7 +43,7 @@ const manufacturingSchema = z.object({
   blend_name: z.string().optional(),
   material_name_id: z.string().optional(),
   unit_id: z.string().optional(),
-  quantity: z.number().min(0, 'الكمية لا يمكن أن تكون سالبة'),
+  quantity: z.number().min(0, 'الكمية لا يمكن أن تكون سالبة').optional(),
   notes: z.string().optional(),
 });
 
@@ -90,7 +90,6 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
     resolver: zodResolver(manufacturingSchema),
     defaultValues: {
       manufacturing_date: new Date().toISOString().split('T')[0],
-      quantity: 0,
     },
   });
 
@@ -134,24 +133,80 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
 
   const onSubmit = async (data: ManufacturingFormData) => {
     setIsLoading(true);
+    
     try {
+      // Validation: Ensure at least one input material is added
+      if (items.length === 0) {
+        toast.error('يجب إضافة مادة مدخلة واحدة على الأقل');
+        setIsLoading(false);
+        return;
+      }
+
+      // Validation: Check if all input materials have sufficient stock
+      const stockValidation = await validateInputMaterialsStock(data.warehouse_id, items);
+      
+      if (!stockValidation.success) {
+        const insufficientItems = stockValidation.data || [];
+        const errorMessages = insufficientItems.map(
+          item => `${item.material_name}: متوفر ${item.available}, مطلوب ${item.required}`
+        );
+        toast.error(`مخزون غير كافٍ:\\n${errorMessages.join('\\n')}`);
+        setIsLoading(false);
+        return;
+      }
+
+      // Create invoice first (without adding output material to inventory yet)
       const invoiceResult = await createManufacturingInvoice(data);
       
       if (!invoiceResult.success || !invoiceResult.data) {
-        toast.error(invoiceResult.error || 'Failed to create manufacturing invoice');
+        toast.error(invoiceResult.error || 'فشل في إنشاء فاتورة التصنيع');
         setIsLoading(false);
         return;
       }
 
       const invoiceId = invoiceResult.data.id;
+      let itemsAdded = 0;
 
-      for (const item of items) {
-        await createManufacturingItem({
-          manufacturing_invoice_id: invoiceId,
-          ...item,
-        });
+      // Add manufacturing items (input materials - decreases inventory)
+      try {
+        for (const item of items) {
+          const itemResult = await createManufacturingItem({
+            manufacturing_invoice_id: invoiceId,
+            ...item,
+          });
+          
+          if (!itemResult.success) {
+            throw new Error(itemResult.error || 'فشل في إضافة المادة المدخلة');
+          }
+          itemsAdded++;
+        }
+
+        // Now add output material to inventory (only after all input items succeed)
+        if (data.material_name_id && data.quantity && data.quantity > 0) {
+          const outputResult = await addOutputMaterialToInventory(invoiceId);
+          
+          if (!outputResult.success) {
+            toast.warning('تم إضافة المواد المدخلة ولكن فشل في إضافة المادة الناتجة');
+          }
+        }
+      } catch (itemError: any) {
+        // Rollback: Delete the invoice if items fail
+        toast.error(itemError.message || 'فشل في إضافة المواد المدخلة');
+        
+        // Rollback the invoice creation
+        const rollbackResult = await rollbackManufacturingInvoice(invoiceId);
+        
+        if (!rollbackResult.success) {
+          toast.error('فشل في التراجع عن العملية. يرجى حذف الفاتورة يدوياً.');
+        } else {
+          toast.info('تم التراجع عن إنشاء الفاتورة');
+        }
+        
+        setIsLoading(false);
+        return;
       }
 
+      // Add manufacturing expenses
       for (const expense of expenses) {
         await createManufacturingExpense({
           manufacturing_invoice_id: invoiceId,
@@ -168,20 +223,23 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
           );
 
           if (!attachmentResult.success) {
-            toast.warning(`Invoice saved but failed to upload file: ${uploadedFile.file.name}`);
+            toast.warning(`تم حفظ الفاتورة ولكن فشل رفع الملف: ${uploadedFile.file.name}`);
           }
         }
       }
 
-      toast.success('Manufacturing invoice created successfully');
+      toast.success('تم إنشاء فاتورة التصنيع بنجاح');
       reset();
       setItems([]);
       setExpenses([]);
       setAttachmentFiles([]);
       onOpenChange(false);
-      window.location.reload();
+      
+      // Use revalidation instead of full page reload
+      // The parent component should handle revalidation
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      console.error('Error creating manufacturing invoice:', error);
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -349,14 +407,18 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quantity">الكمية</Label>
+              <Label htmlFor="quantity">الكمية (اختياري)</Label>
               <Input
                 id="quantity"
                 type="number"
                 step="0.01"
+                placeholder="0"
                 {...register('quantity', { valueAsNumber: true })}
                 disabled={isLoading}
               />
+              <p className="text-xs text-muted-foreground">
+                الكمية المنتجة (اختياري - يمكن تركها فارغة)
+              </p>
             </div>
           </div>
 

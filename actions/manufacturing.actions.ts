@@ -28,7 +28,7 @@ export type CreateManufacturingInvoiceInput = {
   blend_name?: string;
   material_name_id?: string;
   unit_id?: string;
-  quantity: number;
+  quantity?: number;
   manufacturing_date: string;
   notes?: string;
 };
@@ -270,7 +270,7 @@ export async function createManufacturingInvoice(input: CreateManufacturingInvoi
         blend_name: input.blend_name?.trim() || null,
         material_name_id: input.material_name_id || null,
         unit_id: input.unit_id || null,
-        quantity: input.quantity,
+        quantity: input.quantity || 0,
         manufacturing_date: input.manufacturing_date,
         notes: input.notes?.trim() || null,
       })
@@ -281,15 +281,8 @@ export async function createManufacturingInvoice(input: CreateManufacturingInvoi
       return { success: false, error: error.message };
     }
 
-    // Increase output material in warehouse inventory (manufacturing production)
-    if (input.material_name_id && input.warehouse_id && input.quantity > 0) {
-      await increaseOutputMaterial(
-        input.warehouse_id,
-        input.material_name_id,
-        input.unit_id!,
-        input.quantity
-      );
-    }
+    // Note: Output material will be added after all input items are successfully added
+    // This prevents inventory inconsistencies if item addition fails
 
     revalidatePath('/admin/manufacturing');
     revalidatePath('/farmer');
@@ -298,6 +291,32 @@ export async function createManufacturingInvoice(input: CreateManufacturingInvoi
   } catch (error) {
     console.error('Error creating manufacturing invoice:', error);
     return { success: false, error: 'Failed to create manufacturing invoice' };
+  }
+}
+
+/**
+ * Rollback manufacturing invoice (delete without inventory adjustments)
+ * Used internally when invoice creation fails partway
+ */
+export async function rollbackManufacturingInvoice(id: string): Promise<ActionResult> {
+  try {
+    const supabase = await createClient();
+
+    // Simply delete the invoice (cascade will delete items and expenses)
+    // No inventory adjustments needed since items weren't added yet
+    const { error } = await supabase
+      .from('manufacturing_invoices')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error rolling back manufacturing invoice:', error);
+    return { success: false, error: 'Failed to rollback manufacturing invoice' };
   }
 }
 
@@ -386,6 +405,45 @@ export async function deleteManufacturingInvoice(id: string): Promise<ActionResu
   } catch (error) {
     console.error('Error deleting manufacturing invoice:', error);
     return { success: false, error: 'Failed to delete manufacturing invoice' };
+  }
+}
+
+/**
+ * Add output material to warehouse inventory (called after all input items are added)
+ * This is a public function that can be called from the client
+ */
+export async function addOutputMaterialToInventory(
+  invoiceId: string
+): Promise<ActionResult> {
+  try {
+    const supabase = await createClient();
+
+    const { data: invoice } = await supabase
+      .from('manufacturing_invoices')
+      .select('warehouse_id, material_name_id, unit_id, quantity')
+      .eq('id', invoiceId)
+      .single();
+
+    if (!invoice) {
+      return { success: false, error: 'Invoice not found' };
+    }
+
+    if (invoice.material_name_id && invoice.warehouse_id && invoice.quantity > 0) {
+      await increaseOutputMaterial(
+        invoice.warehouse_id,
+        invoice.material_name_id,
+        invoice.unit_id!,
+        invoice.quantity
+      );
+    }
+
+    revalidatePath('/admin/manufacturing');
+    revalidatePath('/farmer');
+    revalidatePath('/farmer/manufacturing');
+    return { success: true };
+  } catch (error) {
+    console.error('Error adding output material:', error);
+    return { success: false, error: 'Failed to add output material to inventory' };
   }
 }
 
