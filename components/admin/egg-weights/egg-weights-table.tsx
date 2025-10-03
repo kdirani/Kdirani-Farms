@@ -131,8 +131,8 @@ export function EggWeightsTable({ eggWeights: initialEggWeights }: EggWeightsTab
               filteredEggWeights.map((eggWeight) => (
                 <TableRow key={eggWeight.id}>
                   <TableCell className="font-medium">{eggWeight.weight_range}</TableCell>
-                  <TableCell>{format(new Date(eggWeight.created_at), 'MMM dd, yyyy')}</TableCell>
-                  <TableCell>{format(new Date(eggWeight.updated_at), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>{format(new Date(eggWeight.created_at), 'د MMM، yyyy')}</TableCell>
+                  <TableCell>{format(new Date(eggWeight.updated_at), 'د MMM، yyyy')}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-start gap-2">
                       <Button
