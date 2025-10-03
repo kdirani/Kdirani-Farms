@@ -204,7 +204,7 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
                 <TableHeader>
                   <TableRow>
                     <TableHead>نوع المصروف</TableHead>
-                    <TableHead>اسم الحساب</TableHead>
+                    <TableHead>الحساب المقابل</TableHead>
                     <TableHead className="text-right">المبلغ</TableHead>
                     <TableHead className="text-right">الإجراءات</TableHead>
                   </TableRow>

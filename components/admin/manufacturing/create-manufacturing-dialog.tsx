@@ -487,16 +487,6 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notes">ملاحظات</Label>
-            <Input
-              id="notes"
-              placeholder="ملاحظات اختيارية"
-              {...register('notes')}
-              disabled={isLoading}
-            />
-          </div>
-
           {/* Manufacturing Items Section */}
           <Card>
             <CardContent className="pt-6">
@@ -597,7 +587,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
             <CardContent className="pt-6">
               <h3 className="text-lg font-semibold mb-4">مصاريف التصنيع ({expenses.length})</h3>
               
-              <div className="grid grid-cols-4 gap-2 mb-4">
+              <div className="grid grid-cols-5 gap-2 mb-4">
                 <div className="col-span-2">
                   <Combobox
                     options={expenseTypes.map((e) => ({
@@ -617,6 +607,12 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                   value={newExpense.amount || ''}
                   onChange={(e) => setNewExpense({ ...newExpense, amount: parseFloat(e.target.value) })}
                 />
+                <Input
+                  type="text"
+                  placeholder="الحساب المقابل"
+                  value={newExpense.account_name || ''}
+                  onChange={(e) => setNewExpense({ ...newExpense, account_name: e.target.value })}
+                />
                 <Button type="button" size="sm" onClick={handleAddExpense}>
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -629,6 +625,9 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                       <span className="text-sm">
                         {expenseTypes.find(e => e.id === expense.expense_type_id)?.name}
                         <strong className="ml-2">${expense.amount.toFixed(2)}</strong>
+                        {expense.account_name && (
+                          <span className="text-muted-foreground mr-2">({expense.account_name})</span>
+                        )}
                       </span>
                       <Button
                         type="button"
@@ -642,6 +641,21 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Notes Section */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-2">
+                <Label htmlFor="notes">ملاحظات</Label>
+                <Input
+                  id="notes"
+                  placeholder="ملاحظات اختيارية"
+                  {...register('notes')}
+                  disabled={isLoading}
+                />
+              </div>
             </CardContent>
           </Card>
 
