@@ -37,13 +37,13 @@ import { toast } from 'sonner';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 
 const manufacturingSchema = z.object({
-  invoice_number: z.string().min(1, 'Invoice number is required'),
-  manufacturing_date: z.string().min(1, 'Manufacturing date is required'),
-  warehouse_id: z.string().min(1, 'Warehouse is required'),
+  invoice_number: z.string().min(1, 'رقم الفاتورة مطلوب'),
+  manufacturing_date: z.string().min(1, 'تاريخ التصنيع مطلوب'),
+  warehouse_id: z.string().min(1, 'المستودع مطلوب'),
   blend_name: z.string().optional(),
   material_name_id: z.string().optional(),
   unit_id: z.string().optional(),
-  quantity: z.number().min(0, 'Quantity cannot be negative'),
+  quantity: z.number().min(0, 'الكمية لا يمكن أن تكون سالبة'),
   notes: z.string().optional(),
 });
 
@@ -217,11 +217,11 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
 
   const handleAddItem = () => {
     if (!newItem.material_name_id || !newItem.unit_id) {
-      toast.error('Material and unit are required');
+      toast.error('المادة والوحدة مطلوبة');
       return;
     }
     if (newItem.quantity === undefined || newItem.quantity < 0) {
-      toast.error('Valid quantity is required');
+      toast.error('الكمية الصحيحة مطلوبة');
       return;
     }
 
@@ -231,11 +231,11 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
 
   const handleAddExpense = () => {
     if (!newExpense.expense_type_id) {
-      toast.error('Expense type is required');
+      toast.error('نوع المصروف مطلوب');
       return;
     }
     if (newExpense.amount === undefined || newExpense.amount < 0) {
-      toast.error('Valid amount is required');
+      toast.error('المبلغ الصحيح مطلوب');
       return;
     }
 
@@ -247,15 +247,15 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Manufacturing Invoice</DialogTitle>
+          <DialogTitle>إنشاء فاتورة تصنيع</DialogTitle>
           <DialogDescription>
-            Add manufacturing information, input items, and expenses
+            إضافة معلومات التصنيع، المواد المدخلة، والمصاريف
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="invoice_number">Invoice Number *</Label>
+              <Label htmlFor="invoice_number">رقم الفاتورة *</Label>
               <Input
                 id="invoice_number"
                 {...register('invoice_number')}
@@ -267,7 +267,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="manufacturing_date">Manufacturing Date *</Label>
+              <Label htmlFor="manufacturing_date">تاريخ التصنيع *</Label>
               <Input
                 id="manufacturing_date"
                 type="date"
@@ -281,7 +281,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="warehouse_id">Warehouse *</Label>
+            <Label htmlFor="warehouse_id">المستودع *</Label>
             <Combobox
               options={warehouses.map((warehouse) => ({
                 value: warehouse.id,
@@ -289,9 +289,9 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
               }))}
               value={warehouseId}
               onValueChange={(value) => setValue('warehouse_id', value)}
-              placeholder="Select warehouse"
-              searchPlaceholder="Search warehouses..."
-              emptyText="No warehouses found"
+              placeholder="اختر المستودع"
+              searchPlaceholder="البحث عن المستودعات..."
+              emptyText="لم يتم العثور على مستودعات"
               disabled={isLoading}
             />
             {errors.warehouse_id && (
@@ -300,10 +300,10 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="blend_name">Blend Name</Label>
+            <Label htmlFor="blend_name">اسم الخلطة</Label>
             <Input
               id="blend_name"
-              placeholder="e.g., Feed Mix A"
+              placeholder="مثال: خلطة علف أ"
               {...register('blend_name')}
               disabled={isLoading}
             />
@@ -311,10 +311,10 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="material_name_id">Output Material</Label>
+              <Label htmlFor="material_name_id">المادة الناتجة</Label>
               <Combobox
                 options={[
-                  { value: 'none', label: 'No material' },
+                  { value: 'none', label: 'لا توجد مادة' },
                   ...materials.map((material) => ({
                     value: material.id,
                     label: material.material_name,
@@ -322,18 +322,18 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                 ]}
                 value={materialNameId || 'none'}
                 onValueChange={(value) => setValue('material_name_id', value === 'none' ? undefined : value)}
-                placeholder="Select material"
-                searchPlaceholder="Search materials..."
-                emptyText="No materials found"
+                placeholder="اختر المادة"
+                searchPlaceholder="البحث عن المواد..."
+                emptyText="لم يتم العثور على مواد"
                 disabled={isLoading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="unit_id">Unit</Label>
+              <Label htmlFor="unit_id">الوحدة</Label>
               <Combobox
                 options={[
-                  { value: 'none', label: 'No unit' },
+                  { value: 'none', label: 'لا توجد وحدة' },
                   ...units.map((unit) => ({
                     value: unit.id,
                     label: unit.unit_name,
@@ -341,15 +341,15 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                 ]}
                 value={unitId || 'none'}
                 onValueChange={(value) => setValue('unit_id', value === 'none' ? undefined : value)}
-                placeholder="Select unit"
-                searchPlaceholder="Search units..."
-                emptyText="No units found"
+                placeholder="اختر الوحدة"
+                searchPlaceholder="البحث عن الوحدات..."
+                emptyText="لم يتم العثور على وحدات"
                 disabled={isLoading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity</Label>
+              <Label htmlFor="quantity">الكمية</Label>
               <Input
                 id="quantity"
                 type="number"
@@ -361,10 +361,10 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes">ملاحظات</Label>
             <Input
               id="notes"
-              placeholder="Optional notes"
+              placeholder="ملاحظات اختيارية"
               {...register('notes')}
               disabled={isLoading}
             />
@@ -373,7 +373,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
           {/* Manufacturing Items Section */}
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Input Materials ({items.length})</h3>
+              <h3 className="text-lg font-semibold mb-4">المواد المدخلة ({items.length})</h3>
               
               <div className="grid grid-cols-6 gap-2 mb-4">
                 <div className="col-span-2">
@@ -384,14 +384,14 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                     }))}
                     value={newItem.material_name_id || ''}
                     onValueChange={(value) => setNewItem({ ...newItem, material_name_id: value })}
-                    placeholder="Material"
-                    searchPlaceholder="Search materials..."
-                    emptyText="No materials found"
+                    placeholder="المادة"
+                    searchPlaceholder="البحث عن المواد..."
+                    emptyText="لم يتم العثور على مواد"
                   />
                 </div>
                 <Input
                   type="number"
-                  placeholder="Qty"
+                  placeholder="الكمية"
                   value={newItem.quantity || ''}
                   onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
                 />
@@ -402,13 +402,13 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                   }))}
                   value={newItem.unit_id || ''}
                   onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
-                  placeholder="Unit"
-                  searchPlaceholder="Search units..."
-                  emptyText="No units found"
+                  placeholder="الوحدة"
+                  searchPlaceholder="البحث عن الوحدات..."
+                  emptyText="لم يتم العثور على وحدات"
                 />
                 <Input
                   type="number"
-                  placeholder="Blend Count"
+                  placeholder="عدد الخلطات"
                   value={newItem.blend_count || ''}
                   onChange={(e) => setNewItem({ ...newItem, blend_count: parseInt(e.target.value) })}
                 />
@@ -444,7 +444,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
           {/* Manufacturing Expenses Section */}
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Manufacturing Expenses ({expenses.length})</h3>
+              <h3 className="text-lg font-semibold mb-4">مصاريف التصنيع ({expenses.length})</h3>
               
               <div className="grid grid-cols-4 gap-2 mb-4">
                 <div className="col-span-2">
@@ -455,14 +455,14 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                     }))}
                     value={newExpense.expense_type_id || ''}
                     onValueChange={(value) => setNewExpense({ ...newExpense, expense_type_id: value })}
-                    placeholder="Expense Type"
-                    searchPlaceholder="Search expense types..."
-                    emptyText="No expense types found"
+                    placeholder="نوع المصروف"
+                    searchPlaceholder="البحث عن أنواع المصاريف..."
+                    emptyText="لم يتم العثور على أنواع مصاريف"
                   />
                 </div>
                 <Input
                   type="number"
-                  placeholder="Amount"
+                  placeholder="المبلغ"
                   value={newExpense.amount || ''}
                   onChange={(e) => setNewExpense({ ...newExpense, amount: parseFloat(e.target.value) })}
                 />
@@ -497,9 +497,9 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
           {/* File Attachments */}
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-2">Attachments</h3>
+              <h3 className="text-lg font-semibold mb-2">المرفقات</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Upload related files (images, PDFs, documents)
+                تحميل الملفات ذات الصلة (صور، ملفات PDF، مستندات)
               </p>
               <FileUpload
                 onFilesSelected={setAttachmentFiles}
@@ -517,11 +517,11 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Manufacturing Invoice
+              إنشاء فاتورة تصنيع
             </Button>
           </DialogFooter>
         </form>

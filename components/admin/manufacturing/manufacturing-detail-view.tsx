@@ -31,29 +31,29 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
   const [deletingExpense, setDeletingExpense] = useState<string | null>(null);
 
   const handleDeleteItem = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+    if (!confirm('هل أنت متأكد من رغبتك في حذف هذا العنصر؟')) return;
     
     setDeletingItem(id);
     const result = await deleteManufacturingItem(id);
     if (result.success) {
-      toast.success('Item deleted successfully');
+      toast.success('تم حذف العنصر بنجاح');
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete item');
+      toast.error(result.error || 'فشل في حذف العنصر');
     }
     setDeletingItem(null);
   };
 
   const handleDeleteExpense = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this expense?')) return;
+    if (!confirm('هل أنت متأكد من رغبتك في حذف هذه المصاريف؟')) return;
     
     setDeletingExpense(id);
     const result = await deleteManufacturingExpense(id);
     if (result.success) {
-      toast.success('Expense deleted successfully');
+      toast.success('تم حذف المصاريف بنجاح');
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete expense');
+      toast.error(result.error || 'فشل في حذف المصاريف');
     }
     setDeletingExpense(null);
   };
@@ -69,7 +69,7 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
         </Link>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Manufacturing Invoice {invoice.invoice_number}
+            فاتورة تصنيع {invoice.invoice_number}
           </h1>
           <p className="text-muted-foreground mt-1">
             {format(new Date(invoice.manufacturing_date), 'MMMM dd, yyyy')}
@@ -80,50 +80,50 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
       {/* Invoice Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Manufacturing Information</CardTitle>
+          <CardTitle>معلومات التصنيع</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Invoice Number</label>
+                <label className="text-sm font-medium text-muted-foreground">رقم الفاتورة</label>
                 <p className="text-lg font-semibold">{invoice.invoice_number}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Manufacturing Date</label>
+                <label className="text-sm font-medium text-muted-foreground">تاريخ التصنيع</label>
                 <p className="text-lg">{format(new Date(invoice.manufacturing_date), 'MMMM dd, yyyy')}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Warehouse</label>
+                <label className="text-sm font-medium text-muted-foreground">المستودع</label>
                 {invoice.warehouse ? (
                   <div>
                     <p className="text-lg font-semibold">{invoice.warehouse.name}</p>
                     <p className="text-sm text-muted-foreground">{invoice.warehouse.farm_name}</p>
                   </div>
                 ) : (
-                  <p className="text-lg text-muted-foreground">Not assigned</p>
+                  <p className="text-lg text-muted-foreground">غير محدد</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Blend Name</label>
+                <label className="text-sm font-medium text-muted-foreground">اسم الخلطة</label>
                 <p className="text-lg">{invoice.blend_name || '-'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Output Material</label>
+                <label className="text-sm font-medium text-muted-foreground">المادة الناتجة</label>
                 {invoice.material_name ? (
                   <div>
                     <p className="text-lg font-semibold">{invoice.material_name}</p>
                     <p className="text-sm text-muted-foreground">{invoice.unit_name}</p>
                   </div>
                 ) : (
-                  <p className="text-lg text-muted-foreground">Not specified</p>
+                  <p className="text-lg text-muted-foreground">غير محدد</p>
                 )}
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Output Quantity</label>
+                <label className="text-sm font-medium text-muted-foreground">الكمية الناتجة</label>
                 <p className="text-lg font-semibold">{invoice.quantity.toLocaleString()}</p>
               </div>
             </div>
@@ -131,7 +131,7 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
 
           {invoice.notes && (
             <div className="mt-6">
-              <label className="text-sm font-medium text-muted-foreground">Notes</label>
+              <label className="text-sm font-medium text-muted-foreground">ملاحظات</label>
               <p className="text-base mt-1">{invoice.notes}</p>
             </div>
           )}
@@ -141,24 +141,24 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
       {/* Input Materials */}
       <Card>
         <CardHeader>
-          <CardTitle>Input Materials ({items.length})</CardTitle>
+          <CardTitle>المواد المدخلة ({items.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {items.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No input materials added yet
+              لم يتم إضافة مواد مدخلة بعد
             </div>
           ) : (
             <div className="border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Material</TableHead>
-                    <TableHead className="text-right">Quantity</TableHead>
-                    <TableHead>Unit</TableHead>
-                    <TableHead className="text-right">Blend Count</TableHead>
-                    <TableHead className="text-right">Weight</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>المادة</TableHead>
+                    <TableHead className="text-right">الكمية</TableHead>
+                    <TableHead>الوحدة</TableHead>
+                    <TableHead className="text-right">عدد الخلطات</TableHead>
+                    <TableHead className="text-right">الوزن</TableHead>
+                    <TableHead className="text-right">الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -191,22 +191,22 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
       {/* Manufacturing Expenses */}
       <Card>
         <CardHeader>
-          <CardTitle>Manufacturing Expenses ({expenses.length})</CardTitle>
+          <CardTitle>مصاريف التصنيع ({expenses.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {expenses.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No expenses added yet
+              لم يتم إضافة مصاريف بعد
             </div>
           ) : (
             <div className="border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Expense Type</TableHead>
-                    <TableHead>Account Name</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>نوع المصروف</TableHead>
+                    <TableHead>اسم الحساب</TableHead>
+                    <TableHead className="text-right">المبلغ</TableHead>
+                    <TableHead className="text-right">الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -241,11 +241,11 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
       {expenses.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Cost Summary</CardTitle>
+            <CardTitle>ملخص التكاليف</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex justify-between text-xl font-bold">
-              <span>Total Manufacturing Expenses:</span>
+              <span>إجمالي مصاريف التصنيع:</span>
               <span className="text-primary">
                 ${expenses.reduce((sum, exp) => sum + exp.amount, 0).toLocaleString()}
               </span>
