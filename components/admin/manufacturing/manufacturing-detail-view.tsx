@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/table';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { ManufacturingAttachmentsSection } from './manufacturing-attachments-section';
@@ -73,6 +74,7 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
           </h1>
           <p className="text-muted-foreground mt-1">
             {format(new Date(invoice.manufacturing_date), 'MMMM dd, yyyy')}
+            {invoice.manufacturing_time && ` - ${invoice.manufacturing_time}`}
           </p>
         </div>
       </div>
@@ -93,6 +95,12 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
                 <label className="text-sm font-medium text-muted-foreground">تاريخ التصنيع</label>
                 <p className="text-lg">{format(new Date(invoice.manufacturing_date), 'MMMM dd, yyyy')}</p>
               </div>
+              {invoice.manufacturing_time && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">وقت التصنيع</label>
+                  <p className="text-lg">{invoice.manufacturing_time}</p>
+                </div>
+              )}
               <div>
                 <label className="text-sm font-medium text-muted-foreground">المستودع</label>
                 {invoice.warehouse ? (
@@ -214,7 +222,7 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
                     <TableRow key={expense.id}>
                       <TableCell className="font-medium">{expense.expense_type_name || '-'}</TableCell>
                       <TableCell>{expense.account_name || '-'}</TableCell>
-                      <TableCell className="text-right font-semibold">${expense.amount.toLocaleString()}</TableCell>
+                      <TableCell className="text-right font-semibold">{formatCurrency(expense.amount)}</TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
@@ -247,7 +255,7 @@ export function ManufacturingDetailView({ invoice, items, expenses }: Manufactur
             <div className="flex justify-between text-xl font-bold">
               <span>إجمالي مصاريف التصنيع:</span>
               <span className="text-primary">
-                ${expenses.reduce((sum, exp) => sum + exp.amount, 0).toLocaleString()}
+                {formatCurrency(expenses.reduce((sum, exp) => sum + exp.amount, 0))}
               </span>
             </div>
           </CardContent>

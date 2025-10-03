@@ -35,10 +35,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 const manufacturingSchema = z.object({
   invoice_number: z.string().min(1, 'رقم الفاتورة مطلوب'),
   manufacturing_date: z.string().min(1, 'تاريخ التصنيع مطلوب'),
+  manufacturing_time: z.string().optional(),
   warehouse_id: z.string().min(1, 'المستودع مطلوب'),
   blend_name: z.string().optional(),
   material_name_id: z.string().min(1, 'المادة الناتجة مطلوبة'),
@@ -114,6 +116,11 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
       loadData();
       const invoiceNum = `MFG-${Date.now()}`;
       setValue('invoice_number', invoiceNum);
+      // Set current time
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      setValue('manufacturing_time', `${hours}:${minutes}`);
       setItems([]);
       setExpenses([]);
       setNewItem({ quantity: 0, blend_count: 1, weight: 0 });
@@ -371,7 +378,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="invoice_number">رقم الفاتورة *</Label>
               <Input
@@ -394,6 +401,19 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
               />
               {errors.manufacturing_date && (
                 <p className="text-sm text-destructive">{errors.manufacturing_date.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="manufacturing_time">وقت التصنيع</Label>
+              <Input
+                id="manufacturing_time"
+                type="time"
+                {...register('manufacturing_time')}
+                disabled={isLoading}
+              />
+              {errors.manufacturing_time && (
+                <p className="text-sm text-destructive">{errors.manufacturing_time.message}</p>
               )}
             </div>
           </div>
@@ -658,6 +678,26 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
               </div>
             </CardContent>
           </Card>
+
+          {/* Totals Summary */}
+          {expenses.length > 0 && (
+            <Card className="bg-muted/50">
+              <CardContent className="pt-6">
+                <h3 className="text-lg font-semibold mb-4">ملخص التكاليف</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center pt-3 border-t">
+                    <Label className="text-lg font-bold">إجمالي مصاريف التصنيع</Label>
+                    <Input
+                      value={formatCurrency(expenses.reduce((sum, exp) => sum + exp.amount, 0))}
+                      readOnly
+                      disabled
+                      className="w-48 text-right text-lg font-bold bg-background border-2 border-primary"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* File Attachments */}
           <Card>

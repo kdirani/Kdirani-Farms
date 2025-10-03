@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatCurrency } from '@/lib/utils';
 
 interface DeleteInvoiceDialogProps {
   invoice: Invoice;
@@ -81,7 +82,7 @@ export function DeleteInvoiceDialog({ invoice, open, onOpenChange }: DeleteInvoi
           )}
           <div className="flex justify-between">
             <span className="text-sm font-medium">القيمة الصافية:</span>
-            <span className="text-sm font-semibold">${invoice.net_value.toLocaleString()}</span>
+            <span className="text-sm font-semibold">{formatCurrency(invoice.net_value)}</span>
           </div>
         </div>
 

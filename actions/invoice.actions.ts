@@ -29,6 +29,7 @@ export type Invoice = {
 export type CreateInvoiceInput = {
   invoice_type: 'buy' | 'sell';
   invoice_date: string;
+  invoice_time?: string;
   invoice_number: string;
   warehouse_id: string;
   client_id?: string;
@@ -181,6 +182,7 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<ActionRe
       .insert({
         invoice_type: input.invoice_type,
         invoice_date: input.invoice_date,
+        invoice_time: input.invoice_time || null,
         invoice_number: input.invoice_number.trim(),
         warehouse_id: input.warehouse_id,
         client_id: input.client_id || null,

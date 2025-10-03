@@ -62,3 +62,35 @@ export function formatDateTime(date: Date): string {
   return `${dateStr} ${timeStr}`;
 }
 
+/**
+ * تنسيق المبلغ المالي بالعملة المحددة
+ * @param amount المبلغ المراد تنسيقه
+ * @param currency رمز العملة (افتراضي: USD)
+ * @returns سلسلة نصية منسقة بالعملة
+ */
+export function formatCurrency(amount: number, currency: string = 'USD'): string {
+  // التأكد من أن المبلغ رقم صالح
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    return "0";
+  }
+
+  // تحديد رمز العملة
+  const currencySymbols: { [key: string]: string } = {
+    'USD': '$',
+    'SAR': 'ر.س',
+    'EUR': '€',
+    'GBP': '£',
+  };
+
+  const symbol = currencySymbols[currency] || currency;
+
+  // تنسيق الرقم
+  const formattedAmount = amount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  // إرجاع المبلغ مع رمز العملة
+  return currency === 'USD' ? `${symbol}${formattedAmount}` : `${formattedAmount} ${symbol}`;
+}
+

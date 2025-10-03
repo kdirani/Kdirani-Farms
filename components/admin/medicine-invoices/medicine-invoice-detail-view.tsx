@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/table';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface MedicineInvoiceDetailViewProps {
@@ -116,7 +117,7 @@ export function MedicineInvoiceDetailView({ invoice, items, expenses }: Medicine
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">القيمة الإجمالية</label>
-                <p className="text-2xl font-bold text-primary">${invoice.total_value.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-primary">{formatCurrency(invoice.total_value)}</p>
               </div>
             </div>
           </div>
@@ -160,8 +161,8 @@ export function MedicineInvoiceDetailView({ invoice, items, expenses }: Medicine
                       <TableCell className="font-medium">{item.medicine_name || '-'}</TableCell>
                       <TableCell className="text-right">{item.quantity.toLocaleString()}</TableCell>
                       <TableCell>{item.unit_name || '-'}</TableCell>
-                      <TableCell className="text-right">${item.price.toLocaleString()}</TableCell>
-                      <TableCell className="text-right font-semibold">${item.value.toLocaleString()}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
+                      <TableCell className="text-right font-semibold">{formatCurrency(item.value)}</TableCell>
                       <TableCell>{item.administration_day || '-'}</TableCell>
                       <TableCell className="text-right">
                         <Button
@@ -208,7 +209,7 @@ export function MedicineInvoiceDetailView({ invoice, items, expenses }: Medicine
                     <TableRow key={expense.id}>
                       <TableCell className="font-medium">{expense.expense_type_name || '-'}</TableCell>
                       <TableCell>{expense.account_name || '-'}</TableCell>
-                      <TableCell className="text-right font-semibold">${expense.amount.toLocaleString()}</TableCell>
+                      <TableCell className="text-right font-semibold">{formatCurrency(expense.amount)}</TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"

@@ -15,6 +15,7 @@ import {
 import { Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AddInvoiceItemDialog } from './add-invoice-item-dialog';
+import { formatCurrency } from '@/lib/utils';
 
 interface InvoiceItemsSectionProps {
   invoiceId: string;
@@ -82,8 +83,8 @@ export function InvoiceItemsSection({ invoiceId, items }: InvoiceItemsSectionPro
                     <TableCell className="text-right">{item.quantity.toLocaleString()}</TableCell>
                     <TableCell className="text-right">{item.weight ? item.weight.toLocaleString() : '-'}</TableCell>
                     <TableCell>{item.unit_name || '-'}</TableCell>
-                    <TableCell className="text-right">${item.price.toLocaleString()}</TableCell>
-                    <TableCell className="text-right font-semibold">${item.value.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
+                    <TableCell className="text-right font-semibold">{formatCurrency(item.value)}</TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"

@@ -32,7 +32,7 @@ import {
 import { FileText, MoreHorizontal, Search, Plus, CheckCircle, XCircle } from 'lucide-react';
 import { CreateInvoiceDialog } from './create-invoice-dialog';
 import { DeleteInvoiceDialog } from './delete-invoice-dialog';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface InvoicesTableProps {
@@ -157,7 +157,7 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
                     ) : '-'}
                   </TableCell>
                   <TableCell className="text-right font-semibold">
-                    ${invoice.net_value.toLocaleString()}
+                    {formatCurrency(invoice.net_value)}
                   </TableCell>
                   <TableCell>{getStatusBadge(invoice.checked)}</TableCell>
                   <TableCell className="text-right">

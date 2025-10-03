@@ -35,10 +35,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 const medicineInvoiceSchema = z.object({
   invoice_number: z.string().min(1, 'رقم الفاتورة مطلوب'),
   invoice_date: z.string().min(1, 'تاريخ الفاتورة مطلوب'),
+  invoice_time: z.string().optional(),
   warehouse_id: z.string().min(1, 'المستودع مطلوب'),
   poultry_status_id: z.string().optional(),
   notes: z.string().optional(),
@@ -98,10 +100,15 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
       loadData();
       const invoiceNum = `MED-${Date.now()}`;
       setValue('invoice_number', invoiceNum);
+      // Set current time
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      setValue('invoice_time', `${hours}:${minutes}`);
       setItems([]);
       setExpenses([]);
       setNewItem({ quantity: 0, price: 0 });
-      setNewExpense({ amount: 0 });
+      setNewExpense({ amount: 0, account_name: '' });
     }
   }, [open]);
 
@@ -188,6 +195,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
   });
   const [newExpense, setNewExpense] = useState<Partial<MedicineExpenseInput>>({
     amount: 0,
+    account_name: '',
   });
 
   const handleAddItem = () => {
@@ -216,7 +224,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
     }
 
     setExpenses([...expenses, newExpense as MedicineExpenseInput]);
-    setNewExpense({ amount: 0 });
+    setNewExpense({ amount: 0, account_name: '' });
     toast.success('تم إضافة المصروف');
   };
 
@@ -236,7 +244,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="invoice_number">رقم الفاتورة *</Label>
               <Input
@@ -259,6 +267,19 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
               />
               {errors.invoice_date && (
                 <p className="text-sm text-destructive">{errors.invoice_date.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="invoice_time">وقت الفاتورة</Label>
+              <Input
+                id="invoice_time"
+                type="time"
+                {...register('invoice_time')}
+                disabled={isLoading}
+              />
+              {errors.invoice_time && (
+                <p className="text-sm text-destructive">{errors.invoice_time.message}</p>
               )}
             </div>
           </div>
@@ -287,7 +308,17 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
             <CardContent className="pt-6">
               <h3 className="text-lg font-semibold mb-4">عناصر الأدوية ({items.length})</h3>
               
-              <div className="grid grid-cols-5 gap-2 mb-4">
+              {/* Column Labels */}
+              <div className="grid grid-cols-6 gap-2 text-sm font-medium text-muted-foreground mb-2">
+                <div className="col-span-2">الدواء</div>
+                <div>الكمية</div>
+                <div>الوحدة</div>
+                <div>السعر</div>
+                <div>القيمة</div>
+                <div></div>
+              </div>
+              
+              <div className="grid grid-cols-6 gap-2 mb-4">
                 <div className="col-span-2">
                   <Combobox
                     options={medicines.map((m) => ({
@@ -296,14 +327,14 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                     }))}
                     value={newItem.medicine_id || ''}
                     onValueChange={(value) => setNewItem({ ...newItem, medicine_id: value })}
-                    placeholder="الدواء"
+                    placeholder="اختر الدواء"
                     searchPlaceholder="البحث عن الأدوية..."
                     emptyText="لم يتم العثور على أدوية"
                   />
                 </div>
                 <Input
                   type="number"
-                  placeholder="الكمية"
+                  placeholder="0"
                   value={newItem.quantity || ''}
                   onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
                 />
@@ -314,32 +345,49 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                   }))}
                   value={newItem.unit_id || ''}
                   onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
-                  placeholder="الوحدة"
+                  placeholder="اختر الوحدة"
                   searchPlaceholder="البحث عن الوحدات..."
                   emptyText="لم يتم العثور على وحدات"
                 />
-                <div className="flex gap-2">
-                  <Input
-                    type="number"
-                    placeholder="السعر"
-                    value={newItem.price || ''}
-                    onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
-                  />
-                  <Button type="button" size="sm" onClick={handleAddItem}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={newItem.price || ''}
+                  onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
+                />
+                <Input
+                  type="text"
+                  value={formatCurrency((newItem.quantity || 0) * (newItem.price || 0))}
+                  readOnly
+                  disabled
+                  className="bg-muted text-center font-semibold"
+                />
+                <Button type="button" size="sm" onClick={handleAddItem}>
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
 
               {items.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2 mt-4">
+                  <div className="text-sm font-medium text-muted-foreground mb-2">العناصر المضافة:</div>
                   {items.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
-                      <span className="text-sm">
-                        {medicines.find(m => m.id === item.medicine_id)?.name} - 
-                        {item.quantity} {units.find(u => u.id === item.unit_id)?.unit_name} @ ${item.price}
-                        <strong className="ml-2">${(item.quantity * item.price).toFixed(2)}</strong>
-                      </span>
+                    <div key={index} className="flex justify-between items-center p-3 bg-muted rounded">
+                      <div className="flex-1">
+                        <div className="text-sm">
+                          <span className="font-medium">
+                            {medicines.find(m => m.id === item.medicine_id)?.name}
+                          </span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          الكمية: {item.quantity} {units.find(u => u.id === item.unit_id)?.unit_name}
+                          <span className="mx-2">•</span>
+                          السعر: {formatCurrency(item.price)}
+                          <span className="mx-2">•</span>
+                          <span className="font-semibold text-foreground">
+                            القيمة: {formatCurrency(item.quantity * item.price)}
+                          </span>
+                        </div>
+                      </div>
                       <Button
                         type="button"
                         variant="ghost"
@@ -363,31 +411,29 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
             <CardContent className="pt-6">
               <h3 className="text-lg font-semibold mb-4">المصاريف ({expenses.length})</h3>
               
-              <div className="grid grid-cols-5 gap-2 mb-4">
-                <div className="col-span-2">
-                  <Combobox
-                    options={expenseTypes.map((e) => ({
-                      value: e.id,
-                      label: e.name,
-                    }))}
-                    value={newExpense.expense_type_id || ''}
-                    onValueChange={(value) => setNewExpense({ ...newExpense, expense_type_id: value })}
-                    placeholder="نوع المصروف"
-                    searchPlaceholder="البحث عن أنواع المصاريف..."
-                    emptyText="لم يتم العثور على أنواع مصاريف"
-                  />
-                </div>
+              <div className="grid grid-cols-4 gap-2 mb-4">
+                <Combobox
+                  options={expenseTypes.map((e) => ({
+                    value: e.id,
+                    label: e.name,
+                  }))}
+                  value={newExpense.expense_type_id || ''}
+                  onValueChange={(value) => setNewExpense({ ...newExpense, expense_type_id: value })}
+                  placeholder="نوع المصروف"
+                  searchPlaceholder="البحث عن أنواع المصاريف..."
+                  emptyText="لم يتم العثور على أنواع مصاريف"
+                />
+                <Input
+                  type="text"
+                  placeholder="الحساب المقابل (اختياري)"
+                  value={newExpense.account_name || ''}
+                  onChange={(e) => setNewExpense({ ...newExpense, account_name: e.target.value })}
+                />
                 <Input
                   type="number"
                   placeholder="المبلغ"
                   value={newExpense.amount || ''}
                   onChange={(e) => setNewExpense({ ...newExpense, amount: parseFloat(e.target.value) })}
-                />
-                <Input
-                  type="text"
-                  placeholder="الحساب المقابل"
-                  value={newExpense.account_name || ''}
-                  onChange={(e) => setNewExpense({ ...newExpense, account_name: e.target.value })}
                 />
                 <Button type="button" size="sm" onClick={handleAddExpense}>
                   <Plus className="h-4 w-4" />
@@ -395,16 +441,23 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
               </div>
 
               {expenses.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2 mt-4">
+                  <div className="text-sm font-medium text-muted-foreground mb-2">المصاريف المضافة:</div>
                   {expenses.map((expense, index) => (
-                    <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
-                      <span className="text-sm">
-                        {expenseTypes.find(e => e.id === expense.expense_type_id)?.name}
-                        <strong className="ml-2">${expense.amount.toFixed(2)}</strong>
-                        {expense.account_name && (
-                          <span className="text-muted-foreground mr-2">({expense.account_name})</span>
-                        )}
-                      </span>
+                    <div key={index} className="flex justify-between items-center p-3 bg-muted rounded">
+                      <div className="flex-1">
+                        <div className="text-sm">
+                          <span className="font-medium">
+                            {expenseTypes.find(e => e.id === expense.expense_type_id)?.name}
+                          </span>
+                          {expense.account_name && (
+                            <span className="text-muted-foreground mx-2">
+                              ({expense.account_name})
+                            </span>
+                          )}
+                          <strong className="ml-2">{formatCurrency(expense.amount)}</strong>
+                        </div>
+                      </div>
                       <Button
                         type="button"
                         variant="ghost"
@@ -438,14 +491,42 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
             </CardContent>
           </Card>
 
-          {/* Total */}
+          {/* Totals Summary */}
           {(items.length > 0 || expenses.length > 0) && (
-            <div className="flex justify-end">
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">إجمالي تقريبي</p>
-                <p className="text-2xl font-bold">${calculateTotal().toFixed(2)}</p>
-              </div>
-            </div>
+            <Card className="bg-muted/50">
+              <CardContent className="pt-6">
+                <h3 className="text-lg font-semibold mb-4">ملخص الفاتورة</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center pb-2">
+                    <Label className="text-muted-foreground">إجمالي قيمة العناصر</Label>
+                    <Input
+                      value={formatCurrency(items.reduce((sum, item) => sum + (item.quantity * item.price), 0))}
+                      readOnly
+                      disabled
+                      className="w-48 text-right font-semibold bg-background"
+                    />
+                  </div>
+                  <div className="flex justify-between items-center pb-2">
+                    <Label className="text-muted-foreground">إجمالي المصاريف</Label>
+                    <Input
+                      value={formatCurrency(expenses.reduce((sum, exp) => sum + exp.amount, 0))}
+                      readOnly
+                      disabled
+                      className="w-48 text-right font-semibold bg-background"
+                    />
+                  </div>
+                  <div className="flex justify-between items-center pt-3 border-t">
+                    <Label className="text-lg font-bold">القيمة الصافية (الإجمالي)</Label>
+                    <Input
+                      value={formatCurrency(calculateTotal())}
+                      readOnly
+                      disabled
+                      className="w-48 text-right text-lg font-bold bg-background border-2 border-primary"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* File Attachments */}

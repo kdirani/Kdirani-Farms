@@ -21,15 +21,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Search, Plus } from 'lucide-react';
 import { CreateMedicineInvoiceDialog } from './create-medicine-invoice-dialog';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
+import { Search, Plus, MoreHorizontal } from 'lucide-react';
 
 interface MedicineInvoicesTableProps { 
   invoices: MedicineInvoice[];
 }
-
 export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -111,7 +110,7 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
                     ) : '-'}
                   </TableCell>
                   <TableCell className="text-right font-semibold">
-                    ${invoice.total_value.toLocaleString()}
+                    {formatCurrency(invoice.total_value)}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>

@@ -26,6 +26,7 @@ export type MedicineInvoice = {
 export type CreateMedicineInvoiceInput = {
   invoice_number: string;
   invoice_date: string;
+  invoice_time?: string;
   warehouse_id: string;
   poultry_status_id?: string;
   notes?: string;
@@ -207,6 +208,7 @@ export async function createMedicineInvoice(input: CreateMedicineInvoiceInput): 
       .insert({
         invoice_number: input.invoice_number,
         invoice_date: input.invoice_date,
+        invoice_time: input.invoice_time || null,
         warehouse_id: input.warehouse_id,
         poultry_status_id: input.poultry_status_id || null,
         total_value: 0,

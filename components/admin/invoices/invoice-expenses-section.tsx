@@ -15,6 +15,7 @@ import {
 import { Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AddInvoiceExpenseDialog } from './add-invoice-expense-dialog';
+import { formatCurrency } from '@/lib/utils';
 
 interface InvoiceExpensesSectionProps {
   invoiceId: string;
@@ -75,7 +76,7 @@ export function InvoiceExpensesSection({ invoiceId, expenses }: InvoiceExpensesS
                   <TableRow key={expense.id}>
                     <TableCell className="font-medium">{expense.expense_type_name || '-'}</TableCell>
                     <TableCell>{expense.account_name || '-'}</TableCell>
-                    <TableCell className="text-right font-semibold">${expense.amount.toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-semibold">{formatCurrency(expense.amount)}</TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"

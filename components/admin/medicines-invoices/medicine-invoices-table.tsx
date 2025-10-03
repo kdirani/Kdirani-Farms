@@ -4,7 +4,7 @@ import { MedicineInvoice, deleteMedicineInvoice } from '@/actions/medicine-invoi
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { CreateMedicineInvoiceDialog } from './create-medicine-invoice-dialog';
-import { MoreHorizontal, Search, Plus } from 'lucide-react';
+import { formatDate, formatCurrency } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Search, Plus, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -110,7 +111,7 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
                     ) : '-'}
                   </TableCell>
                   <TableCell className="text-right font-semibold">
-                    ${invoice.total_value.toLocaleString()}
+                    {formatCurrency(invoice.total_value)}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>

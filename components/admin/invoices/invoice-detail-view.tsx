@@ -10,7 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, FileText, CheckCircle, XCircle } from 'lucide-react';
-import { format } from 'date-fns'; 
+import { format } from 'date-fns';
+import { formatCurrency } from '@/lib/utils'; 
 import { InvoiceItemsSection } from './invoice-items-section';
 import { InvoiceExpensesSection } from './invoice-expenses-section';
 import { InvoiceAttachmentsSection } from './invoice-attachments-section';
@@ -87,6 +88,12 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
                 <label className="text-sm font-medium text-muted-foreground">تاريخ الفاتورة</label>
                 <p className="text-lg">{format(new Date(invoice.invoice_date), 'MMMM dd, yyyy')}</p>
               </div>
+              {invoice.invoice_time && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">وقت الفاتورة</label>
+                  <p className="text-lg">{invoice.invoice_time}</p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -145,16 +152,16 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
           <div className="space-y-3">
             <div className="flex justify-between text-base">
               <span className="text-muted-foreground">إجمالي قيمة العناصر:</span>
-              <span className="font-semibold">${invoice.total_items_value.toLocaleString()}</span>
+              <span className="font-semibold">{formatCurrency(invoice.total_items_value)}</span>
             </div>
             <div className="flex justify-between text-base">
               <span className="text-muted-foreground">إجمالي المصاريف:</span>
-              <span className="font-semibold">${invoice.total_expenses_value.toLocaleString()}</span>
+              <span className="font-semibold">{formatCurrency(invoice.total_expenses_value)}</span>
             </div>
             <Separator />
             <div className="flex justify-between text-xl font-bold">
               <span>القيمة الصافية:</span>
-              <span className="text-primary">${invoice.net_value.toLocaleString()}</span>
+              <span className="text-primary">{formatCurrency(invoice.net_value)}</span>
             </div>
           </div>
         </CardContent>

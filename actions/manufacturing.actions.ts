@@ -30,6 +30,7 @@ export type CreateManufacturingInvoiceInput = {
   unit_id: string;
   quantity: number;
   manufacturing_date: string;
+  manufacturing_time?: string;
   notes?: string;
 };
 
@@ -272,6 +273,7 @@ export async function createManufacturingInvoice(input: CreateManufacturingInvoi
         unit_id: input.unit_id,
         quantity: input.quantity,
         manufacturing_date: input.manufacturing_date,
+        manufacturing_time: input.manufacturing_time || null,
         notes: input.notes?.trim() || null,
       })
       .select()

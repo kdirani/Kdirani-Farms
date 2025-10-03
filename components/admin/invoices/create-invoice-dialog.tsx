@@ -38,11 +38,13 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2, PackageCheck, AlertTriangle } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 const invoiceSchema = z.object({
   invoice_type: z.enum(['buy', 'sell']),
   invoice_number: z.string().min(1, 'رقم الفاتورة مطلوب'),
   invoice_date: z.string().min(1, 'تاريخ الفاتورة مطلوب'),
+  invoice_time: z.string().optional(),
   warehouse_id: z.string().min(1, 'المستودع مطلوب'),
   client_id: z.string().optional(),
   notes: z.string().optional(),
@@ -111,11 +113,16 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
       // Generate invoice number
       const invoiceNum = `INV-${Date.now()}`;
       setValue('invoice_number', invoiceNum);
+      // Set current time
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      setValue('invoice_time', `${hours}:${minutes}`);
       // Reset items and expenses
       setItems([]);
       setExpenses([]);
       setNewItem({ quantity: 1, price: 0 });
-      setNewExpense({ amount: 0 });
+      setNewExpense({ amount: 0, account_name: '' });
     }
   }, [open]);
 
@@ -246,10 +253,16 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
     toast.success('تم حذف المصروف');
   };
 
-  const calculateTotal = () => {
-    const itemsTotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-    const expensesTotal = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-    return itemsTotal + expensesTotal;
+  const calculateItemsTotal = () => {
+    return items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+  };
+
+  const calculateExpensesTotal = () => {
+    return expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  };
+
+  const calculateNetTotal = () => {
+    return calculateItemsTotal() + calculateExpensesTotal();
   };
 
   // Form states for adding items/expenses
@@ -259,6 +272,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
   });
   const [newExpense, setNewExpense] = useState<Partial<InvoiceExpenseInput>>({
     amount: 0,
+    account_name: '',
   });
 
   // Load inventory when material changes in new item form
@@ -321,7 +335,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
     }
 
     addExpense(newExpense as InvoiceExpenseInput);
-    setNewExpense({ amount: 0 });
+    setNewExpense({ amount: 0, account_name: '' });
   };
 
   return (
@@ -334,7 +348,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="invoice_type">نوع الفاتورة *</Label>
               <Select
@@ -366,6 +380,16 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
               {errors.invoice_date && (
                 <p className="text-sm text-destructive">{errors.invoice_date.message}</p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="invoice_time">وقت الفاتورة</Label>
+              <Input
+                id="invoice_time"
+                type="time"
+                {...register('invoice_time')}
+                disabled={isLoading}
+              />
             </div>
           </div>
 
@@ -437,7 +461,18 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
               
               {/* Add Item Form */}
               <div className="space-y-3">
-                <div className="grid grid-cols-6 gap-2">
+                {/* Column Labels */}
+                <div className="grid grid-cols-8 gap-2 text-sm font-medium text-muted-foreground">
+                  <div className="col-span-2">المادة</div>
+                  <div>وزن البيض</div>
+                  <div>الكمية</div>
+                  <div>الوحدة</div>
+                  <div>السعر</div>
+                  <div>القيمة</div>
+                  <div></div>
+                </div>
+                
+                <div className="grid grid-cols-8 gap-2">
                   <div className="col-span-2">
                     <Combobox
                       options={[
@@ -449,14 +484,28 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
                       ]}
                       value={newItem.material_name_id || 'none'}
                       onValueChange={(value) => setNewItem({ ...newItem, material_name_id: value === 'none' ? undefined : value })}
-                      placeholder="المادة"
+                      placeholder="اختر المادة"
                       searchPlaceholder="ابحث عن المواد..."
                       emptyText="لم يتم العثور على مواد"
                     />
                   </div>
+                  <Combobox
+                    options={[
+                      { value: 'none', label: '-' },
+                      ...eggWeights.map((w) => ({
+                        value: w.id,
+                        label: w.weight_range,
+                      }))
+                    ]}
+                    value={newItem.egg_weight_id || 'none'}
+                    onValueChange={(value) => setNewItem({ ...newItem, egg_weight_id: value === 'none' ? undefined : value })}
+                    placeholder="اختر الوزن"
+                    searchPlaceholder="ابحث عن الأوزان..."
+                    emptyText="لم يتم العثور على أوزان"
+                  />
                   <Input
                     type="number"
-                    placeholder="الكمية"
+                    placeholder="0"
                     value={newItem.quantity || ''}
                     onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
                   />
@@ -467,15 +516,22 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
                     }))}
                     value={newItem.unit_id || ''}
                     onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
-                    placeholder="الوحدة"
+                    placeholder="اختر الوحدة"
                     searchPlaceholder="ابحث عن الوحدات..."
                     emptyText="لم يتم العثور على وحدات"
                   />
                   <Input
                     type="number"
-                    placeholder="السعر"
+                    placeholder="0.00"
                     value={newItem.price || ''}
                     onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
+                  />
+                  <Input
+                    type="text"
+                    value={formatCurrency((newItem.quantity || 0) * (newItem.price || 0))}
+                    readOnly
+                    disabled
+                    className="bg-muted text-center font-semibold"
                   />
                   <Button type="button" size="sm" onClick={handleAddItem}>
                     <Plus className="h-4 w-4" />
@@ -516,14 +572,31 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
 
               {/* Items List */}
               {items.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2 mt-4">
+                  <div className="text-sm font-medium text-muted-foreground mb-2">البنود المضافة:</div>
                   {items.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
-                      <span className="text-sm">
-                        {materials.find(m => m.id === item.material_name_id)?.material_name || 'البند'} - 
-                        {item.quantity} {units.find(u => u.id === item.unit_id)?.unit_name} @ ${item.price}
-                        <strong className="ml-2">${(item.quantity * item.price).toFixed(2)}</strong>
-                      </span>
+                    <div key={index} className="flex justify-between items-center p-3 bg-muted rounded">
+                      <div className="flex-1">
+                        <div className="text-sm">
+                          <span className="font-medium">
+                            {materials.find(m => m.id === item.material_name_id)?.material_name || 'البند'}
+                          </span>
+                          {item.egg_weight_id && (
+                            <span className="text-muted-foreground mx-2">
+                              ({eggWeights.find(w => w.id === item.egg_weight_id)?.weight_range})
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          الكمية: {item.quantity} {units.find(u => u.id === item.unit_id)?.unit_name} 
+                          <span className="mx-2">•</span>
+                          السعر: {formatCurrency(item.price)}
+                          <span className="mx-2">•</span>
+                          <span className="font-semibold text-foreground">
+                            القيمة: {formatCurrency(item.quantity * item.price)}
+                          </span>
+                        </div>
+                      </div>
                       <Button
                         type="button"
                         variant="ghost"
@@ -546,19 +619,23 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
               
               {/* Add Expense Form */}
               <div className="grid grid-cols-4 gap-2 mb-4">
-                <div className="col-span-2">
-                  <Combobox
-                    options={expenseTypes.map((e) => ({
-                      value: e.id,
-                      label: e.name,
-                    }))}
-                    value={newExpense.expense_type_id || ''}
-                    onValueChange={(value) => setNewExpense({ ...newExpense, expense_type_id: value })}
-                    placeholder="نوع المصروف"
-                    searchPlaceholder="البحث في أنواع المصروفات..."
-                    emptyText="لا توجد أنواع مصروفات"
-                  />
-                </div>
+                <Combobox
+                  options={expenseTypes.map((e) => ({
+                    value: e.id,
+                    label: e.name,
+                  }))}
+                  value={newExpense.expense_type_id || ''}
+                  onValueChange={(value) => setNewExpense({ ...newExpense, expense_type_id: value })}
+                  placeholder="نوع المصروف"
+                  searchPlaceholder="البحث في أنواع المصروفات..."
+                  emptyText="لا توجد أنواع مصروفات"
+                />
+                <Input
+                  type="text"
+                  placeholder="اسم الحساب (اختياري)"
+                  value={newExpense.account_name || ''}
+                  onChange={(e) => setNewExpense({ ...newExpense, account_name: e.target.value })}
+                />
                 <Input
                   type="number"
                   placeholder="المبلغ"
@@ -575,10 +652,19 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
                 <div className="space-y-2">
                   {expenses.map((expense, index) => (
                     <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
-                      <span className="text-sm">
-                        {expenseTypes.find(e => e.id === expense.expense_type_id)?.name || 'المصروف'}
-                        <strong className="ml-2">${expense.amount.toFixed(2)}</strong>
-                      </span>
+                      <div className="flex-1">
+                        <div className="text-sm">
+                          <span className="font-medium">
+                            {expenseTypes.find(e => e.id === expense.expense_type_id)?.name || 'المصروف'}
+                          </span>
+                          {expense.account_name && (
+                            <span className="text-muted-foreground mx-2">
+                              ({expense.account_name})
+                            </span>
+                          )}
+                          <strong className="ml-2">{formatCurrency(expense.amount)}</strong>
+                        </div>
+                      </div>
                       <Button
                         type="button"
                         variant="ghost"
@@ -594,14 +680,42 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
             </CardContent>
           </Card>
 
-          {/* Total */}
+          {/* Totals Summary */}
           {(items.length > 0 || expenses.length > 0) && (
-            <div className="flex justify-end">
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">الإجمالي المقدر</p>
-                <p className="text-2xl font-bold">${calculateTotal().toFixed(2)}</p>
-              </div>
-            </div>
+            <Card className="bg-muted/50">
+              <CardContent className="pt-6">
+                <h3 className="text-lg font-semibold mb-4">ملخص الفاتورة</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center pb-2">
+                    <Label className="text-muted-foreground">إجمالي قيمة البنود</Label>
+                    <Input
+                      value={formatCurrency(calculateItemsTotal())}
+                      readOnly
+                      disabled
+                      className="w-48 text-right font-semibold bg-background"
+                    />
+                  </div>
+                  <div className="flex justify-between items-center pb-2">
+                    <Label className="text-muted-foreground">إجمالي قيمة المصروفات</Label>
+                    <Input
+                      value={formatCurrency(calculateExpensesTotal())}
+                      readOnly
+                      disabled
+                      className="w-48 text-right font-semibold bg-background"
+                    />
+                  </div>
+                  <div className="flex justify-between items-center pt-3 border-t">
+                    <Label className="text-lg font-bold">القيمة الصافية (الإجمالي)</Label>
+                    <Input
+                      value={formatCurrency(calculateNetTotal())}
+                      readOnly
+                      disabled
+                      className="w-48 text-right text-lg font-bold bg-background border-2 border-primary"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* File Attachments */}
