@@ -36,9 +36,11 @@ import { DeleteMaterialDialog } from './delete-material-dialog';
 
 interface MaterialsTableProps {
   materials: Material[];
+  isAggregated?: boolean;
+  availableWarehouses?: Array<{ display: string }>;
 }
 
-export function MaterialsTable({ materials }: MaterialsTableProps) {
+export function MaterialsTable({ materials, isAggregated = false, availableWarehouses = [] }: MaterialsTableProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -55,17 +57,10 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
 
-  // بناء قائمة المستودعات الفريدة للتصفية
+  // استخدام قائمة المستودعات المتاحة من السيرفر
   const warehouses = useMemo(() => {
-    const map = new Map<string, { display: string }>();
-    for (const material of materials) {
-      if (material.warehouse?.name && material.warehouse?.farm_name) {
-        const display = `${material.warehouse.name} - ${material.warehouse.farm_name}`;
-        if (!map.has(display)) map.set(display, { display });
-      }
-    }
-    return Array.from(map.values()).sort((a, b) => a.display.localeCompare(b.display));
-  }, [materials]);
+    return availableWarehouses.sort((a, b) => a.display.localeCompare(b.display));
+  }, [availableWarehouses]);
 
   // تحديث URL عند تغيير المرشحات
   const updateURL = useCallback((warehouse: string, search: string) => {
@@ -75,59 +70,22 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
     
     const queryString = params.toString();
     const newURL = queryString ? `${pathname}?${queryString}` : pathname;
-    router.replace(newURL, { scroll: false });
+    router.push(newURL); // استخدام push بدلاً من replace لإعادة التحميل
   }, [pathname, router]);
 
-  // معالج تغيير المستودع
+  // معالج تغيير المستودع - سيؤدي لإعادة تحميل البيانات
   const handleWarehouseChange = useCallback((warehouse: string) => {
     setSelectedWarehouse(warehouse);
     updateURL(warehouse, searchTerm);
   }, [searchTerm, updateURL]);
 
-  // معالج تغيير البحث
+  // معالج تغيير البحث - فلترة محلية فقط
   const handleSearchChange = useCallback((search: string) => {
     setSearchTerm(search);
-    updateURL(selectedWarehouse, search);
-  }, [selectedWarehouse, updateURL]);
-
-  // تجميع المواد عند اختيار "جميع المستودعات"
-  const aggregatedMaterials = useMemo(() => {
-    if (deferredWarehouse !== 'all') {
-      return null; // لا نحتاج للتجميع إذا كان مستودع محدد مختار
-    }
-
-    const grouped = new Map<string, Material>();
-
-    for (const material of materials) {
-      const key = `${material.material_name_id}-${material.unit_id}`;
-      
-      if (grouped.has(key)) {
-        const existing = grouped.get(key)!;
-        existing.opening_balance += material.opening_balance;
-        existing.purchases += material.purchases;
-        existing.sales += material.sales;
-        existing.consumption += material.consumption;
-        existing.manufacturing += material.manufacturing;
-        existing.current_balance += material.current_balance;
-      } else {
-        grouped.set(key, {
-          ...material,
-          id: key, // استخدام مفتاح فريد للعنصر المجمع
-          warehouse: {
-            name: 'جميع المستودعات',
-            farm_name: 'عام'
-          }
-        });
-      }
-    }
-
-    return Array.from(grouped.values());
-  }, [materials, deferredWarehouse]);
+  }, []);
 
   const filteredMaterials = useMemo(() => {
-    const dataToFilter = aggregatedMaterials || materials;
-    
-    return dataToFilter.filter((material) => {
+    return materials.filter((material) => {
       const s = deferredSearchTerm.toLowerCase();
       const matchesSearch = !s || (
         material.material_name?.toLowerCase().includes(s) ||
@@ -135,14 +93,9 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
         material.warehouse?.farm_name.toLowerCase().includes(s)
       );
 
-      const display = material.warehouse
-        ? `${material.warehouse.name} - ${material.warehouse.farm_name}`
-        : '';
-      const matchesWarehouse = deferredWarehouse === 'all' || display === deferredWarehouse;
-
-      return matchesSearch && matchesWarehouse;
+      return matchesSearch;
     });
-  }, [materials, aggregatedMaterials, deferredSearchTerm, deferredWarehouse]);
+  }, [materials, deferredSearchTerm]);
 
   const getStockStatus = (current: number, opening: number) => {
     if (current === 0) return <Badge variant="destructive">نفد من المخزون</Badge>;
@@ -173,7 +126,7 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
                 <SelectValue placeholder="تصفية حسب المستودع" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع المستودعات</SelectItem>
+                <SelectItem value="all">جميع المستودعات (عرض مجمع)</SelectItem>
                 {warehouses.map((w) => (
                   <SelectItem key={w.display} value={w.display}>
                     {w.display}
@@ -234,7 +187,7 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
                   <TableCell className="text-right font-semibold">{material.current_balance.toLocaleString()}</TableCell>
                   <TableCell>{getStockStatus(material.current_balance, material.opening_balance)}</TableCell>
                   <TableCell className="text-right">
-                    {selectedWarehouse === 'all' ? (
+                    {isAggregated ? (
                       <span className="text-muted-foreground text-sm">-</span>
                     ) : (
                       <DropdownMenu>
