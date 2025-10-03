@@ -37,12 +37,7 @@ const navSections = [
         title: 'إعداد مزرعة كاملة',
         href: '/admin/setup',
         icon: Zap,
-      },
-      {
-        title: 'التقارير والإحصائيات',
-        href: '/admin/analytics',
-        icon: BarChart3,
-      },
+      }
     ],
   },
   {
@@ -74,7 +69,7 @@ const navSections = [
     title: 'المخزون والمواد',
     items: [
       {
-        title: 'المواد',
+        title: 'ادارة المخزن',
         href: '/admin/materials',
         icon: Package,
       },
