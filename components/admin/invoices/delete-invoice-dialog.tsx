@@ -30,7 +30,7 @@ export function DeleteInvoiceDialog({ invoice, open, onOpenChange }: DeleteInvoi
       const result = await deleteInvoice(invoice.id);
       
       if (result.success) {
-        toast.success('Invoice deleted successfully');
+        toast.success('تم حذف الفاتورة بنجاح');
         onOpenChange(false);
 
         // Delay page reload to allow user to see success message
@@ -38,10 +38,10 @@ export function DeleteInvoiceDialog({ invoice, open, onOpenChange }: DeleteInvoi
           window.location.reload();
         }, 1500);
       } else {
-        toast.error(result.error || 'Failed to delete invoice');
+        toast.error(result.error || 'فشل في حذف الفاتورة');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -53,34 +53,34 @@ export function DeleteInvoiceDialog({ invoice, open, onOpenChange }: DeleteInvoi
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            Delete Invoice
+            حذف الفاتورة
           </DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete this invoice? This will also delete all associated items and expenses. This action cannot be undone.
+            هل أنت متأكد من رغبتك في حذف هذه الفاتورة؟ سيؤدي ذلك أيضًا إلى حذف جميع البنود والمصروفات المرتبطة بها. لا يمكن التراجع عن هذا الإجراء.
           </DialogDescription>
         </DialogHeader>
         
         <div className="bg-muted p-4 rounded-lg space-y-2">
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Invoice #:</span>
+            <span className="text-sm font-medium">رقم الفاتورة:</span>
             <span className="text-sm">{invoice.invoice_number}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Type:</span>
-            <span className="text-sm capitalize">{invoice.invoice_type}</span>
+            <span className="text-sm font-medium">النوع:</span>
+            <span className="text-sm capitalize">{invoice.invoice_type === 'buy' ? 'شراء' : 'بيع'}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Date:</span>
+            <span className="text-sm font-medium">التاريخ:</span>
             <span className="text-sm">{format(new Date(invoice.invoice_date), 'MMM dd, yyyy')}</span>
           </div>
           {invoice.client && (
             <div className="flex justify-between">
-              <span className="text-sm font-medium">Client:</span>
+              <span className="text-sm font-medium">العميل:</span>
               <span className="text-sm">{invoice.client.name}</span>
             </div>
           )}
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Net Value:</span>
+            <span className="text-sm font-medium">القيمة الصافية:</span>
             <span className="text-sm font-semibold">${invoice.net_value.toLocaleString()}</span>
           </div>
         </div>
@@ -92,7 +92,7 @@ export function DeleteInvoiceDialog({ invoice, open, onOpenChange }: DeleteInvoi
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
-            Cancel
+            إلغاء
           </Button>
           <Button
             type="button"
@@ -100,8 +100,8 @@ export function DeleteInvoiceDialog({ invoice, open, onOpenChange }: DeleteInvoi
             onClick={handleDelete}
             disabled={isLoading}
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Delete Invoice
+            {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+            حذف الفاتورة
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -30,16 +30,16 @@ export function ManufacturingAttachmentsSection({ invoiceId }: ManufacturingAtta
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this attachment?')) return;
+    if (!confirm('هل أنت متأكد من رغبتك في حذف هذا المرفق؟')) return;
 
     setDeletingId(id);
     const result = await deleteManufacturingAttachment(id);
     
     if (result.success) {
-      toast.success('Attachment deleted successfully');
+      toast.success('تم حذف المرفق بنجاح');
       loadAttachments();
     } else {
-      toast.error(result.error || 'Failed to delete attachment');
+      toast.error(result.error || 'فشل في حذف المرفق');
     }
     setDeletingId(null);
   };
@@ -52,7 +52,7 @@ export function ManufacturingAttachmentsSection({ invoiceId }: ManufacturingAtta
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Attachments</CardTitle>
+          <CardTitle>المرفقات</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
@@ -67,11 +67,11 @@ export function ManufacturingAttachmentsSection({ invoiceId }: ManufacturingAtta
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Attachments</CardTitle>
+          <CardTitle>المرفقات</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground text-center py-8">
-            No attachments found
+            لم يتم العثور على مرفقات
           </p>
         </CardContent>
       </Card>
@@ -81,7 +81,7 @@ export function ManufacturingAttachmentsSection({ invoiceId }: ManufacturingAtta
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Attachments ({attachments.length})</CardTitle>
+        <CardTitle>المرفقات ({attachments.length})</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

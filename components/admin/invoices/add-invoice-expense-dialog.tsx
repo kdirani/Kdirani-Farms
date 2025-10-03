@@ -29,8 +29,8 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const expenseSchema = z.object({
-  expense_type_id: z.string().min(1, 'Expense type is required'),
-  amount: z.number().min(0, 'Amount cannot be negative'),
+  expense_type_id: z.string().min(1, 'نوع المصروف مطلوب'),
+  amount: z.number().min(0, 'المبلغ لا يمكن أن يكون سالباً'),
   account_name: z.string().optional(),
 });
 
@@ -86,7 +86,7 @@ export function AddInvoiceExpenseDialog({ invoiceId, open, onOpenChange }: AddIn
       });
       
       if (result.success) {
-        toast.success('Expense added successfully');
+        toast.success('تم إضافة المصروف بنجاح');
         reset();
         onOpenChange(false);
 
@@ -95,10 +95,10 @@ export function AddInvoiceExpenseDialog({ invoiceId, open, onOpenChange }: AddIn
           window.location.reload();
         }, 1500);
       } else {
-        toast.error(result.error || 'Failed to add expense');
+        toast.error(result.error || 'فشل في إضافة المصروف');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -108,14 +108,14 @@ export function AddInvoiceExpenseDialog({ invoiceId, open, onOpenChange }: AddIn
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add Invoice Expense</DialogTitle>
+          <DialogTitle>إضافة مصروف للفاتورة</DialogTitle>
           <DialogDescription>
-            Add an additional expense to this invoice
+            إضافة مصروف إضافي لهذه الفاتورة
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="expense_type_id">Expense Type *</Label>
+            <Label htmlFor="expense_type_id">نوع المصروف *</Label>
             <Combobox
               options={expenseTypes.map((type) => ({
                 value: type.id,
@@ -123,9 +123,9 @@ export function AddInvoiceExpenseDialog({ invoiceId, open, onOpenChange }: AddIn
               }))}
               value={expenseTypeId}
               onValueChange={(value) => setValue('expense_type_id', value)}
-              placeholder="Select expense type"
-              searchPlaceholder="Search expense types..."
-              emptyText="No expense types found"
+              placeholder="اختر نوع المصروف"
+              searchPlaceholder="البحث عن أنواع المصروفات..."
+              emptyText="لا توجد أنواع مصروفات"
               disabled={isLoading}
             />
             {errors.expense_type_id && (
@@ -134,7 +134,7 @@ export function AddInvoiceExpenseDialog({ invoiceId, open, onOpenChange }: AddIn
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount *</Label>
+            <Label htmlFor="amount">المبلغ *</Label>
             <Input
               id="amount"
               type="number"
@@ -149,10 +149,10 @@ export function AddInvoiceExpenseDialog({ invoiceId, open, onOpenChange }: AddIn
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="account_name">Account Name</Label>
+            <Label htmlFor="account_name">اسم الحساب</Label>
             <Input
               id="account_name"
-              placeholder="Optional account name"
+              placeholder="اسم الحساب (اختياري)"
               {...register('account_name')}
               disabled={isLoading}
             />
@@ -165,11 +165,11 @@ export function AddInvoiceExpenseDialog({ invoiceId, open, onOpenChange }: AddIn
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Add Expense
+              {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+              إضافة المصروف
             </Button>
           </DialogFooter>
         </form>

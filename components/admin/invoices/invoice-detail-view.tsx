@@ -24,9 +24,9 @@ interface InvoiceDetailViewProps {
 export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailViewProps) {
   const getTypeBadge = (type: 'buy' | 'sell') => {
     return type === 'buy' ? (
-      <Badge variant="default">Buy Invoice</Badge>
+      <Badge variant="default">فاتورة شراء</Badge>
     ) : (
-      <Badge variant="secondary">Sell Invoice</Badge>
+      <Badge variant="secondary">فاتورة بيع</Badge>
     );
   };
 
@@ -34,12 +34,12 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
     return checked ? (
       <Badge variant="success" className="gap-1">
         <CheckCircle className="h-3 w-3" />
-        Checked
+        مدققة
       </Badge>
     ) : (
       <Badge variant="warning" className="gap-1">
         <XCircle className="h-3 w-3" />
-        Unchecked
+        غير مدققة
       </Badge>
     );
   };
@@ -56,7 +56,7 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
           </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight">Invoice {invoice.invoice_number}</h1>
+              <h1 className="text-3xl font-bold tracking-tight">فاتورة {invoice.invoice_number}</h1>
               {getTypeBadge(invoice.invoice_type)}
               {getStatusBadge(invoice.checked)}
             </div>
@@ -80,36 +80,36 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
                 <p className="text-lg font-semibold">{invoice.invoice_number}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Invoice Type</label>
+                <label className="text-sm font-medium text-muted-foreground">نوع الفاتورة</label>
                 <p className="text-lg capitalize">{invoice.invoice_type}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Invoice Date</label>
+                <label className="text-sm font-medium text-muted-foreground">تاريخ الفاتورة</label>
                 <p className="text-lg">{format(new Date(invoice.invoice_date), 'MMMM dd, yyyy')}</p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Warehouse</label>
+                <label className="text-sm font-medium text-muted-foreground">المستودع</label>
                 {invoice.warehouse ? (
                   <div>
                     <p className="text-lg font-semibold">{invoice.warehouse.name}</p>
                     <p className="text-sm text-muted-foreground">{invoice.warehouse.farm_name}</p>
                   </div>
                 ) : (
-                  <p className="text-lg text-muted-foreground">Not assigned</p>
+                  <p className="text-lg text-muted-foreground">غير محدد</p>
                 )}
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Client</label>
+                <label className="text-sm font-medium text-muted-foreground">العميل</label>
                 {invoice.client ? (
                   <div>
                     <p className="text-lg font-semibold">{invoice.client.name}</p>
                     <p className="text-sm text-muted-foreground capitalize">{invoice.client.type}</p>
                   </div>
                 ) : (
-                  <p className="text-lg text-muted-foreground">Not assigned</p>
+                  <p className="text-lg text-muted-foreground">غير محدد</p>
                 )}
               </div>
             </div>
@@ -119,7 +119,7 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
             <>
               <Separator className="my-4" />
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Notes</label>
+                <label className="text-sm font-medium text-muted-foreground">ملاحظات</label>
                 <p className="text-base mt-1">{invoice.notes}</p>
               </div>
             </>
@@ -139,21 +139,21 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
       {/* Totals */}
       <Card>
         <CardHeader>
-          <CardTitle>Invoice Summary</CardTitle>
+          <CardTitle>ملخص الفاتورة</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <div className="flex justify-between text-base">
-              <span className="text-muted-foreground">Total Items Value:</span>
+              <span className="text-muted-foreground">إجمالي قيمة العناصر:</span>
               <span className="font-semibold">${invoice.total_items_value.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-base">
-              <span className="text-muted-foreground">Total Expenses:</span>
+              <span className="text-muted-foreground">إجمالي المصاريف:</span>
               <span className="font-semibold">${invoice.total_expenses_value.toLocaleString()}</span>
             </div>
             <Separator />
             <div className="flex justify-between text-xl font-bold">
-              <span>Net Value:</span>
+              <span>القيمة الصافية:</span>
               <span className="text-primary">${invoice.net_value.toLocaleString()}</span>
             </div>
           </div>
