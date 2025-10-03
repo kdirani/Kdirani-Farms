@@ -29,13 +29,13 @@ export function DeletePoultryDialog({ poultry, open, onOpenChange }: DeletePoult
       const result = await deletePoultryStatus(poultry.id);
       
       if (result.success) {
-        toast.success('Poultry batch deleted successfully');
+        toast.success('تم حذف دفعة الدواجن بنجاح');
         onOpenChange(false);
       } else {
-        toast.error(result.error || 'Failed to delete poultry batch');
+        toast.error(result.error || 'فشل في حذف دفعة الدواجن');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -47,27 +47,27 @@ export function DeletePoultryDialog({ poultry, open, onOpenChange }: DeletePoult
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            Delete Poultry Batch
+            حذف دفعة الدواجن
           </DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete this poultry batch? This action cannot be undone.
+            هل أنت متأكد من رغبتك في حذف دفعة الدواجن هذه؟ لا يمكن التراجع عن هذا الإجراء.
           </DialogDescription>
         </DialogHeader>
         
         <div className="bg-muted p-4 rounded-lg space-y-2">
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Batch:</span>
-            <span className="text-sm">{poultry.batch_name || 'Unnamed'}</span>
+            <span className="text-sm font-medium">الدفعة:</span>
+            <span className="text-sm">{poultry.batch_name || 'بدون اسم'}</span>
           </div>
           {poultry.farm && (
             <>
               <div className="flex justify-between">
-                <span className="text-sm font-medium">Farm:</span>
+                <span className="text-sm font-medium">المزرعة:</span>
                 <span className="text-sm">{poultry.farm.name}</span>
               </div>
               {poultry.farm.user_name && (
                 <div className="flex justify-between">
-                  <span className="text-sm font-medium">Farmer:</span>
+                  <span className="text-sm font-medium">المزارع:</span>
                   <span className="text-sm">{poultry.farm.user_name}</span>
                 </div>
               )}
@@ -75,15 +75,15 @@ export function DeletePoultryDialog({ poultry, open, onOpenChange }: DeletePoult
           )}
           <div className="pt-2 border-t">
             <div className="flex justify-between">
-              <span className="text-sm font-medium">Opening Chicks:</span>
+              <span className="text-sm font-medium">عدد الكتاكيت الافتتاحي:</span>
               <span className="text-sm">{poultry.opening_chicks.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm font-medium">Dead Chicks:</span>
+              <span className="text-sm font-medium">الكتاكيت النافقة:</span>
               <span className="text-sm text-destructive">{poultry.dead_chicks.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm font-medium">Remaining:</span>
+              <span className="text-sm font-medium">المتبقي:</span>
               <span className="text-sm font-semibold">{poultry.remaining_chicks.toLocaleString()}</span>
             </div>
           </div>
@@ -96,7 +96,7 @@ export function DeletePoultryDialog({ poultry, open, onOpenChange }: DeletePoult
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
-            Cancel
+            إلغاء
           </Button>
           <Button
             type="button"
@@ -104,8 +104,8 @@ export function DeletePoultryDialog({ poultry, open, onOpenChange }: DeletePoult
             onClick={handleDelete}
             disabled={isLoading}
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Delete Batch
+            {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+            حذف الدفعة
           </Button>
         </DialogFooter>
       </DialogContent>

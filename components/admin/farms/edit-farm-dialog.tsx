@@ -27,7 +27,7 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const farmSchema = z.object({
-  name: z.string().min(2, 'Farm name must be at least 2 characters'),
+  name: z.string().min(2, 'اسم المزرعة يجب أن يكون حرفين على الأقل'),
   location: z.string().optional(),
   user_id: z.string().optional(),
   is_active: z.boolean(),
@@ -100,13 +100,13 @@ export function EditFarmDialog({ farm, open, onOpenChange }: EditFarmDialogProps
       });
       
       if (result.success) {
-        toast.success('Farm updated successfully');
+        toast.success('تم تحديث المزرعة بنجاح');
         onOpenChange(false);
       } else {
-        toast.error(result.error || 'Failed to update farm');
+        toast.error(result.error || 'فشل في تحديث المزرعة');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -116,17 +116,17 @@ export function EditFarmDialog({ farm, open, onOpenChange }: EditFarmDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Edit Farm</DialogTitle>
+          <DialogTitle>تعديل المزرعة</DialogTitle>
           <DialogDescription>
-            Update farm information and assignment.
+            تحديث معلومات المزرعة والتعيين.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Farm Name *</Label>
+            <Label htmlFor="name">اسم المزرعة *</Label>
             <Input
               id="name"
-              placeholder="e.g., Green Valley Farm"
+              placeholder="مثال: مزرعة الوادي الأخضر"
               {...register('name')}
               disabled={isLoading}
             />
@@ -136,10 +136,10 @@ export function EditFarmDialog({ farm, open, onOpenChange }: EditFarmDialogProps
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="location">الموقع</Label>
             <Input
               id="location"
-              placeholder="e.g., Al-Qadeerani District"
+              placeholder="مثال: منطقة القديراني"
               {...register('location')}
               disabled={isLoading}
             />
@@ -149,17 +149,17 @@ export function EditFarmDialog({ farm, open, onOpenChange }: EditFarmDialogProps
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="user_id">Assign to Farmer</Label>
+            <Label htmlFor="user_id">تعيين إلى مزارع</Label>
             <Select
               value={userId}
               onValueChange={(value) => setValue('user_id', value === 'none' ? undefined : value)}
               disabled={isLoading || loadingUsers}
             >
               <SelectTrigger>
-                <SelectValue placeholder={loadingUsers ? 'Loading farmers...' : 'Select a farmer'} />
+                <SelectValue placeholder={loadingUsers ? 'جاري تحميل المزارعين...' : 'اختر مزارعًا'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No farmer (Unassigned)</SelectItem>
+                <SelectItem value="none">لا يوجد مزارع (غير معين)</SelectItem>
                 {availableUsers.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.fname} ({user.email})
@@ -177,8 +177,8 @@ export function EditFarmDialog({ farm, open, onOpenChange }: EditFarmDialogProps
               disabled={isLoading}
               className="rounded border-gray-300"
             />
-            <Label htmlFor="is_active" className="cursor-pointer">
-              Farm is active
+            <Label htmlFor="is_active" className="cursor-pointer mr-2">
+              المزرعة نشطة
             </Label>
           </div>
 
@@ -189,11 +189,11 @@ export function EditFarmDialog({ farm, open, onOpenChange }: EditFarmDialogProps
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
+              حفظ التغييرات
             </Button>
           </DialogFooter>
         </form>

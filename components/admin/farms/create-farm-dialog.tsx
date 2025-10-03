@@ -27,7 +27,7 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const farmSchema = z.object({
-  name: z.string().min(2, 'Farm name must be at least 2 characters'),
+  name: z.string().min(2, 'اسم المزرعة يجب أن يكون حرفين على الأقل'),
   location: z.string().optional(),
   user_id: z.string().optional(),
   is_active: z.boolean().default(true),
@@ -87,14 +87,14 @@ export function CreateFarmDialog({ open, onOpenChange }: CreateFarmDialogProps) 
       });
       
       if (result.success) {
-        toast.success('Farm created successfully');
+        toast.success('تم إنشاء المزرعة بنجاح');
         reset();
         onOpenChange(false);
       } else {
-        toast.error(result.error || 'Failed to create farm');
+        toast.error(result.error || 'فشل في إنشاء المزرعة');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -104,17 +104,17 @@ export function CreateFarmDialog({ open, onOpenChange }: CreateFarmDialogProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Farm</DialogTitle>
+          <DialogTitle>إنشاء مزرعة جديدة</DialogTitle>
           <DialogDescription>
-            Add a new farm and optionally assign it to a farmer.
+            إضافة مزرعة جديدة وتعيينها لمزارع اختياريًا.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Farm Name *</Label>
+            <Label htmlFor="name">اسم المزرعة *</Label>
             <Input
               id="name"
-              placeholder="e.g., Green Valley Farm"
+              placeholder="مثال: مزرعة الوادي الأخضر"
               {...register('name')}
               disabled={isLoading}
             />
@@ -124,10 +124,10 @@ export function CreateFarmDialog({ open, onOpenChange }: CreateFarmDialogProps) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="location">الموقع</Label>
             <Input
               id="location"
-              placeholder="e.g., Al-Qadeerani District"
+              placeholder="مثال: منطقة القديراني"
               {...register('location')}
               disabled={isLoading}
             />
@@ -137,17 +137,17 @@ export function CreateFarmDialog({ open, onOpenChange }: CreateFarmDialogProps) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="user_id">Assign to Farmer (Optional)</Label>
+            <Label htmlFor="user_id">تعيين إلى مزارع (اختياري)</Label>
             <Select
               value={userId}
               onValueChange={(value) => setValue('user_id', value === 'none' ? undefined : value)}
               disabled={isLoading || loadingUsers}
             >
               <SelectTrigger>
-                <SelectValue placeholder={loadingUsers ? 'Loading farmers...' : 'Select a farmer'} />
+                <SelectValue placeholder={loadingUsers ? 'جاري تحميل المزارعين...' : 'اختر مزارعًا'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No farmer (Unassigned)</SelectItem>
+                <SelectItem value="none">لا يوجد مزارع (غير معين)</SelectItem>
                 {availableUsers.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.fname} ({user.email})
@@ -157,7 +157,7 @@ export function CreateFarmDialog({ open, onOpenChange }: CreateFarmDialogProps) 
             </Select>
             {availableUsers.length === 0 && !loadingUsers && (
               <p className="text-xs text-muted-foreground">
-                All farmers already have farms assigned
+                جميع المزارعين لديهم مزارع معينة بالفعل
               </p>
             )}
           </div>
@@ -171,7 +171,7 @@ export function CreateFarmDialog({ open, onOpenChange }: CreateFarmDialogProps) 
               className="rounded border-gray-300"
             />
             <Label htmlFor="is_active" className="cursor-pointer">
-              Farm is active
+              المزرعة نشطة
             </Label>
           </div>
 
@@ -182,11 +182,11 @@ export function CreateFarmDialog({ open, onOpenChange }: CreateFarmDialogProps) 
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Farm
+              {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+              إنشاء مزرعة
             </Button>
           </DialogFooter>
         </form>

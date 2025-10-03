@@ -27,9 +27,9 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const poultrySchema = z.object({
-  batch_name: z.string().min(2, 'Batch name must be at least 2 characters'),
-  farm_id: z.string().min(1, 'Farm is required'),
-  opening_chicks: z.number().min(1, 'Opening chicks must be at least 1'),
+  batch_name: z.string().min(2, 'اسم الدفعة يجب أن يكون حرفين على الأقل'),
+  farm_id: z.string().min(1, 'المزرعة مطلوبة'),
+  opening_chicks: z.number().min(1, 'عدد الكتاكيت الافتتاحي يجب أن يكون 1 على الأقل'),
 });
 
 type PoultryFormData = z.infer<typeof poultrySchema>;
@@ -85,14 +85,14 @@ export function CreatePoultryDialog({ open, onOpenChange }: CreatePoultryDialogP
       });
       
       if (result.success) {
-        toast.success('Poultry batch created successfully');
+        toast.success('تم إنشاء دفعة الدواجن بنجاح');
         reset();
         onOpenChange(false);
       } else {
-        toast.error(result.error || 'Failed to create poultry batch');
+        toast.error(result.error || 'فشل في إنشاء دفعة الدواجن');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -102,17 +102,17 @@ export function CreatePoultryDialog({ open, onOpenChange }: CreatePoultryDialogP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Poultry Batch</DialogTitle>
+          <DialogTitle>إنشاء دفعة دواجن جديدة</DialogTitle>
           <DialogDescription>
-            Add a new poultry batch and assign it to a farm.
+            إضافة دفعة دواجن جديدة وتعيينها لمزرعة.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="batch_name">Batch Name *</Label>
+            <Label htmlFor="batch_name">اسم الدفعة *</Label>
             <Input
               id="batch_name"
-              placeholder="e.g., Batch 2024-01"
+              placeholder="مثال: دفعة 2024-01"
               {...register('batch_name')}
               disabled={isLoading}
             />
@@ -122,14 +122,14 @@ export function CreatePoultryDialog({ open, onOpenChange }: CreatePoultryDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="farm_id">Assign to Farm *</Label>
+            <Label htmlFor="farm_id">تعيين إلى مزرعة *</Label>
             <Select
               value={farmId}
               onValueChange={(value) => setValue('farm_id', value)}
               disabled={isLoading || loadingFarms}
             >
               <SelectTrigger>
-                <SelectValue placeholder={loadingFarms ? 'Loading farms...' : 'Select a farm'} />
+                <SelectValue placeholder={loadingFarms ? 'جاري تحميل المزارع...' : 'اختر مزرعة'} />
               </SelectTrigger>
               <SelectContent>
                 {availableFarms.map((farm) => (
@@ -144,18 +144,18 @@ export function CreatePoultryDialog({ open, onOpenChange }: CreatePoultryDialogP
             )}
             {availableFarms.length === 0 && !loadingFarms && (
               <p className="text-xs text-muted-foreground">
-                No farms available. Please create a farm first.
+                لا توجد مزارع متاحة. يرجى إنشاء مزرعة أولاً.
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="opening_chicks">Opening Chicks Count *</Label>
+            <Label htmlFor="opening_chicks">عدد الكتاكيت الافتتاحي *</Label>
             <Input
               id="opening_chicks"
               type="number"
               min="1"
-              placeholder="e.g., 1000"
+              placeholder="مثال: 1000"
               {...register('opening_chicks', { valueAsNumber: true })}
               disabled={isLoading}
             />
@@ -163,7 +163,7 @@ export function CreatePoultryDialog({ open, onOpenChange }: CreatePoultryDialogP
               <p className="text-sm text-destructive">{errors.opening_chicks.message}</p>
             )}
             <p className="text-xs text-muted-foreground">
-              Initial number of chicks in this batch
+              العدد الأولي للكتاكيت في هذه الدفعة
             </p>
           </div>
 
@@ -174,11 +174,11 @@ export function CreatePoultryDialog({ open, onOpenChange }: CreatePoultryDialogP
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading || availableFarms.length === 0}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Batch
+              {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+              إنشاء دفعة
             </Button>
           </DialogFooter>
         </form>

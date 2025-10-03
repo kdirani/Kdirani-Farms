@@ -29,13 +29,13 @@ export function DeleteFarmDialog({ farm, open, onOpenChange }: DeleteFarmDialogP
       const result = await deleteFarm(farm.id);
       
       if (result.success) {
-        toast.success('Farm deleted successfully');
+        toast.success('تم حذف المزرعة بنجاح');
         onOpenChange(false);
       } else {
-        toast.error(result.error || 'Failed to delete farm');
+        toast.error(result.error || 'فشل في حذف المزرعة');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -47,25 +47,25 @@ export function DeleteFarmDialog({ farm, open, onOpenChange }: DeleteFarmDialogP
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            Delete Farm
+            حذف المزرعة
           </DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete this farm? This will also delete all associated warehouses, materials, and reports. This action cannot be undone.
+            هل أنت متأكد من حذف هذه المزرعة؟ سيؤدي هذا أيضًا إلى حذف جميع المستودعات والمواد والتقارير المرتبطة بها. لا يمكن التراجع عن هذا الإجراء.
           </DialogDescription>
         </DialogHeader>
         
         <div className="bg-muted p-4 rounded-lg space-y-2">
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Farm:</span>
+            <span className="text-sm font-medium">المزرعة:</span>
             <span className="text-sm">{farm.name}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Location:</span>
-            <span className="text-sm">{farm.location || 'N/A'}</span>
+            <span className="text-sm font-medium">الموقع:</span>
+            <span className="text-sm">{farm.location || 'غير متوفر'}</span>
           </div>
           {farm.user && (
             <div className="flex justify-between">
-              <span className="text-sm font-medium">Farmer:</span>
+              <span className="text-sm font-medium">المزارع:</span>
               <span className="text-sm">{farm.user.fname}</span>
             </div>
           )}
@@ -78,7 +78,7 @@ export function DeleteFarmDialog({ farm, open, onOpenChange }: DeleteFarmDialogP
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
-            Cancel
+            إلغاء
           </Button>
           <Button
             type="button"
@@ -86,8 +86,8 @@ export function DeleteFarmDialog({ farm, open, onOpenChange }: DeleteFarmDialogP
             onClick={handleDelete}
             disabled={isLoading}
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Delete Farm
+            {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+            حذف المزرعة
           </Button>
         </DialogFooter>
       </DialogContent>

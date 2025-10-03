@@ -29,13 +29,13 @@ export function DeleteWarehouseDialog({ warehouse, open, onOpenChange }: DeleteW
       const result = await deleteWarehouse(warehouse.id);
       
       if (result.success) {
-        toast.success('Warehouse deleted successfully');
+        toast.success('تم حذف المستودع بنجاح');
         onOpenChange(false);
       } else {
-        toast.error(result.error || 'Failed to delete warehouse');
+        toast.error(result.error || 'فشل في حذف المستودع');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -47,27 +47,27 @@ export function DeleteWarehouseDialog({ warehouse, open, onOpenChange }: DeleteW
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            Delete Warehouse
+            حذف المستودع
           </DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete this warehouse? This will also delete all associated materials, daily reports, and invoices. This action cannot be undone.
+            هل أنت متأكد أنك تريد حذف هذا المستودع؟ سيؤدي هذا أيضًا إلى حذف جميع المواد والتقارير اليومية والفواتير المرتبطة به. لا يمكن التراجع عن هذا الإجراء.
           </DialogDescription>
         </DialogHeader>
         
         <div className="bg-muted p-4 rounded-lg space-y-2">
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Warehouse:</span>
+            <span className="text-sm font-medium">المستودع:</span>
             <span className="text-sm">{warehouse.name}</span>
           </div>
           {warehouse.farm && (
             <>
               <div className="flex justify-between">
-                <span className="text-sm font-medium">Farm:</span>
+                <span className="text-sm font-medium">المزرعة:</span>
                 <span className="text-sm">{warehouse.farm.name}</span>
               </div>
               {warehouse.farm.user_name && (
                 <div className="flex justify-between">
-                  <span className="text-sm font-medium">Farmer:</span>
+                  <span className="text-sm font-medium">المزارع:</span>
                   <span className="text-sm">{warehouse.farm.user_name}</span>
                 </div>
               )}
@@ -82,7 +82,7 @@ export function DeleteWarehouseDialog({ warehouse, open, onOpenChange }: DeleteW
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
-            Cancel
+            إلغاء
           </Button>
           <Button
             type="button"
@@ -90,8 +90,8 @@ export function DeleteWarehouseDialog({ warehouse, open, onOpenChange }: DeleteW
             onClick={handleDelete}
             disabled={isLoading}
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Delete Warehouse
+            {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+            حذف المستودع
           </Button>
         </DialogFooter>
       </DialogContent>
