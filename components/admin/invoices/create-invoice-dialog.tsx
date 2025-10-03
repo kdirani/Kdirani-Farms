@@ -157,6 +157,12 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
   };
 
   const onSubmit = async (data: InvoiceFormData) => {
+    // Validate that at least one item is added
+    if (items.length === 0) {
+      toast.error('يجب إضافة بند واحد على الأقل للفاتورة');
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Create invoice first
