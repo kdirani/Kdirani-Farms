@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* تعريف الخط العربي */
+@font-face {
+  font-family: 'ExpoArabic';
+  src: url('/Fonts/alfont_com_AlFont_com_ExpoArabic-Book-1.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -62,9 +71,11 @@
 @layer base {
   * {
     @apply border-border;
+    font-family: 'ExpoArabic', system-ui, sans-serif;
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'ExpoArabic', system-ui, sans-serif;
   }
 }
 
