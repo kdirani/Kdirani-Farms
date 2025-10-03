@@ -41,9 +41,9 @@ const manufacturingSchema = z.object({
   manufacturing_date: z.string().min(1, 'تاريخ التصنيع مطلوب'),
   warehouse_id: z.string().min(1, 'المستودع مطلوب'),
   blend_name: z.string().optional(),
-  material_name_id: z.string().optional(),
-  unit_id: z.string().optional(),
-  quantity: z.number().min(0, 'الكمية لا يمكن أن تكون سالبة').optional(),
+  material_name_id: z.string().min(1, 'المادة الناتجة مطلوبة'),
+  unit_id: z.string().min(1, 'الوحدة مطلوبة'),
+  quantity: z.number().min(0.01, 'الكمية يجب أن تكون أكبر من صفر'),
   notes: z.string().optional(),
 });
 
@@ -182,12 +182,10 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
         }
 
         // Now add output material to inventory (only after all input items succeed)
-        if (data.material_name_id && data.quantity && data.quantity > 0) {
-          const outputResult = await addOutputMaterialToInventory(invoiceId);
-          
-          if (!outputResult.success) {
-            toast.warning('تم إضافة المواد المدخلة ولكن فشل في إضافة المادة الناتجة');
-          }
+        const outputResult = await addOutputMaterialToInventory(invoiceId);
+        
+        if (!outputResult.success) {
+          toast.warning('تم إضافة المواد المدخلة ولكن فشل في إضافة المادة الناتجة');
         }
       } catch (itemError: any) {
         // Rollback: Delete the invoice if items fail
@@ -408,61 +406,58 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="material_name_id">المادة الناتجة (اختياري)</Label>
+              <Label htmlFor="material_name_id">المادة الناتجة *</Label>
               <Combobox
-                options={[
-                  { value: 'none', label: 'لا توجد مادة' },
-                  ...materials.map((material) => ({
+                options={materials
+                  .filter((material) => material.material_name.startsWith('علف'))
+                  .map((material) => ({
                     value: material.id,
                     label: material.material_name,
-                  }))
-                ]}
-                value={materialNameId || 'none'}
-                onValueChange={(value) => setValue('material_name_id', value === 'none' ? undefined : value)}
+                  }))}
+                value={materialNameId || ''}
+                onValueChange={(value) => setValue('material_name_id', value)}
                 placeholder="اختر المادة"
                 searchPlaceholder="البحث عن المواد..."
-                emptyText="لم يتم العثور على مواد"
+                emptyText="لم يتم العثور على مواد تبدأ بـ 'علف'"
                 disabled={isLoading}
               />
-              {(!materialNameId || materialNameId === 'none') && (
-                <p className="text-xs text-muted-foreground">
-                  ℹ️ لن يتم إضافة مادة ناتجة للمخزون
-                </p>
+              {errors.material_name_id && (
+                <p className="text-sm text-destructive">{errors.material_name_id.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="unit_id">الوحدة</Label>
+              <Label htmlFor="unit_id">الوحدة *</Label>
               <Combobox
-                options={[
-                  { value: 'none', label: 'لا توجد وحدة' },
-                  ...units.map((unit) => ({
-                    value: unit.id,
-                    label: unit.unit_name,
-                  }))
-                ]}
-                value={unitId || 'none'}
-                onValueChange={(value) => setValue('unit_id', value === 'none' ? undefined : value)}
+                options={units.map((unit) => ({
+                  value: unit.id,
+                  label: unit.unit_name,
+                }))}
+                value={unitId || ''}
+                onValueChange={(value) => setValue('unit_id', value)}
                 placeholder="اختر الوحدة"
                 searchPlaceholder="البحث عن الوحدات..."
                 emptyText="لم يتم العثور على وحدات"
                 disabled={isLoading}
               />
+              {errors.unit_id && (
+                <p className="text-sm text-destructive">{errors.unit_id.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quantity">الكمية (اختياري)</Label>
+              <Label htmlFor="quantity">الكمية *</Label>
               <Input
                 id="quantity"
                 type="number"
                 step="0.01"
-                placeholder="0"
+                placeholder="أدخل الكمية"
                 {...register('quantity', { valueAsNumber: true })}
                 disabled={isLoading}
               />
-              <p className="text-xs text-muted-foreground">
-                الكمية المنتجة (اختياري - يمكن تركها فارغة)
-              </p>
+              {errors.quantity && (
+                <p className="text-sm text-destructive">{errors.quantity.message}</p>
+              )}
             </div>
           </div>
 
