@@ -12,10 +12,18 @@ export const metadata = {
 };
 
 async function MaterialsContent({ warehouse }: { warehouse?: string }) {
+  // جلب قائمة المستودعات أولاً للفلترة
+  const { getWarehousesForMaterials } = await import('@/actions/material.actions');
+  const warehousesResult = await getWarehousesForMaterials();
+  const warehousesList = warehousesResult.success && warehousesResult.data 
+    ? warehousesResult.data.map(w => ({ display: `${w.name} - ${w.farm_name}` }))
+    : [];
+
   // استخدام الدالة المناسبة حسب اختيار المستودع
-  const result = warehouse === 'all' || !warehouse
+  const isAggregatedView = !warehouse || warehouse === 'all';
+  const result = isAggregatedView
     ? await getMaterialsAggregated()
-    : await getMaterials();
+    : await getMaterials(warehouse);
 
   if (!result.success || !result.data) {
     return (
@@ -28,17 +36,10 @@ async function MaterialsContent({ warehouse }: { warehouse?: string }) {
     );
   }
 
-  // جلب قائمة المستودعات للفلترة
-  const { getWarehousesForMaterials } = await import('@/actions/material.actions');
-  const warehousesResult = await getWarehousesForMaterials();
-  const warehousesList = warehousesResult.success && warehousesResult.data 
-    ? warehousesResult.data.map(w => ({ display: `${w.name} - ${w.farm_name}` }))
-    : [];
-
   return (
     <MaterialsTable 
       materials={result.data} 
-      isAggregated={warehouse === 'all' || !warehouse}
+      isAggregated={isAggregatedView}
       availableWarehouses={warehousesList}
     />
   );

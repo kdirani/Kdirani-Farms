@@ -46,11 +46,10 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
   const pathname = usePathname();
   
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-  const [selectedWarehouse, setSelectedWarehouse] = useState<string>(searchParams.get('warehouse') || 'all');
+  const selectedWarehouse = searchParams.get('warehouse') || 'all';
   
   // استخدام useDeferredValue للأداء الأفضل
   const deferredSearchTerm = useDeferredValue(searchTerm);
-  const deferredWarehouse = useDeferredValue(selectedWarehouse);
   
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -73,9 +72,8 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
     router.push(newURL); // استخدام push بدلاً من replace لإعادة التحميل
   }, [pathname, router]);
 
-  // معالج تغيير المستودع - سيؤدي لإعادة تحميل البيانات
+  // معالج تغيير المستودع - سيؤدي لإعادة تحميل البيانات من السيرفر
   const handleWarehouseChange = useCallback((warehouse: string) => {
-    setSelectedWarehouse(warehouse);
     updateURL(warehouse, searchTerm);
   }, [searchTerm, updateURL]);
 
@@ -84,17 +82,16 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
     setSearchTerm(search);
   }, []);
 
+  // فلترة محلية للبحث فقط (المستودع يأتي مفلتر من السيرفر)
   const filteredMaterials = useMemo(() => {
-    return materials.filter((material) => {
-      const s = deferredSearchTerm.toLowerCase();
-      const matchesSearch = !s || (
-        material.material_name?.toLowerCase().includes(s) ||
-        material.warehouse?.name.toLowerCase().includes(s) ||
-        material.warehouse?.farm_name.toLowerCase().includes(s)
-      );
-
-      return matchesSearch;
-    });
+    if (!deferredSearchTerm) return materials;
+    
+    const s = deferredSearchTerm.toLowerCase();
+    return materials.filter((material) => 
+      material.material_name?.toLowerCase().includes(s) ||
+      material.warehouse?.name.toLowerCase().includes(s) ||
+      material.warehouse?.farm_name.toLowerCase().includes(s)
+    );
   }, [materials, deferredSearchTerm]);
 
   const getStockStatus = (current: number, opening: number) => {
@@ -119,22 +116,30 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
               className="pl-9"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <Select value={selectedWarehouse} onValueChange={handleWarehouseChange}>
-              <SelectTrigger className="w-[250px]">
-                <SelectValue placeholder="تصفية حسب المستودع" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع المستودعات (عرض مجمع)</SelectItem>
-                {warehouses.map((w) => (
-                  <SelectItem key={w.display} value={w.display}>
-                    {w.display}
+          {warehouses.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={selectedWarehouse} onValueChange={handleWarehouseChange}>
+                <SelectTrigger className="w-[280px]">
+                  <SelectValue placeholder="تصفية حسب المستودع" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">🏢 جميع المستودعات</span>
+                      <span className="text-xs text-muted-foreground">(عرض مجمع)</span>
+                    </div>
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                  <div className="my-1 h-px bg-border" />
+                  {warehouses.map((w) => (
+                    <SelectItem key={w.display} value={w.display}>
+                      {w.display}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -162,10 +167,10 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
           <TableBody>
             {filteredMaterials.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={11} className="text-center text-muted-foreground">
-                  {selectedWarehouse !== 'all' || searchTerm
-                    ? 'لم يتم العثور على مواد تطابق المعايير المحددة'
-                    : 'لم يتم العثور على مواد'}
+                <TableCell colSpan={11} className="text-center text-muted-foreground py-8">
+                  {searchTerm
+                    ? 'لم يتم العثور على مواد تطابق البحث'
+                    : 'لم يتم العثور على مواد في هذا المستودع'}
                 </TableCell>
               </TableRow>
             ) : (

@@ -160,9 +160,9 @@ export async function getMaterialsAggregated(): Promise<ActionResult<Material[]>
 }
 
 /**
- * Get all materials with their details
+ * Get all materials with their details (optionally filtered by warehouse)
  */
-export async function getMaterials(): Promise<ActionResult<Material[]>> {
+export async function getMaterials(warehouseFilter?: string): Promise<ActionResult<Material[]>> {
   try {
     const supabase = await createClient();
 
@@ -245,7 +245,17 @@ export async function getMaterials(): Promise<ActionResult<Material[]>> {
       });
     }
 
-    return { success: true, data: enrichedMaterials };
+    // Apply warehouse filter if provided
+    let filteredMaterials = enrichedMaterials;
+    if (warehouseFilter && warehouseFilter !== 'all') {
+      filteredMaterials = enrichedMaterials.filter((material) => {
+        if (!material.warehouse) return false;
+        const display = `${material.warehouse.name} - ${material.warehouse.farm_name}`;
+        return display === warehouseFilter;
+      });
+    }
+
+    return { success: true, data: filteredMaterials };
   } catch (error) {
     console.error('Error getting materials:', error);
     return { success: false, error: 'Failed to get materials' };
