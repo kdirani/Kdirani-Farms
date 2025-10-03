@@ -27,8 +27,8 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const warehouseSchema = z.object({
-  name: z.string().min(2, 'Warehouse name must be at least 2 characters'),
-  farm_id: z.string().min(1, 'Farm is required'),
+  name: z.string().min(2, 'اسم المستودع يجب أن يكون حرفين على الأقل'),
+  farm_id: z.string().min(1, 'المزرعة مطلوبة'),
 });
 
 type WarehouseFormData = z.infer<typeof warehouseSchema>;
@@ -94,13 +94,13 @@ export function EditWarehouseDialog({ warehouse, open, onOpenChange }: EditWareh
       });
       
       if (result.success) {
-        toast.success('Warehouse updated successfully');
+        toast.success('تم تحديث المستودع بنجاح');
         onOpenChange(false);
       } else {
-        toast.error(result.error || 'Failed to update warehouse');
+        toast.error(result.error || 'فشل في تحديث المستودع');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -110,17 +110,17 @@ export function EditWarehouseDialog({ warehouse, open, onOpenChange }: EditWareh
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Edit Warehouse</DialogTitle>
+          <DialogTitle>تعديل المستودع</DialogTitle>
           <DialogDescription>
-            Update warehouse information and assignment.
+            تحديث معلومات المستودع والتعيين.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Warehouse Name *</Label>
+            <Label htmlFor="name">اسم المستودع *</Label>
             <Input
               id="name"
-              placeholder="e.g., Main Storage"
+              placeholder="مثال: المخزن الرئيسي"
               {...register('name')}
               disabled={isLoading}
             />
@@ -130,19 +130,19 @@ export function EditWarehouseDialog({ warehouse, open, onOpenChange }: EditWareh
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="farm_id">Assign to Farm *</Label>
+            <Label htmlFor="farm_id">تعيين إلى مزرعة *</Label>
             <Select
               value={farmId}
               onValueChange={(value) => setValue('farm_id', value)}
               disabled={isLoading || loadingFarms}
             >
               <SelectTrigger>
-                <SelectValue placeholder={loadingFarms ? 'Loading farms...' : 'Select a farm'} />
+                <SelectValue placeholder={loadingFarms ? 'جاري تحميل المزارع...' : 'اختر مزرعة'} />
               </SelectTrigger>
               <SelectContent>
                 {availableFarms.map((farm) => (
                   <SelectItem key={farm.id} value={farm.id}>
-                    {farm.name} {farm.location ? `- ${farm.location}` : ''} {!farm.is_active ? ' [Inactive]' : ''}
+                    {farm.name} {farm.location ? `- ${farm.location}` : ''} {!farm.is_active ? ' [غير نشطة]' : ''}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -159,11 +159,11 @@ export function EditWarehouseDialog({ warehouse, open, onOpenChange }: EditWareh
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
+              {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+              حفظ التغييرات
             </Button>
           </DialogFooter>
         </form>

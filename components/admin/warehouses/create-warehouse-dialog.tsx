@@ -27,8 +27,8 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const warehouseSchema = z.object({
-  name: z.string().min(2, 'Warehouse name must be at least 2 characters'),
-  farm_id: z.string().min(1, 'Farm is required'),
+  name: z.string().min(2, 'اسم المستودع يجب أن يكون حرفين على الأقل'),
+  farm_id: z.string().min(1, 'المزرعة مطلوبة'),
 });
 
 type WarehouseFormData = z.infer<typeof warehouseSchema>;
@@ -80,14 +80,14 @@ export function CreateWarehouseDialog({ open, onOpenChange }: CreateWarehouseDia
       });
       
       if (result.success) {
-        toast.success('Warehouse created successfully');
+        toast.success('تم إنشاء المستودع بنجاح');
         reset();
         onOpenChange(false);
       } else {
-        toast.error(result.error || 'Failed to create warehouse');
+        toast.error(result.error || 'فشل في إنشاء المستودع');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -97,17 +97,17 @@ export function CreateWarehouseDialog({ open, onOpenChange }: CreateWarehouseDia
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Warehouse</DialogTitle>
+          <DialogTitle>إنشاء مستودع جديد</DialogTitle>
           <DialogDescription>
-            Add a new warehouse and assign it to a farm.
+            إضافة مستودع جديد وتعيينه لمزرعة.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Warehouse Name *</Label>
+            <Label htmlFor="name">اسم المستودع *</Label>
             <Input
               id="name"
-              placeholder="e.g., Main Storage"
+              placeholder="مثال: المخزن الرئيسي"
               {...register('name')}
               disabled={isLoading}
             />
@@ -117,19 +117,19 @@ export function CreateWarehouseDialog({ open, onOpenChange }: CreateWarehouseDia
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="farm_id">Assign to Farm *</Label>
+            <Label htmlFor="farm_id">تعيين إلى مزرعة *</Label>
             <Select
               value={farmId}
               onValueChange={(value) => setValue('farm_id', value)}
               disabled={isLoading || loadingFarms}
             >
               <SelectTrigger>
-                <SelectValue placeholder={loadingFarms ? 'Loading farms...' : 'Select a farm'} />
+                <SelectValue placeholder={loadingFarms ? 'جاري تحميل المزارع...' : 'اختر مزرعة'} />
               </SelectTrigger>
               <SelectContent>
                 {availableFarms.map((farm) => (
                   <SelectItem key={farm.id} value={farm.id}>
-                    {farm.name} {farm.location ? `- ${farm.location}` : ''} {!farm.is_active ? ' [Inactive]' : ''}
+                    {farm.name} {farm.location ? `- ${farm.location}` : ''} {!farm.is_active ? ' [غير نشطة]' : ''}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -139,7 +139,7 @@ export function CreateWarehouseDialog({ open, onOpenChange }: CreateWarehouseDia
             )}
             {availableFarms.length === 0 && !loadingFarms && (
               <p className="text-xs text-muted-foreground">
-                All farms already have warehouses assigned
+                جميع المزارع لديها مستودعات معينة بالفعل
               </p>
             )}
           </div>
@@ -151,11 +151,11 @@ export function CreateWarehouseDialog({ open, onOpenChange }: CreateWarehouseDia
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading || availableFarms.length === 0}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Warehouse
+              {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+              إنشاء مستودع
             </Button>
           </DialogFooter>
         </form>
