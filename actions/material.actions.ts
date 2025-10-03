@@ -47,9 +47,122 @@ export type ActionResult<T = void> = {
 };
 
 /**
- * Get all materials with their details
+ * Get aggregated materials from all warehouses
  */
-export async function getMaterials(): Promise<ActionResult<Material[]>> {
+export async function getMaterialsAggregated(): Promise<ActionResult<Material[]>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_role')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile || (profile.user_role !== 'admin' && profile.user_role !== 'sub_admin')) {
+      return { success: false, error: 'Unauthorized - Admin access required' };
+    }
+
+    // Get aggregated data using SQL
+    const { data: aggregatedData, error } = await supabase.rpc('get_aggregated_materials');
+
+    if (error) {
+      // If the RPC doesn't exist, fall back to manual aggregation
+      const { data: materials, error: materialsError } = await supabase
+        .from('materials')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (materialsError) {
+        return { success: false, error: materialsError.message };
+      }
+
+      // Manual aggregation
+      const grouped = new Map<string, any>();
+
+      for (const material of materials || []) {
+        const key = `${material.material_name_id}-${material.unit_id}`;
+        
+        if (grouped.has(key)) {
+          const existing = grouped.get(key);
+          existing.opening_balance += material.opening_balance;
+          existing.purchases += material.purchases;
+          existing.sales += material.sales;
+          existing.consumption += material.consumption;
+          existing.manufacturing += material.manufacturing;
+          existing.current_balance += material.current_balance;
+        } else {
+          grouped.set(key, {
+            id: key,
+            warehouse_id: null,
+            material_name_id: material.material_name_id,
+            unit_id: material.unit_id,
+            opening_balance: material.opening_balance,
+            purchases: material.purchases,
+            sales: material.sales,
+            consumption: material.consumption,
+            manufacturing: material.manufacturing,
+            current_balance: material.current_balance,
+            created_at: material.created_at,
+            updated_at: material.updated_at,
+          });
+        }
+      }
+
+      const enrichedMaterials: Material[] = [];
+      
+      for (const material of Array.from(grouped.values())) {
+        let materialName = undefined;
+        let unitName = undefined;
+
+        if (material.material_name_id) {
+          const { data: matName } = await supabase
+            .from('materials_names')
+            .select('material_name')
+            .eq('id', material.material_name_id)
+            .single();
+          materialName = matName?.material_name;
+        }
+
+        if (material.unit_id) {
+          const { data: unit } = await supabase
+            .from('measurement_units')
+            .select('unit_name')
+            .eq('id', material.unit_id)
+            .single();
+          unitName = unit?.unit_name;
+        }
+
+        enrichedMaterials.push({
+          ...material,
+          warehouse: {
+            name: 'جميع المستودعات',
+            farm_name: 'عام',
+          },
+          material_name: materialName,
+          unit_name: unitName,
+        });
+      }
+
+      return { success: true, data: enrichedMaterials };
+    }
+
+    return { success: true, data: aggregatedData };
+  } catch (error) {
+    console.error('Error getting aggregated materials:', error);
+    return { success: false, error: 'Failed to get aggregated materials' };
+  }
+}
+
+/**
+ * Get all materials with their details (optionally filtered by warehouse)
+ */
+export async function getMaterials(warehouseFilter?: string): Promise<ActionResult<Material[]>> {
   try {
     const supabase = await createClient();
 
@@ -132,7 +245,17 @@ export async function getMaterials(): Promise<ActionResult<Material[]>> {
       });
     }
 
-    return { success: true, data: enrichedMaterials };
+    // Apply warehouse filter if provided
+    let filteredMaterials = enrichedMaterials;
+    if (warehouseFilter && warehouseFilter !== 'all') {
+      filteredMaterials = enrichedMaterials.filter((material) => {
+        if (!material.warehouse) return false;
+        const display = `${material.warehouse.name} - ${material.warehouse.farm_name}`;
+        return display === warehouseFilter;
+      });
+    }
+
+    return { success: true, data: filteredMaterials };
   } catch (error) {
     console.error('Error getting materials:', error);
     return { success: false, error: 'Failed to get materials' };

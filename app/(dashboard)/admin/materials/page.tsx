@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { getMaterials } from '@/actions/material.actions';
+import { getMaterials, getMaterialsAggregated } from '@/actions/material.actions';
 import { MaterialsTable } from '@/components/admin/materials/materials-table';
 import { MaterialsTableSkeleton } from '@/components/admin/materials/materials-table-skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +11,19 @@ export const metadata = {
   description: 'إدارة مخزون المواد وتتبع الأرصدة',
 };
 
-async function MaterialsContent() {
-  const result = await getMaterials();
+async function MaterialsContent({ warehouse }: { warehouse?: string }) {
+  // جلب قائمة المستودعات أولاً للفلترة
+  const { getWarehousesForMaterials } = await import('@/actions/material.actions');
+  const warehousesResult = await getWarehousesForMaterials();
+  const warehousesList = warehousesResult.success && warehousesResult.data 
+    ? warehousesResult.data.map(w => ({ display: `${w.name} - ${w.farm_name}` }))
+    : [];
+
+  // استخدام الدالة المناسبة حسب اختيار المستودع
+  const isAggregatedView = !warehouse || warehouse === 'all';
+  const result = isAggregatedView
+    ? await getMaterialsAggregated()
+    : await getMaterials(warehouse);
 
   if (!result.success || !result.data) {
     return (
@@ -25,10 +36,22 @@ async function MaterialsContent() {
     );
   }
 
-  return <MaterialsTable materials={result.data} />;
+  return (
+    <MaterialsTable 
+      materials={result.data} 
+      isAggregated={isAggregatedView}
+      availableWarehouses={warehousesList}
+    />
+  );
 }
 
-export default function MaterialsPage() {
+export default async function MaterialsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ warehouse?: string; search?: string }>;
+}) {
+  const params = await searchParams;
+  
   return (
     <div className="space-y-6">
       <div>
@@ -47,7 +70,7 @@ export default function MaterialsPage() {
         </CardHeader>
         <CardContent>
           <Suspense fallback={<MaterialsTableSkeleton />}>
-            <MaterialsContent />
+            <MaterialsContent warehouse={params.warehouse} />
           </Suspense>
         </CardContent>
       </Card>

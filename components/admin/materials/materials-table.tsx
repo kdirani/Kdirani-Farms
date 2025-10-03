@@ -36,36 +36,30 @@ import { DeleteMaterialDialog } from './delete-material-dialog';
 
 interface MaterialsTableProps {
   materials: Material[];
+  isAggregated?: boolean;
+  availableWarehouses?: Array<{ display: string }>;
 }
 
-export function MaterialsTable({ materials }: MaterialsTableProps) {
+export function MaterialsTable({ materials, isAggregated = false, availableWarehouses = [] }: MaterialsTableProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-  const [selectedWarehouse, setSelectedWarehouse] = useState<string>(searchParams.get('warehouse') || 'all');
+  const selectedWarehouse = searchParams.get('warehouse') || 'all';
   
   // استخدام useDeferredValue للأداء الأفضل
   const deferredSearchTerm = useDeferredValue(searchTerm);
-  const deferredWarehouse = useDeferredValue(selectedWarehouse);
   
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
 
-  // بناء قائمة المستودعات الفريدة للتصفية
+  // استخدام قائمة المستودعات المتاحة من السيرفر
   const warehouses = useMemo(() => {
-    const map = new Map<string, { display: string }>();
-    for (const material of materials) {
-      if (material.warehouse?.name && material.warehouse?.farm_name) {
-        const display = `${material.warehouse.name} - ${material.warehouse.farm_name}`;
-        if (!map.has(display)) map.set(display, { display });
-      }
-    }
-    return Array.from(map.values()).sort((a, b) => a.display.localeCompare(b.display));
-  }, [materials]);
+    return availableWarehouses.sort((a, b) => a.display.localeCompare(b.display));
+  }, [availableWarehouses]);
 
   // تحديث URL عند تغيير المرشحات
   const updateURL = useCallback((warehouse: string, search: string) => {
@@ -75,38 +69,30 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
     
     const queryString = params.toString();
     const newURL = queryString ? `${pathname}?${queryString}` : pathname;
-    router.replace(newURL, { scroll: false });
+    router.push(newURL); // استخدام push بدلاً من replace لإعادة التحميل
   }, [pathname, router]);
 
-  // معالج تغيير المستودع
+  // معالج تغيير المستودع - سيؤدي لإعادة تحميل البيانات من السيرفر
   const handleWarehouseChange = useCallback((warehouse: string) => {
-    setSelectedWarehouse(warehouse);
     updateURL(warehouse, searchTerm);
   }, [searchTerm, updateURL]);
 
-  // معالج تغيير البحث
+  // معالج تغيير البحث - فلترة محلية فقط
   const handleSearchChange = useCallback((search: string) => {
     setSearchTerm(search);
-    updateURL(selectedWarehouse, search);
-  }, [selectedWarehouse, updateURL]);
+  }, []);
 
+  // فلترة محلية للبحث فقط (المستودع يأتي مفلتر من السيرفر)
   const filteredMaterials = useMemo(() => {
-    return materials.filter((material) => {
-      const s = deferredSearchTerm.toLowerCase();
-      const matchesSearch = !s || (
-        material.material_name?.toLowerCase().includes(s) ||
-        material.warehouse?.name.toLowerCase().includes(s) ||
-        material.warehouse?.farm_name.toLowerCase().includes(s)
-      );
-
-      const display = material.warehouse
-        ? `${material.warehouse.name} - ${material.warehouse.farm_name}`
-        : '';
-      const matchesWarehouse = deferredWarehouse === 'all' || display === deferredWarehouse;
-
-      return matchesSearch && matchesWarehouse;
-    });
-  }, [materials, deferredSearchTerm, deferredWarehouse]);
+    if (!deferredSearchTerm) return materials;
+    
+    const s = deferredSearchTerm.toLowerCase();
+    return materials.filter((material) => 
+      material.material_name?.toLowerCase().includes(s) ||
+      material.warehouse?.name.toLowerCase().includes(s) ||
+      material.warehouse?.farm_name.toLowerCase().includes(s)
+    );
+  }, [materials, deferredSearchTerm]);
 
   const getStockStatus = (current: number, opening: number) => {
     if (current === 0) return <Badge variant="destructive">نفد من المخزون</Badge>;
@@ -130,22 +116,30 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
               className="pl-9"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <Select value={selectedWarehouse} onValueChange={handleWarehouseChange}>
-              <SelectTrigger className="w-[250px]">
-                <SelectValue placeholder="تصفية حسب المستودع" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع المستودعات</SelectItem>
-                {warehouses.map((w) => (
-                  <SelectItem key={w.display} value={w.display}>
-                    {w.display}
+          {warehouses.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={selectedWarehouse} onValueChange={handleWarehouseChange}>
+                <SelectTrigger className="w-[280px]">
+                  <SelectValue placeholder="تصفية حسب المستودع" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">🏢 جميع المستودعات</span>
+                      <span className="text-xs text-muted-foreground">(عرض مجمع)</span>
+                    </div>
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                  <div className="my-1 h-px bg-border" />
+                  {warehouses.map((w) => (
+                    <SelectItem key={w.display} value={w.display}>
+                      {w.display}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -173,10 +167,10 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
           <TableBody>
             {filteredMaterials.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={11} className="text-center text-muted-foreground">
-                  {selectedWarehouse !== 'all' || searchTerm
-                    ? 'لم يتم العثور على مواد تطابق المعايير المحددة'
-                    : 'لم يتم العثور على مواد'}
+                <TableCell colSpan={11} className="text-center text-muted-foreground py-8">
+                  {searchTerm
+                    ? 'لم يتم العثور على مواد تطابق البحث'
+                    : 'لم يتم العثور على مواد في هذا المستودع'}
                 </TableCell>
               </TableRow>
             ) : (
@@ -198,36 +192,40 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
                   <TableCell className="text-right font-semibold">{material.current_balance.toLocaleString()}</TableCell>
                   <TableCell>{getStockStatus(material.current_balance, material.opening_balance)}</TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">فتح القائمة</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedMaterial(material);
-                            setEditDialogOpen(true);
-                          }}
-                        >
-                          تعديل المادة
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedMaterial(material);
-                            setDeleteDialogOpen(true);
-                          }}
-                          className="text-destructive"
-                        >
-                          حذف المادة
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {isAggregated ? (
+                      <span className="text-muted-foreground text-sm">-</span>
+                    ) : (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">فتح القائمة</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedMaterial(material);
+                              setEditDialogOpen(true);
+                            }}
+                          >
+                            تعديل المادة
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedMaterial(material);
+                              setDeleteDialogOpen(true);
+                            }}
+                            className="text-destructive"
+                          >
+                            حذف المادة
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
