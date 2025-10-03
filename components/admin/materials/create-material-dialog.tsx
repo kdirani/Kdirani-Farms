@@ -29,10 +29,10 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const materialSchema = z.object({
-  warehouse_id: z.string().min(1, 'Warehouse is required'),
-  material_name_id: z.string().min(1, 'Material name is required'),
-  unit_id: z.string().min(1, 'Unit is required'),
-  opening_balance: z.number().min(0, 'Opening balance cannot be negative'),
+  warehouse_id: z.string().min(1, 'المستودع مطلوب'),
+  material_name_id: z.string().min(1, 'اسم المادة مطلوب'),
+  unit_id: z.string().min(1, 'الوحدة مطلوبة'),
+  opening_balance: z.number().min(0, 'الرصيد الافتتاحي لا يمكن أن يكون سالباً'),
 });
 
 type MaterialFormData = z.infer<typeof materialSchema>;
@@ -96,15 +96,15 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
       const result = await createMaterial(data);
       
       if (result.success) {
-        toast.success('Material created successfully');
+        toast.success('تم إنشاء المادة بنجاح');
         reset();
         onOpenChange(false);
         window.location.reload();
       } else {
-        toast.error(result.error || 'Failed to create material');
+        toast.error(result.error || 'فشل في إنشاء المادة');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -114,21 +114,21 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Material</DialogTitle>
+          <DialogTitle>إضافة مادة جديدة</DialogTitle>
           <DialogDescription>
-            Add a new material to warehouse inventory
+            إضافة مادة جديدة إلى مخزون المستودع
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="warehouse_id">Warehouse *</Label>
+            <Label htmlFor="warehouse_id">المستودع *</Label>
             <Select
               value={warehouseId}
               onValueChange={(value) => setValue('warehouse_id', value)}
               disabled={isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select warehouse" />
+                <SelectValue placeholder="اختر المستودع" />
               </SelectTrigger>
               <SelectContent>
                 {warehouses.map((warehouse) => (
@@ -144,14 +144,14 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="material_name_id">Material Name *</Label>
+            <Label htmlFor="material_name_id">اسم المادة *</Label>
             <Select
               value={materialNameId}
               onValueChange={(value) => setValue('material_name_id', value)}
               disabled={isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select material" />
+                <SelectValue placeholder="اختر المادة" />
               </SelectTrigger>
               <SelectContent>
                 {materialNames.map((material) => (
@@ -167,14 +167,14 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="unit_id">Unit *</Label>
+            <Label htmlFor="unit_id">الوحدة *</Label>
             <Select
               value={unitId}
               onValueChange={(value) => setValue('unit_id', value)}
               disabled={isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select unit" />
+                <SelectValue placeholder="اختر الوحدة" />
               </SelectTrigger>
               <SelectContent>
                 {units.map((unit) => (
@@ -190,7 +190,7 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="opening_balance">Opening Balance *</Label>
+            <Label htmlFor="opening_balance">الرصيد الافتتاحي *</Label>
             <Input
               id="opening_balance"
               type="number"
@@ -212,11 +212,11 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Material
+              إنشاء مادة
             </Button>
           </DialogFooter>
         </form>

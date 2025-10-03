@@ -41,9 +41,9 @@ import { Loader2, Plus, Trash2, PackageCheck, AlertTriangle } from 'lucide-react
 
 const invoiceSchema = z.object({
   invoice_type: z.enum(['buy', 'sell']),
-  invoice_number: z.string().min(1, 'Invoice number is required'),
-  invoice_date: z.string().min(1, 'Invoice date is required'),
-  warehouse_id: z.string().min(1, 'Warehouse is required'),
+  invoice_number: z.string().min(1, 'رقم الفاتورة مطلوب'),
+  invoice_date: z.string().min(1, 'تاريخ الفاتورة مطلوب'),
+  warehouse_id: z.string().min(1, 'المستودع مطلوب'),
   client_id: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -163,7 +163,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
       const invoiceResult = await createInvoice(data);
       
       if (!invoiceResult.success || !invoiceResult.data) {
-        toast.error(invoiceResult.error || 'Failed to create invoice');
+        toast.error(invoiceResult.error || 'فشل في إنشاء الفاتورة');
         setIsLoading(false);
         return;
       }
@@ -196,12 +196,12 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
           );
 
           if (!attachmentResult.success) {
-            toast.warning(`Invoice saved but failed to upload file: ${uploadedFile.file.name}`);
+            toast.warning(`تم حفظ الفاتورة ولكن فشل في رفع الملف: ${uploadedFile.file.name}`);
           }
         }
       }
 
-      toast.success('Invoice created successfully with items, expenses, and attachments');
+      toast.success('تم إنشاء الفاتورة بنجاح مع البنود والمصروفات والمرفقات');
       reset();
       setItems([]);
       setExpenses([]);
@@ -214,7 +214,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
         window.location.reload();
       }, 1500);
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -222,22 +222,22 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
 
   const addItem = (item: InvoiceItemInput) => {
     setItems([...items, item]);
-    toast.success('Item added to invoice');
+    toast.success('تمت إضافة البند إلى الفاتورة');
   };
 
   const removeItem = (index: number) => {
     setItems(items.filter((_, i) => i !== index));
-    toast.success('Item removed');
+    toast.success('تم حذف البند');
   };
 
   const addExpense = (expense: InvoiceExpenseInput) => {
     setExpenses([...expenses, expense]);
-    toast.success('Expense added to invoice');
+    toast.success('تمت إضافة المصروف إلى الفاتورة');
   };
 
   const removeExpense = (index: number) => {
     setExpenses(expenses.filter((_, i) => i !== index));
-    toast.success('Expense removed');
+    toast.success('تم حذف المصروف');
   };
 
   const calculateTotal = () => {
@@ -306,11 +306,11 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
 
   const handleAddExpense = () => {
     if (!newExpense.expense_type_id) {
-      toast.error('Expense type is required');
+      toast.error('نوع المصروف مطلوب');
       return;
     }
     if (newExpense.amount === undefined || newExpense.amount < 0) {
-      toast.error('Amount cannot be negative');
+      toast.error('المبلغ لا يمكن أن يكون سالباً');
       return;
     }
 
@@ -322,15 +322,15 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Invoice</DialogTitle>
+          <DialogTitle>إنشاء فاتورة جديدة</DialogTitle>
           <DialogDescription>
-            Add invoice information, items, and expenses
+            إضافة معلومات الفاتورة والبنود والمصروفات
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="invoice_type">Invoice Type *</Label>
+              <Label htmlFor="invoice_type">نوع الفاتورة *</Label>
               <Select
                 value={invoiceType}
                 onValueChange={(value: 'buy' | 'sell') => setValue('invoice_type', value)}
@@ -340,8 +340,8 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="buy">Buy</SelectItem>
-                  <SelectItem value="sell">Sell</SelectItem>
+                  <SelectItem value="buy">شراء</SelectItem>
+                  <SelectItem value="sell">بيع</SelectItem>
                 </SelectContent>
               </Select>
               {errors.invoice_type && (
@@ -350,7 +350,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="invoice_date">Invoice Date *</Label>
+              <Label htmlFor="invoice_date">تاريخ الفاتورة *</Label>
               <Input
                 id="invoice_date"
                 type="date"
@@ -364,7 +364,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="invoice_number">Invoice Number *</Label>
+            <Label htmlFor="invoice_number">رقم الفاتورة *</Label>
             <Input
               id="invoice_number"
               placeholder="INV-001"
@@ -377,7 +377,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="warehouse_id">Warehouse *</Label>
+            <Label htmlFor="warehouse_id">المستودع *</Label>
             <Combobox
               options={warehouses.map((warehouse) => ({
                 value: warehouse.id,
@@ -385,9 +385,9 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
               }))}
               value={warehouseId}
               onValueChange={(value) => setValue('warehouse_id', value)}
-              placeholder="Select warehouse"
-              searchPlaceholder="Search warehouses..."
-              emptyText="No warehouses found"
+              placeholder="اختر المستودع"
+              searchPlaceholder="البحث في المستودعات..."
+              emptyText="لا توجد مستودعات"
               disabled={isLoading}
             />
             {errors.warehouse_id && (
@@ -396,10 +396,10 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="client_id">Client (Optional)</Label>
+            <Label htmlFor="client_id">العميل (اختياري)</Label>
             <Combobox
               options={[
-                { value: 'none', label: 'No client' },
+                { value: 'none', label: 'بدون عميل' },
                 ...clients.map((client) => ({
                   value: client.id,
                   label: `${client.name} (${client.type})`,
@@ -407,18 +407,18 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
               ]}
               value={clientId || 'none'}
               onValueChange={(value) => setValue('client_id', value === 'none' ? undefined : value)}
-              placeholder="Select client"
-              searchPlaceholder="Search clients..."
-              emptyText="No clients found"
+              placeholder="اختر العميل"
+              searchPlaceholder="البحث في العملاء..."
+              emptyText="لا يوجد عملاء"
               disabled={isLoading}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes">ملاحظات</Label>
             <Input
               id="notes"
-              placeholder="Optional notes"
+              placeholder="ملاحظات اختيارية"
               {...register('notes')}
               disabled={isLoading}
             />
@@ -427,7 +427,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
           {/* Invoice Items Section */}
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Invoice Items ({items.length})</h3>
+              <h3 className="text-lg font-semibold mb-4">بنود الفاتورة ({items.length})</h3>
               
               {/* Add Item Form */}
               <div className="space-y-3">
@@ -514,7 +514,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
                   {items.map((item, index) => (
                     <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
                       <span className="text-sm">
-                        {materials.find(m => m.id === item.material_name_id)?.material_name || 'Item'} - 
+                        {materials.find(m => m.id === item.material_name_id)?.material_name || 'البند'} - 
                         {item.quantity} {units.find(u => u.id === item.unit_id)?.unit_name} @ ${item.price}
                         <strong className="ml-2">${(item.quantity * item.price).toFixed(2)}</strong>
                       </span>
@@ -536,7 +536,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
           {/* Invoice Expenses Section */}
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Invoice Expenses ({expenses.length})</h3>
+              <h3 className="text-lg font-semibold mb-4">مصروفات الفاتورة ({expenses.length})</h3>
               
               {/* Add Expense Form */}
               <div className="grid grid-cols-4 gap-2 mb-4">
@@ -548,14 +548,14 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
                     }))}
                     value={newExpense.expense_type_id || ''}
                     onValueChange={(value) => setNewExpense({ ...newExpense, expense_type_id: value })}
-                    placeholder="Expense Type"
-                    searchPlaceholder="Search expense types..."
-                    emptyText="No expense types found"
+                    placeholder="نوع المصروف"
+                    searchPlaceholder="البحث في أنواع المصروفات..."
+                    emptyText="لا توجد أنواع مصروفات"
                   />
                 </div>
                 <Input
                   type="number"
-                  placeholder="Amount"
+                  placeholder="المبلغ"
                   value={newExpense.amount || ''}
                   onChange={(e) => setNewExpense({ ...newExpense, amount: parseFloat(e.target.value) })}
                 />
@@ -570,7 +570,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
                   {expenses.map((expense, index) => (
                     <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
                       <span className="text-sm">
-                        {expenseTypes.find(e => e.id === expense.expense_type_id)?.name || 'Expense'}
+                        {expenseTypes.find(e => e.id === expense.expense_type_id)?.name || 'المصروف'}
                         <strong className="ml-2">${expense.amount.toFixed(2)}</strong>
                       </span>
                       <Button
@@ -592,7 +592,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
           {(items.length > 0 || expenses.length > 0) && (
             <div className="flex justify-end">
               <div className="text-right">
-                <p className="text-sm text-muted-foreground">Estimated Total</p>
+                <p className="text-sm text-muted-foreground">الإجمالي المقدر</p>
                 <p className="text-2xl font-bold">${calculateTotal().toFixed(2)}</p>
               </div>
             </div>
@@ -601,9 +601,9 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
           {/* File Attachments */}
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-2">Attachments</h3>
+              <h3 className="text-lg font-semibold mb-2">المرفقات</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Upload related files (images, PDFs, documents)
+                رفع الملفات ذات الصلة (صور، ملفات PDF، مستندات)
               </p>
               <FileUpload
                 onFilesSelected={setAttachmentFiles}
@@ -621,11 +621,11 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Invoice
+              إنشاء الفاتورة
             </Button>
           </DialogFooter>
         </form>
