@@ -361,7 +361,7 @@ export async function deleteManufacturingInvoice(id: string): Promise<ActionResu
     // Get all input items to reverse their consumption
     const { data: items } = await supabase
       .from('manufacturing_invoice_items')
-      .select('material_name_id, quantity')
+      .select('material_name_id, quantity, weight')
       .eq('manufacturing_invoice_id', id);
 
     // Reverse input materials consumption
@@ -376,12 +376,14 @@ export async function deleteManufacturingInvoice(id: string): Promise<ActionResu
             .single();
 
           if (material) {
+            // Use weight if available, otherwise use quantity
+            const actualQuantity = item.weight || item.quantity;
             // Reverse consumption: decrease consumption, increase balance
             await supabase
               .from('materials')
               .update({
-                consumption: material.consumption - item.quantity,
-                current_balance: material.current_balance + item.quantity,
+                consumption: material.consumption - actualQuantity,
+                current_balance: material.current_balance + actualQuantity,
                 updated_at: new Date().toISOString(),
               })
               .eq('id', material.id);

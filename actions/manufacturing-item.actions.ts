@@ -35,7 +35,7 @@ export type ActionResult<T = void> = {
  */
 export async function validateInputMaterialsStock(
   warehouseId: string,
-  items: Array<{ material_name_id: string; quantity: number }>
+  items: Array<{ material_name_id: string; quantity: number; weight?: number }>
 ): Promise<ActionResult<Array<{ material_name: string; available: number; required: number }>>> {
   try {
     const supabase = await createClient();
@@ -55,11 +55,14 @@ export async function validateInputMaterialsStock(
         .eq('id', item.material_name_id)
         .single();
 
-      if (!material || material.current_balance < item.quantity) {
+      // Check against weight if available, otherwise use quantity
+      const requiredQuantity = item.weight || item.quantity;
+      
+      if (!material || material.current_balance < requiredQuantity) {
         insufficientItems.push({
           material_name: materialName?.material_name || 'Unknown',
           available: material?.current_balance || 0,
-          required: item.quantity,
+          required: requiredQuantity,
         });
       }
     }
@@ -152,10 +155,12 @@ export async function createManufacturingItem(input: CreateManufacturingItemInpu
     }
 
     // Decrease input material from warehouse inventory
+    // Use weight (quantity × blend_count) if available, otherwise use quantity
+    const actualQuantityToDecrease = input.weight || input.quantity;
     const inventoryResult = await decreaseWarehouseInventory(
       invoice.warehouse_id,
       input.material_name_id,
-      input.quantity
+      actualQuantityToDecrease
     );
 
     if (!inventoryResult.success) {
@@ -196,7 +201,7 @@ export async function deleteManufacturingItem(id: string): Promise<ActionResult>
 
     const { data: item } = await supabase
       .from('manufacturing_invoice_items')
-      .select('manufacturing_invoice_id, material_name_id, quantity')
+      .select('manufacturing_invoice_id, material_name_id, quantity, weight')
       .eq('id', id)
       .single();
 
@@ -212,11 +217,13 @@ export async function deleteManufacturingItem(id: string): Promise<ActionResult>
       .single();
 
     // Reverse the inventory decrease by increasing it back
+    // Use weight if available, otherwise use quantity
     if (invoice?.warehouse_id && item.material_name_id) {
+      const actualQuantityToIncrease = item.weight || item.quantity;
       await increaseWarehouseInventory(
         invoice.warehouse_id,
         item.material_name_id,
-        item.quantity
+        actualQuantityToIncrease
       );
     }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -102,6 +102,19 @@ export function ManufacturingForm({
 
   const materialNameId = watch('material_name_id');
   const unitId = watch('unit_id');
+  const inputItems = watch('inputItems');
+
+  // Auto-calculate output quantity from sum of all input weights
+  useEffect(() => {
+    if (inputItems && inputItems.length > 0) {
+      const totalWeight = inputItems.reduce((sum, item) => {
+        return sum + (item.weight || 0);
+      }, 0);
+      setValue('quantity', totalWeight);
+    } else {
+      setValue('quantity', 0);
+    }
+  }, [inputItems, setValue]);
 
   const onSubmit = async (data: ManufacturingFormData) => {
     setIsLoading(true);
@@ -261,14 +274,18 @@ export function ManufacturingForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="quantity">الكمية المنتجة *</Label>
+            <Label htmlFor="quantity">الكمية المنتجة (محسوبة) *</Label>
             <Input
               id="quantity"
               type="number"
               step="0.01"
               {...register('quantity', { valueAsNumber: true })}
-              disabled={isLoading}
+              disabled={true}
+              className="bg-muted"
             />
+            <p className="text-xs text-muted-foreground">
+              مجموع أوزان المواد المدخلة: {watch('quantity')?.toFixed(2) || '0.00'} كجم
+            </p>
             {errors.quantity && (
               <p className="text-sm text-destructive">{errors.quantity.message}</p>
             )}
@@ -321,8 +338,24 @@ export function ManufacturingForm({
             </Button>
           </div>
 
-          {inputItemFields.map((field, index) => (
-            <div key={field.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg">
+          {inputItemFields.map((field, index) => {
+            const quantity = watch(`inputItems.${index}.quantity`);
+            const blendCount = watch(`inputItems.${index}.blend_count`);
+            
+            // Auto-calculate weight: weight = quantity × blend_count
+            useEffect(() => {
+              if (quantity && blendCount) {
+                const calculatedWeight = quantity * blendCount;
+                setValue(`inputItems.${index}.weight`, calculatedWeight);
+              } else {
+                setValue(`inputItems.${index}.weight`, 0);
+              }
+            }, [quantity, blendCount]);
+            
+            const calculatedWeight = quantity && blendCount ? quantity * blendCount : 0;
+            
+            return (
+            <div key={field.id} className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 border rounded-lg">
               <div className="space-y-2">
                 <Label>المادة *</Label>
                 <Combobox
@@ -394,6 +427,19 @@ export function ManufacturingForm({
                 )}
               </div>
 
+              <div className="space-y-2">
+                <Label>الوزن الكلي (محسوب)</Label>
+                <Input
+                  type="number"
+                  value={calculatedWeight.toFixed(2)}
+                  disabled={true}
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {quantity || 0} × {blendCount || 0} = {calculatedWeight.toFixed(2)} كجم
+                </p>
+              </div>
+
               <div className="space-y-2 flex items-end">
                 <Button
                   type="button"
@@ -407,7 +453,8 @@ export function ManufacturingForm({
                 </Button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <Separator />

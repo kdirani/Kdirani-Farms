@@ -97,6 +97,18 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
   const materialNameId = watch('material_name_id');
   const unitId = watch('unit_id');
 
+  // Auto-calculate output quantity from sum of all input item weights
+  useEffect(() => {
+    if (items && items.length > 0) {
+      const totalWeight = items.reduce((sum, item) => {
+        return sum + (item.weight || 0);
+      }, 0);
+      setValue('quantity', totalWeight);
+    } else {
+      setValue('quantity', 0);
+    }
+  }, [items, setValue]);
+
   useEffect(() => {
     if (open) {
       loadData();
@@ -104,7 +116,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
       setValue('invoice_number', invoiceNum);
       setItems([]);
       setExpenses([]);
-      setNewItem({ quantity: 0, blend_count: 1 });
+      setNewItem({ quantity: 0, blend_count: 1, weight: 0 });
       setNewExpense({ amount: 0 });
     }
   }, [open]);
@@ -266,6 +278,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
   const [newItem, setNewItem] = useState<Partial<ManufacturingItemInput>>({
     quantity: 0,
     blend_count: 1,
+    weight: 0,
   });
   const [newExpense, setNewExpense] = useState<Partial<ManufacturingExpenseInput>>({
     amount: 0,
@@ -303,6 +316,16 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
     fetchStock();
   }, [newItem.material_name_id, warehouseId]);
 
+  // Auto-calculate weight: weight = quantity × blend_count
+  useEffect(() => {
+    if (newItem.quantity && newItem.blend_count) {
+      const calculatedWeight = newItem.quantity * newItem.blend_count;
+      setNewItem(prev => ({ ...prev, weight: calculatedWeight }));
+    } else {
+      setNewItem(prev => ({ ...prev, weight: 0 }));
+    }
+  }, [newItem.quantity, newItem.blend_count]);
+
   const handleAddItem = () => {
     if (!newItem.material_name_id || !newItem.unit_id) {
       toast.error('المادة والوحدة مطلوبة');
@@ -320,7 +343,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
     }
 
     addItem(newItem as ManufacturingItemInput);
-    setNewItem({ quantity: 0, blend_count: 1 });
+    setNewItem({ quantity: 0, blend_count: 1, weight: 0 });
     setCurrentStock(null); // Reset stock display
   };
 
@@ -446,15 +469,18 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quantity">الكمية *</Label>
+              <Label htmlFor="quantity">الكمية المنتجة (محسوبة) *</Label>
               <Input
                 id="quantity"
                 type="number"
                 step="0.01"
-                placeholder="أدخل الكمية"
                 {...register('quantity', { valueAsNumber: true })}
-                disabled={isLoading}
+                disabled={true}
+                className="bg-muted"
               />
+              <p className="text-xs text-muted-foreground">
+                مجموع أوزان المواد المدخلة: {watch('quantity')?.toFixed(2) || '0.00'} كجم
+              </p>
               {errors.quantity && (
                 <p className="text-sm text-destructive">{errors.quantity.message}</p>
               )}
@@ -524,6 +550,18 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                   value={newItem.blend_count || ''}
                   onChange={(e) => setNewItem({ ...newItem, blend_count: parseInt(e.target.value) })}
                 />
+                <div className="space-y-1">
+                  <Input
+                    type="number"
+                    value={newItem.weight?.toFixed(2) || '0.00'}
+                    disabled={true}
+                    className="bg-muted text-sm"
+                    title="الوزن الكلي = الكمية × عدد الخلطات"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {newItem.quantity || 0} × {newItem.blend_count || 0} = {(newItem.weight || 0).toFixed(2)}
+                  </p>
+                </div>
                 <Button type="button" size="sm" onClick={handleAddItem}>
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -537,6 +575,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                         {materials.find(m => m.id === item.material_name_id)?.material_name} - 
                         {item.quantity} {units.find(u => u.id === item.unit_id)?.unit_name}
                         {item.blend_count && <span> (x{item.blend_count})</span>}
+                        {item.weight && <span className="text-muted-foreground"> [{item.weight}كجم]</span>}
                       </span>
                       <Button
                         type="button"
