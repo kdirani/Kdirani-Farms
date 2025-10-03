@@ -408,7 +408,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="material_name_id">المادة الناتجة</Label>
+              <Label htmlFor="material_name_id">المادة الناتجة (اختياري)</Label>
               <Combobox
                 options={[
                   { value: 'none', label: 'لا توجد مادة' },
@@ -424,6 +424,11 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                 emptyText="لم يتم العثور على مواد"
                 disabled={isLoading}
               />
+              {(!materialNameId || materialNameId === 'none') && (
+                <p className="text-xs text-muted-foreground">
+                  ℹ️ لن يتم إضافة مادة ناتجة للمخزون
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
