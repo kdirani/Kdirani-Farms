@@ -70,13 +70,13 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
       {/* Invoice Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Invoice Information</CardTitle>
+          <CardTitle>معلومات الفاتورة</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Invoice Number</label>
+                <label className="text-sm font-medium text-muted-foreground">رقم الفاتورة</label>
                 <p className="text-lg font-semibold">{invoice.invoice_number}</p>
               </div>
               <div>
