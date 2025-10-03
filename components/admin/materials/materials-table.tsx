@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Package, MoreHorizontal, Search, Plus, Filter } from 'lucide-react';
+import { formatDate, formatTime } from '@/lib/utils';
 import { CreateMaterialDialog } from './create-material-dialog';
 import { EditMaterialDialog } from './edit-material-dialog';
 import { DeleteMaterialDialog } from './delete-material-dialog';
@@ -47,6 +48,7 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
   
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const selectedWarehouse = searchParams.get('warehouse') || 'all';
+  const [filterStatus, setFilterStatus] = useState<string>('all');
   
   // استخدام useDeferredValue للأداء الأفضل
   const deferredSearchTerm = useDeferredValue(searchTerm);
@@ -82,25 +84,32 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
     setSearchTerm(search);
   }, []);
 
-  // فلترة محلية للبحث فقط (المستودع يأتي مفلتر من السيرفر)
+  // فلترة محلية للبحث والحالة (المستودع يأتي مفلتر من السيرفر)
   const filteredMaterials = useMemo(() => {
-    if (!deferredSearchTerm) return materials;
+    let filtered = materials;
     
-    const s = deferredSearchTerm.toLowerCase();
-    return materials.filter((material) => 
-      material.material_name?.toLowerCase().includes(s) ||
-      material.warehouse?.name.toLowerCase().includes(s) ||
-      material.warehouse?.farm_name.toLowerCase().includes(s)
-    );
-  }, [materials, deferredSearchTerm]);
+    // فلترة البحث
+    if (deferredSearchTerm) {
+      const s = deferredSearchTerm.toLowerCase();
+      filtered = filtered.filter((material) => 
+        material.material_name?.toLowerCase().includes(s) ||
+        material.warehouse?.name.toLowerCase().includes(s) ||
+        material.warehouse?.farm_name.toLowerCase().includes(s)
+      );
+    }
+    
+    // فلترة الحالة
+    if (filterStatus === 'low') {
+      filtered = filtered.filter(m => m.current_balance > 0 && m.current_balance < 100);
+    } else if (filterStatus === 'out') {
+      filtered = filtered.filter(m => m.current_balance === 0);
+    } else if (filterStatus === 'good') {
+      filtered = filtered.filter(m => m.current_balance >= 100);
+    }
+    
+    return filtered;
+  }, [materials, deferredSearchTerm, filterStatus]);
 
-  const getStockStatus = (current: number, opening: number) => {
-    if (current === 0) return <Badge variant="destructive">نفد من المخزون</Badge>;
-    const percentage = (current / opening) * 100;
-    if (percentage < 20) return <Badge variant="destructive">مخزون قليل</Badge>;
-    if (percentage < 50) return <Badge variant="warning">مخزون متوسط</Badge>;
-    return <Badge variant="success">متوفر في المخزون</Badge>;
-  };
 
   return (
     <div className="space-y-4">
@@ -140,6 +149,17 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
               </Select>
             </div>
           )}
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">جميع الحالات</SelectItem>
+              <SelectItem value="good">متوفر</SelectItem>
+              <SelectItem value="low">مخزون قليل</SelectItem>
+              <SelectItem value="out">نفد المخزون</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -159,17 +179,18 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
               <TableHead className="text-right">المشتريات</TableHead>
               <TableHead className="text-right">المبيعات</TableHead>
               <TableHead className="text-right">الاستهلاك</TableHead>
+              <TableHead className="text-right">التصنيع</TableHead>
               <TableHead className="text-right">الحالي</TableHead>
-              <TableHead>الحالة</TableHead>
+              <TableHead>آخر تحديث</TableHead>
               <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredMaterials.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={11} className="text-center text-muted-foreground py-8">
-                  {searchTerm
-                    ? 'لم يتم العثور على مواد تطابق البحث'
+                <TableCell colSpan={12} className="text-center text-muted-foreground py-8">
+                  {searchTerm || filterStatus !== 'all'
+                    ? 'لم يتم العثور على مواد تطابق الفلاتر المحددة'
                     : 'لم يتم العثور على مواد في هذا المستودع'}
                 </TableCell>
               </TableRow>
@@ -183,14 +204,20 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
                     </div>
                   </TableCell>
                   <TableCell>{material.warehouse?.name || '-'}</TableCell>
-                  <TableCell>{material.warehouse?.farm_name || '-'}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{material.warehouse?.farm_name || '-'}</TableCell>
                   <TableCell>{material.unit_name || '-'}</TableCell>
                   <TableCell className="text-right">{material.opening_balance.toLocaleString()}</TableCell>
-                  <TableCell className="text-right text-green-600">{material.purchases.toLocaleString()}</TableCell>
-                  <TableCell className="text-right text-blue-600">{material.sales.toLocaleString()}</TableCell>
-                  <TableCell className="text-right text-orange-600">{material.consumption.toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-semibold">{material.current_balance.toLocaleString()}</TableCell>
-                  <TableCell>{getStockStatus(material.current_balance, material.opening_balance)}</TableCell>
+                  <TableCell className="text-right text-green-600">+{material.purchases.toLocaleString()}</TableCell>
+                  <TableCell className="text-right text-red-600">-{material.sales.toLocaleString()}</TableCell>
+                  <TableCell className="text-right text-orange-600">-{material.consumption.toLocaleString()}</TableCell>
+                  <TableCell className="text-right text-blue-600">+{material.manufacturing.toLocaleString()}</TableCell>
+                  <TableCell className="text-right font-bold text-lg">{material.current_balance.toLocaleString()}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    <div className="flex flex-col">
+                      <span>{formatDate(new Date(material.updated_at))}</span>
+                      <span className="text-[10px] opacity-70">{formatTime(new Date(material.updated_at))}</span>
+                    </div>
+                  </TableCell>
                   <TableCell className="text-right">
                     {isAggregated ? (
                       <span className="text-muted-foreground text-sm">-</span>
@@ -232,6 +259,24 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex justify-between items-center text-sm text-muted-foreground">
+        <span>عرض {filteredMaterials.length} من {materials.length} مادة</span>
+        <div className="flex gap-4">
+          <span className="flex items-center gap-2">
+            <span className="text-green-600">●</span> المشتريات تضيف للمخزون
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="text-red-600">●</span> المبيعات تقلل المخزون
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="text-orange-600">●</span> الاستهلاك يقلل المخزون
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="text-blue-600">●</span> التصنيع يضيف للمخزون
+          </span>
+        </div>
       </div>
 
       <CreateMaterialDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />

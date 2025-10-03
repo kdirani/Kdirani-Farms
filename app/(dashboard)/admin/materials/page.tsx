@@ -1,15 +1,27 @@
 import { Suspense } from 'react';
-import { getMaterials, getMaterialsAggregated } from '@/actions/material.actions';
+import { getMaterials, getMaterialsAggregated, getMaterialsSummary } from '@/actions/material.actions';
 import { MaterialsTable } from '@/components/admin/materials/materials-table';
 import { MaterialsTableSkeleton } from '@/components/admin/materials/materials-table-skeleton';
+import { MaterialsSummaryCards } from '@/components/admin/materials/materials-summary-cards';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
   title: 'إدارة المواد - لوحة التحكم الإدارية',
   description: 'إدارة مخزون المواد وتتبع الأرصدة',
 };
+
+async function MaterialsSummaryContent() {
+  const result = await getMaterialsSummary();
+
+  if (!result.success || !result.data) {
+    return null;
+  }
+
+  return <MaterialsSummaryCards summary={result.data} />;
+}
 
 async function MaterialsContent({ warehouse }: { warehouse?: string }) {
   // جلب قائمة المستودعات أولاً للفلترة
@@ -60,6 +72,10 @@ export default async function MaterialsPage({
           إدارة مخزون المواد وتتبع مستويات المخزون في المستودعات
         </p>
       </div>
+
+      <Suspense fallback={<div className="grid gap-4 md:grid-cols-4"><Skeleton className="h-32" /><Skeleton className="h-32" /><Skeleton className="h-32" /><Skeleton className="h-32" /></div>}>
+        <MaterialsSummaryContent />
+      </Suspense>
 
       <Card>
         <CardHeader>

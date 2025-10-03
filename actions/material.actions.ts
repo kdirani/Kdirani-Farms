@@ -40,6 +40,14 @@ export type UpdateMaterialInput = {
   manufacturing?: number;
 };
 
+export type MaterialsSummary = {
+  total_materials: number;
+  total_value: number;
+  low_stock_count: number;
+  out_of_stock_count: number;
+  total_warehouses: number;
+};
+
 export type ActionResult<T = void> = {
   success: boolean;
   error?: string;
@@ -520,5 +528,46 @@ export async function getMaterialInventory(
   } catch (error) {
     console.error('Error getting material inventory:', error);
     return { success: false, error: 'Failed to get material inventory' };
+  }
+}
+
+/**
+ * Get materials summary statistics
+ */
+export async function getMaterialsSummary(): Promise<ActionResult<MaterialsSummary>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const { data: materials } = await supabase
+      .from('materials')
+      .select('current_balance');
+
+    const { data: warehouses } = await supabase
+      .from('warehouses')
+      .select('id');
+
+    const totalMaterials = materials?.length || 0;
+    const lowStockCount = materials?.filter(m => m.current_balance > 0 && m.current_balance < 100).length || 0;
+    const outOfStockCount = materials?.filter(m => m.current_balance === 0).length || 0;
+    const totalWarehouses = warehouses?.length || 0;
+
+    return {
+      success: true,
+      data: {
+        total_materials: totalMaterials,
+        total_value: 0, // Can be calculated if we add price tracking
+        low_stock_count: lowStockCount,
+        out_of_stock_count: outOfStockCount,
+        total_warehouses: totalWarehouses,
+      },
+    };
+  } catch (error) {
+    console.error('Error getting materials summary:', error);
+    return { success: false, error: 'Failed to get materials summary' };
   }
 }
