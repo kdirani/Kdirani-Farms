@@ -243,14 +243,12 @@ export async function deleteInvoiceItem(id: string): Promise<ActionResult> {
 
     // Reverse inventory update if material exists
     if (item.material_name_id && invoice?.warehouse_id) {
-      // Reverse the transaction (buy becomes sell, sell becomes buy)
-      const reverseType = invoice.invoice_type === 'buy' ? 'sell' : 'buy';
-      await updateWarehouseInventory(
+      // Reverse the exact operation that was performed
+      await reverseWarehouseInventory(
         invoice.warehouse_id,
         item.material_name_id,
-        item.unit_id,
         item.quantity,
-        reverseType
+        invoice.invoice_type
       );
     }
 
@@ -351,6 +349,60 @@ async function updateWarehouseInventory(
           current_balance: quantity,
         });
     }
+  }
+
+  return { success: true };
+}
+
+/**
+ * Reverse warehouse inventory when deleting an invoice item
+ */
+async function reverseWarehouseInventory(
+  warehouseId: string,
+  materialNameId: string,
+  quantity: number,
+  originalInvoiceType: 'buy' | 'sell'
+): Promise<ActionResult> {
+  const supabase = await createClient();
+
+  // Get existing material
+  const { data: existingMaterial } = await supabase
+    .from('materials')
+    .select('*')
+    .eq('warehouse_id', warehouseId)
+    .eq('material_name_id', materialNameId)
+    .single();
+
+  if (!existingMaterial) {
+    return { success: false, error: 'Material not found in warehouse inventory' };
+  }
+
+  if (originalInvoiceType === 'buy') {
+    // Reversing a BUY: decrease purchases and current_balance
+    const newPurchases = Math.max(0, existingMaterial.purchases - quantity);
+    const newBalance = Math.max(0, existingMaterial.current_balance - quantity);
+
+    await supabase
+      .from('materials')
+      .update({
+        purchases: newPurchases,
+        current_balance: newBalance,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', existingMaterial.id);
+  } else {
+    // Reversing a SELL: decrease sales and increase current_balance
+    const newSales = Math.max(0, existingMaterial.sales - quantity);
+    const newBalance = existingMaterial.current_balance + quantity;
+
+    await supabase
+      .from('materials')
+      .update({
+        sales: newSales,
+        current_balance: newBalance,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', existingMaterial.id);
   }
 
   return { success: true };
