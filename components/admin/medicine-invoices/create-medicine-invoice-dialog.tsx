@@ -34,9 +34,9 @@ import { toast } from 'sonner';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 
 const medicineInvoiceSchema = z.object({
-  invoice_number: z.string().min(1, 'Invoice number is required'),
-  invoice_date: z.string().min(1, 'Invoice date is required'),
-  warehouse_id: z.string().min(1, 'Warehouse is required'),
+  invoice_number: z.string().min(1, 'رقم الفاتورة مطلوب'),
+  invoice_date: z.string().min(1, 'تاريخ الفاتورة مطلوب'),
+  warehouse_id: z.string().min(1, 'المستودع مطلوب'),
   poultry_status_id: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -129,7 +129,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
       const invoiceResult = await createMedicineInvoice(data);
       
       if (!invoiceResult.success || !invoiceResult.data) {
-        toast.error(invoiceResult.error || 'Failed to create medicine invoice');
+        toast.error(invoiceResult.error || 'فشل في إنشاء فاتورة الأدوية');
         setIsLoading(false);
         return;
       }
@@ -150,14 +150,14 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
         });
       }
 
-      toast.success('Medicine invoice created successfully');
+      toast.success('تم إنشاء فاتورة الأدوية بنجاح');
       reset();
       setItems([]);
       setExpenses([]);
       onOpenChange(false);
       window.location.reload();
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -173,32 +173,32 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
 
   const handleAddItem = () => {
     if (!newItem.medicine_id || !newItem.unit_id) {
-      toast.error('Medicine and unit are required');
+      toast.error('الدواء والوحدة مطلوبان');
       return;
     }
     if (newItem.quantity === undefined || newItem.quantity <= 0) {
-      toast.error('Quantity must be greater than 0');
+      toast.error('يجب أن تكون الكمية أكبر من 0');
       return;
     }
 
     setItems([...items, newItem as MedicineItemInput]);
     setNewItem({ quantity: 0, price: 0 });
-    toast.success('Medicine added');
+    toast.success('تمت إضافة الدواء');
   };
 
   const handleAddExpense = () => {
     if (!newExpense.expense_type_id) {
-      toast.error('Expense type is required');
+      toast.error('نوع المصروف مطلوب');
       return;
     }
     if (newExpense.amount === undefined || newExpense.amount < 0) {
-      toast.error('Valid amount is required');
+      toast.error('مبلغ صالح مطلوب');
       return;
     }
 
     setExpenses([...expenses, newExpense as MedicineExpenseInput]);
     setNewExpense({ amount: 0 });
-    toast.success('Expense added');
+    toast.success('تمت إضافة المصروف');
   };
 
   const calculateTotal = () => {
@@ -211,15 +211,15 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Medicine Consumption Invoice</DialogTitle>
+          <DialogTitle>إنشاء فاتورة استهلاك الأدوية</DialogTitle>
           <DialogDescription>
-            Add invoice information, medicine items, and expenses
+            إضافة معلومات الفاتورة، الأدوية، والمصاريف
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="invoice_number">Invoice Number *</Label>
+              <Label htmlFor="invoice_number">رقم الفاتورة *</Label>
               <Input
                 id="invoice_number"
                 {...register('invoice_number')}
@@ -231,7 +231,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="invoice_date">Invoice Date *</Label>
+              <Label htmlFor="invoice_date">تاريخ الفاتورة *</Label>
               <Input
                 id="invoice_date"
                 type="date"
@@ -245,14 +245,14 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="warehouse_id">Warehouse *</Label>
+            <Label htmlFor="warehouse_id">المستودع *</Label>
             <Select
               value={warehouseId}
               onValueChange={(value) => setValue('warehouse_id', value)}
               disabled={isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select warehouse" />
+                <SelectValue placeholder="اختر المستودع" />
               </SelectTrigger>
               <SelectContent>
                 {warehouses.map((warehouse) => (
@@ -268,10 +268,10 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes">ملاحظات</Label>
             <Input
               id="notes"
-              placeholder="Optional notes"
+              placeholder="ملاحظات اختيارية"
               {...register('notes')}
               disabled={isLoading}
             />
@@ -280,7 +280,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
           {/* Medicine Items Section */}
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Medicine Items ({items.length})</h3>
+              <h3 className="text-lg font-semibold mb-4">الأدوية ({items.length})</h3>
               
               <div className="grid grid-cols-5 gap-2 mb-4">
                 <div className="col-span-2">
@@ -289,7 +289,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                     onValueChange={(value) => setNewItem({ ...newItem, medicine_id: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Medicine" />
+                      <SelectValue placeholder="الدواء" />
                     </SelectTrigger>
                     <SelectContent>
                       {medicines.map((m) => (
@@ -300,7 +300,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                 </div>
                 <Input
                   type="number"
-                  placeholder="Qty"
+                  placeholder="الكمية"
                   value={newItem.quantity || ''}
                   onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
                 />
@@ -309,7 +309,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                   onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Unit" />
+                    <SelectValue placeholder="الوحدة" />
                   </SelectTrigger>
                   <SelectContent>
                     {units.map((u) => (
@@ -320,7 +320,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                 <div className="flex gap-2">
                   <Input
                     type="number"
-                    placeholder="Price"
+                    placeholder="السعر"
                     value={newItem.price || ''}
                     onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
                   />
@@ -345,7 +345,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                         size="sm"
                         onClick={() => {
                           setItems(items.filter((_, i) => i !== index));
-                          toast.success('Item removed');
+                          toast.success('تم حذف العنصر');
                         }}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -360,7 +360,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
           {/* Medicine Expenses Section */}
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Expenses ({expenses.length})</h3>
+              <h3 className="text-lg font-semibold mb-4">المصاريف ({expenses.length})</h3>
               
               <div className="grid grid-cols-4 gap-2 mb-4">
                 <div className="col-span-2">
@@ -369,7 +369,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                     onValueChange={(value) => setNewExpense({ ...newExpense, expense_type_id: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Expense Type" />
+                      <SelectValue placeholder="نوع المصروف" />
                     </SelectTrigger>
                     <SelectContent>
                       {expenseTypes.map((e) => (
@@ -380,7 +380,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                 </div>
                 <Input
                   type="number"
-                  placeholder="Amount"
+                  placeholder="المبلغ"
                   value={newExpense.amount || ''}
                   onChange={(e) => setNewExpense({ ...newExpense, amount: parseFloat(e.target.value) })}
                 />
@@ -403,7 +403,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                         size="sm"
                         onClick={() => {
                           setExpenses(expenses.filter((_, i) => i !== index));
-                          toast.success('Expense removed');
+                          toast.success('تم حذف المصروف');
                         }}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -419,7 +419,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
           {(items.length > 0 || expenses.length > 0) && (
             <div className="flex justify-end">
               <div className="text-right">
-                <p className="text-sm text-muted-foreground">Estimated Total</p>
+                <p className="text-sm text-muted-foreground">الإجمالي التقديري</p>
                 <p className="text-2xl font-bold">${calculateTotal().toFixed(2)}</p>
               </div>
             </div>
@@ -432,11 +432,11 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Medicine Invoice
+              إنشاء فاتورة الأدوية
             </Button>
           </DialogFooter>
         </form>

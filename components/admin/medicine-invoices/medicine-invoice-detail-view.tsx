@@ -30,29 +30,29 @@ export function MedicineInvoiceDetailView({ invoice, items, expenses }: Medicine
   const [deletingExpense, setDeletingExpense] = useState<string | null>(null);
 
   const handleDeleteItem = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+    if (!confirm('هل أنت متأكد من حذف هذا العنصر؟')) return;
     
     setDeletingItem(id);
     const result = await deleteMedicineItem(id);
     if (result.success) {
-      toast.success('Item deleted successfully');
+      toast.success('تم حذف العنصر بنجاح');
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete item');
+      toast.error(result.error || 'فشل في حذف العنصر');
     }
     setDeletingItem(null);
   };
 
   const handleDeleteExpense = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this expense?')) return;
+    if (!confirm('هل أنت متأكد من حذف هذا المصروف؟')) return;
     
     setDeletingExpense(id);
     const result = await deleteMedicineExpense(id);
     if (result.success) {
-      toast.success('Expense deleted successfully');
+      toast.success('تم حذف المصروف بنجاح');
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete expense');
+      toast.error(result.error || 'فشل في حذف المصروف');
     }
     setDeletingExpense(null);
   };
@@ -68,7 +68,7 @@ export function MedicineInvoiceDetailView({ invoice, items, expenses }: Medicine
         </Link>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Medicine Invoice {invoice.invoice_number}
+            فاتورة الأدوية {invoice.invoice_number}
           </h1>
           <p className="text-muted-foreground mt-1">
             {format(new Date(invoice.invoice_date), 'MMMM dd, yyyy')}
@@ -79,43 +79,43 @@ export function MedicineInvoiceDetailView({ invoice, items, expenses }: Medicine
       {/* Invoice Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Invoice Information</CardTitle>
+          <CardTitle>معلومات الفاتورة</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Invoice Number</label>
+                <label className="text-sm font-medium text-muted-foreground">رقم الفاتورة</label>
                 <p className="text-lg font-semibold">{invoice.invoice_number}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Invoice Date</label>
+                <label className="text-sm font-medium text-muted-foreground">تاريخ الفاتورة</label>
                 <p className="text-lg">{format(new Date(invoice.invoice_date), 'MMMM dd, yyyy')}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Warehouse</label>
+                <label className="text-sm font-medium text-muted-foreground">المستودع</label>
                 {invoice.warehouse ? (
                   <div>
                     <p className="text-lg font-semibold">{invoice.warehouse.name}</p>
                     <p className="text-sm text-muted-foreground">{invoice.warehouse.farm_name}</p>
                   </div>
                 ) : (
-                  <p className="text-lg text-muted-foreground">Not assigned</p>
+                  <p className="text-lg text-muted-foreground">غير محدد</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Poultry Status</label>
+                <label className="text-sm font-medium text-muted-foreground">حالة الدواجن</label>
                 {invoice.poultry_status ? (
                   <p className="text-lg font-semibold">{invoice.poultry_status.status_name}</p>
                 ) : (
-                  <p className="text-lg text-muted-foreground">Not specified</p>
+                  <p className="text-lg text-muted-foreground">غير محدد</p>
                 )}
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Total Value</label>
+                <label className="text-sm font-medium text-muted-foreground">القيمة الإجمالية</label>
                 <p className="text-2xl font-bold text-primary">${invoice.total_value.toLocaleString()}</p>
               </div>
             </div>
@@ -123,7 +123,7 @@ export function MedicineInvoiceDetailView({ invoice, items, expenses }: Medicine
 
           {invoice.notes && (
             <div className="mt-6">
-              <label className="text-sm font-medium text-muted-foreground">Notes</label>
+              <label className="text-sm font-medium text-muted-foreground">ملاحظات</label>
               <p className="text-base mt-1">{invoice.notes}</p>
             </div>
           )}
@@ -133,25 +133,25 @@ export function MedicineInvoiceDetailView({ invoice, items, expenses }: Medicine
       {/* Medicine Items */}
       <Card>
         <CardHeader>
-          <CardTitle>Medicine Items ({items.length})</CardTitle>
+          <CardTitle>الأدوية ({items.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {items.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No medicine items added yet
+              لم يتم إضافة أدوية بعد
             </div>
           ) : (
             <div className="border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Medicine</TableHead>
-                    <TableHead className="text-right">Quantity</TableHead>
-                    <TableHead>Unit</TableHead>
-                    <TableHead className="text-right">Price</TableHead>
-                    <TableHead className="text-right">Value</TableHead>
-                    <TableHead>Admin Day</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>الدواء</TableHead>
+                    <TableHead className="text-right">الكمية</TableHead>
+                    <TableHead>الوحدة</TableHead>
+                    <TableHead className="text-right">السعر</TableHead>
+                    <TableHead className="text-right">القيمة</TableHead>
+                    <TableHead>يوم الإعطاء</TableHead>
+                    <TableHead className="text-right">الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -185,22 +185,22 @@ export function MedicineInvoiceDetailView({ invoice, items, expenses }: Medicine
       {/* Expenses */}
       <Card>
         <CardHeader>
-          <CardTitle>Expenses ({expenses.length})</CardTitle>
+          <CardTitle>المصاريف ({expenses.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {expenses.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No expenses added yet
+              لم يتم إضافة مصاريف بعد
             </div>
           ) : (
             <div className="border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Expense Type</TableHead>
-                    <TableHead>Account Name</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>نوع المصروف</TableHead>
+                    <TableHead>اسم الحساب</TableHead>
+                    <TableHead className="text-right">المبلغ</TableHead>
+                    <TableHead className="text-right">الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
