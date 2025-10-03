@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState, useDeferredValue, useCallback } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Material } from '@/actions/material.actions';
 import {
   Table,
@@ -14,6 +15,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -21,7 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Package, MoreHorizontal, Search, Plus } from 'lucide-react';
+import { Package, MoreHorizontal, Search, Plus, Filter } from 'lucide-react';
 import { CreateMaterialDialog } from './create-material-dialog';
 import { EditMaterialDialog } from './edit-material-dialog';
 import { DeleteMaterialDialog } from './delete-material-dialog';
@@ -31,18 +39,74 @@ interface MaterialsTableProps {
 }
 
 export function MaterialsTable({ materials }: MaterialsTableProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [selectedWarehouse, setSelectedWarehouse] = useState<string>(searchParams.get('warehouse') || 'all');
+  
+  // استخدام useDeferredValue للأداء الأفضل
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const deferredWarehouse = useDeferredValue(selectedWarehouse);
+  
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
 
-  const filteredMaterials = materials.filter(
-    (material) =>
-      material.material_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      material.warehouse?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      material.warehouse?.farm_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // بناء قائمة المستودعات الفريدة للتصفية
+  const warehouses = useMemo(() => {
+    const map = new Map<string, { display: string }>();
+    for (const material of materials) {
+      if (material.warehouse?.name && material.warehouse?.farm_name) {
+        const display = `${material.warehouse.name} - ${material.warehouse.farm_name}`;
+        if (!map.has(display)) map.set(display, { display });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.display.localeCompare(b.display));
+  }, [materials]);
+
+  // تحديث URL عند تغيير المرشحات
+  const updateURL = useCallback((warehouse: string, search: string) => {
+    const params = new URLSearchParams();
+    if (warehouse !== 'all') params.set('warehouse', warehouse);
+    if (search.trim()) params.set('search', search);
+    
+    const queryString = params.toString();
+    const newURL = queryString ? `${pathname}?${queryString}` : pathname;
+    router.replace(newURL, { scroll: false });
+  }, [pathname, router]);
+
+  // معالج تغيير المستودع
+  const handleWarehouseChange = useCallback((warehouse: string) => {
+    setSelectedWarehouse(warehouse);
+    updateURL(warehouse, searchTerm);
+  }, [searchTerm, updateURL]);
+
+  // معالج تغيير البحث
+  const handleSearchChange = useCallback((search: string) => {
+    setSearchTerm(search);
+    updateURL(selectedWarehouse, search);
+  }, [selectedWarehouse, updateURL]);
+
+  const filteredMaterials = useMemo(() => {
+    return materials.filter((material) => {
+      const s = deferredSearchTerm.toLowerCase();
+      const matchesSearch = !s || (
+        material.material_name?.toLowerCase().includes(s) ||
+        material.warehouse?.name.toLowerCase().includes(s) ||
+        material.warehouse?.farm_name.toLowerCase().includes(s)
+      );
+
+      const display = material.warehouse
+        ? `${material.warehouse.name} - ${material.warehouse.farm_name}`
+        : '';
+      const matchesWarehouse = deferredWarehouse === 'all' || display === deferredWarehouse;
+
+      return matchesSearch && matchesWarehouse;
+    });
+  }, [materials, deferredSearchTerm, deferredWarehouse]);
 
   const getStockStatus = (current: number, opening: number) => {
     if (current === 0) return <Badge variant="destructive">نفد من المخزون</Badge>;
@@ -55,15 +119,33 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="البحث في المواد..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9"
-          />
+        <div className="flex items-center gap-4 flex-1">
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="البحث في المواد..."
+              value={searchTerm}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <Select value={selectedWarehouse} onValueChange={handleWarehouseChange}>
+              <SelectTrigger className="w-[250px]">
+                <SelectValue placeholder="تصفية حسب المستودع" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع المستودعات</SelectItem>
+                {warehouses.map((w) => (
+                  <SelectItem key={w.display} value={w.display}>
+                    {w.display}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -92,7 +174,9 @@ export function MaterialsTable({ materials }: MaterialsTableProps) {
             {filteredMaterials.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={11} className="text-center text-muted-foreground">
-                  لم يتم العثور على مواد
+                  {selectedWarehouse !== 'all' || searchTerm
+                    ? 'لم يتم العثور على مواد تطابق المعايير المحددة'
+                    : 'لم يتم العثور على مواد'}
                 </TableCell>
               </TableRow>
             ) : (
