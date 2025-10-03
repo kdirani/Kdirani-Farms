@@ -29,14 +29,14 @@ export function DeleteMaterialDialog({ material, open, onOpenChange }: DeleteMat
       const result = await deleteMaterial(material.id);
       
       if (result.success) {
-        toast.success('Material deleted successfully');
+        toast.success('تم حذف المادة بنجاح');
         onOpenChange(false);
         window.location.reload();
       } else {
-        toast.error(result.error || 'Failed to delete material');
+        toast.error(result.error || 'فشل في حذف المادة');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -48,24 +48,24 @@ export function DeleteMaterialDialog({ material, open, onOpenChange }: DeleteMat
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            Delete Material
+            حذف المادة
           </DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete this material? This action cannot be undone.
+            هل أنت متأكد من رغبتك في حذف هذه المادة؟ لا يمكن التراجع عن هذا الإجراء.
           </DialogDescription>
         </DialogHeader>
         
         <div className="bg-muted p-4 rounded-lg space-y-2">
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Material:</span>
+            <span className="text-sm font-medium">المادة:</span>
             <span className="text-sm">{material.material_name}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Warehouse:</span>
+            <span className="text-sm font-medium">المستودع:</span>
             <span className="text-sm">{material.warehouse?.name}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Current Balance:</span>
+            <span className="text-sm font-medium">الرصيد الحالي:</span>
             <span className="text-sm font-semibold">{material.current_balance} {material.unit_name}</span>
           </div>
         </div>
@@ -77,7 +77,7 @@ export function DeleteMaterialDialog({ material, open, onOpenChange }: DeleteMat
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
-            Cancel
+            إلغاء
           </Button>
           <Button
             type="button"
@@ -85,8 +85,8 @@ export function DeleteMaterialDialog({ material, open, onOpenChange }: DeleteMat
             onClick={handleDelete}
             disabled={isLoading}
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Delete Material
+            {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+            حذف المادة
           </Button>
         </DialogFooter>
       </DialogContent>

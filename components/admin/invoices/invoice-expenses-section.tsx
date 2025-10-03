@@ -26,16 +26,16 @@ export function InvoiceExpensesSection({ invoiceId, expenses }: InvoiceExpensesS
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   const handleDelete = async (expenseId: string) => {
-    if (!confirm('Are you sure you want to delete this expense?')) return;
+    if (!confirm('هل أنت متأكد من رغبتك في حذف هذا المصروف؟')) return;
     
     setIsDeleting(expenseId);
     const result = await deleteInvoiceExpense(expenseId);
     
     if (result.success) {
-      toast.success('Expense deleted successfully');
+      toast.success('تم حذف المصروف بنجاح');
       window.location.reload();
     } else {
-      toast.error(result.error || 'Failed to delete expense');
+      toast.error(result.error || 'فشل في حذف المصروف');
     }
     setIsDeleting(null);
   };
@@ -45,29 +45,29 @@ export function InvoiceExpensesSection({ invoiceId, expenses }: InvoiceExpensesS
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Invoice Expenses</CardTitle>
-            <CardDescription>Additional costs and expenses for this invoice</CardDescription>
+            <CardTitle>مصاريف الفاتورة</CardTitle>
+            <CardDescription>التكاليف والمصاريف الإضافية لهذه الفاتورة</CardDescription>
           </div>
           <Button onClick={() => setAddDialogOpen(true)} size="sm">
             <Plus className="h-4 w-4 mr-2" />
-            Add Expense
+            إضافة مصروف
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         {expenses.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            No expenses added yet. Click "Add Expense" to get started.
+            لم يتم إضافة مصاريف بعد. انقر على "إضافة مصروف" للبدء.
           </div>
         ) : (
           <div className="border rounded-lg">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Expense Type</TableHead>
-                  <TableHead>Account Name</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>نوع المصروف</TableHead>
+                  <TableHead>اسم الحساب</TableHead>
+                  <TableHead className="text-right">المبلغ</TableHead>
+                  <TableHead className="text-right">الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

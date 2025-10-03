@@ -20,11 +20,11 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const materialSchema = z.object({
-  opening_balance: z.number().min(0, 'Cannot be negative'),
-  purchases: z.number().min(0, 'Cannot be negative'),
-  sales: z.number().min(0, 'Cannot be negative'),
-  consumption: z.number().min(0, 'Cannot be negative'),
-  manufacturing: z.number().min(0, 'Cannot be negative'),
+  opening_balance: z.number().min(0, 'لا يمكن أن يكون سالباً'),
+  purchases: z.number().min(0, 'لا يمكن أن يكون سالباً'),
+  sales: z.number().min(0, 'لا يمكن أن يكون سالباً'),
+  consumption: z.number().min(0, 'لا يمكن أن يكون سالباً'),
+  manufacturing: z.number().min(0, 'لا يمكن أن يكون سالباً'),
 });
 
 type MaterialFormData = z.infer<typeof materialSchema>;
@@ -72,14 +72,14 @@ export function EditMaterialDialog({ material, open, onOpenChange }: EditMateria
       });
       
       if (result.success) {
-        toast.success('Material updated successfully');
+        toast.success('تم تحديث المادة بنجاح');
         onOpenChange(false);
         window.location.reload();
       } else {
-        toast.error(result.error || 'Failed to update material');
+        toast.error(result.error || 'فشل في تحديث المادة');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
@@ -89,20 +89,20 @@ export function EditMaterialDialog({ material, open, onOpenChange }: EditMateria
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Edit Material</DialogTitle>
+          <DialogTitle>تعديل المادة</DialogTitle>
           <DialogDescription>
-            Update material inventory transactions
+            تحديث معاملات مخزون المادة
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="bg-muted p-3 rounded-lg space-y-1">
-            <div className="text-sm"><span className="font-medium">Material:</span> {material.material_name}</div>
-            <div className="text-sm"><span className="font-medium">Warehouse:</span> {material.warehouse?.name}</div>
-            <div className="text-sm"><span className="font-medium">Unit:</span> {material.unit_name}</div>
+            <div className="text-sm"><span className="font-medium">المادة:</span> {material.material_name}</div>
+            <div className="text-sm"><span className="font-medium">المستودع:</span> {material.warehouse?.name}</div>
+            <div className="text-sm"><span className="font-medium">الوحدة:</span> {material.unit_name}</div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="opening_balance">Opening Balance</Label>
+            <Label htmlFor="opening_balance">الرصيد الافتتاحي</Label>
             <Input
               id="opening_balance"
               type="number"
@@ -118,7 +118,7 @@ export function EditMaterialDialog({ material, open, onOpenChange }: EditMateria
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="purchases">Purchases</Label>
+              <Label htmlFor="purchases">المشتريات</Label>
               <Input
                 id="purchases"
                 type="number"
@@ -133,7 +133,7 @@ export function EditMaterialDialog({ material, open, onOpenChange }: EditMateria
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="manufacturing">Manufacturing</Label>
+              <Label htmlFor="manufacturing">التصنيع</Label>
               <Input
                 id="manufacturing"
                 type="number"
@@ -150,7 +150,7 @@ export function EditMaterialDialog({ material, open, onOpenChange }: EditMateria
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="sales">Sales</Label>
+              <Label htmlFor="sales">المبيعات</Label>
               <Input
                 id="sales"
                 type="number"
@@ -165,7 +165,7 @@ export function EditMaterialDialog({ material, open, onOpenChange }: EditMateria
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="consumption">Consumption</Label>
+              <Label htmlFor="consumption">الاستهلاك</Label>
               <Input
                 id="consumption"
                 type="number"
@@ -182,11 +182,11 @@ export function EditMaterialDialog({ material, open, onOpenChange }: EditMateria
 
           <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Current Balance:</span>
+              <span className="text-sm font-medium">الرصيد الحالي:</span>
               <span className="text-lg font-bold">{calculatedBalance.toFixed(2)}</span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              = Opening + Purchases + Manufacturing - Sales - Consumption
+              = الرصيد الافتتاحي + المشتريات + التصنيع - المبيعات - الاستهلاك
             </p>
           </div>
 
@@ -197,11 +197,11 @@ export function EditMaterialDialog({ material, open, onOpenChange }: EditMateria
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
+              {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+              حفظ التغييرات
             </Button>
           </DialogFooter>
         </form>

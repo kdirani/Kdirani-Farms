@@ -35,11 +35,11 @@ import { Loader2, AlertTriangle, PackageCheck } from 'lucide-react';
 
 const itemSchema = z.object({
   material_name_id: z.string().optional(),
-  unit_id: z.string().min(1, 'Unit is required'),
+  unit_id: z.string().min(1, 'الوحدة مطلوبة'),
   egg_weight_id: z.string().optional(),
-  quantity: z.number().min(0.01, 'Quantity must be greater than 0'),
+  quantity: z.number().min(0.01, 'الكمية يجب أن تكون أكبر من 0'),
   weight: z.number().optional(),
-  price: z.number().min(0, 'Price cannot be negative'),
+  price: z.number().min(0, 'السعر لا يمكن أن يكون سالباً'),
 });
 
 type ItemFormData = z.infer<typeof itemSchema>;
@@ -200,35 +200,36 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
                 ...materials.map((material) => ({
                   value: material.id,
                   label: material.material_name,
-                }))
+                })),
               ]}
               value={materialId || 'none'}
               onValueChange={(value) => setValue('material_name_id', value === 'none' ? undefined : value)}
               placeholder="اختر المادة"
-              searchPlaceholder="ابحث عن المواد..."
-              emptyText="لم يتم العثور على مواد"
+              searchPlaceholder="البحث عن المواد..."
+              emptyText="لا توجد مواد"
               disabled={isLoading}
             />
             
-            {/* Show inventory for sell invoices */}
             {invoice?.invoice_type === 'sell' && materialId && materialId !== 'none' && (
-              <div className="mt-2">
+              <div className="bg-muted p-3 rounded-md">
                 {loadingInventory ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>جاري تحميل المخزون...</span>
+                  <div className="flex items-center justify-center py-2">
+                    <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                    <span className="text-sm">جاري تحميل معلومات المخزون...</span>
                   </div>
                 ) : inventory ? (
-                  <Alert variant={inventory.current_balance > 0 ? "default" : "destructive"}>
-                    <PackageCheck className="h-4 w-4" />
-                    <AlertDescription className="flex items-center justify-between">
-                      <span>المخزون المتاح:</span>
-                      <span className="font-bold">
-                        {inventory.current_balance} {inventory.unit_name}
-                      </span>
-                    </AlertDescription>
-                  </Alert>
-                ) : null}
+                  <div className="flex items-center gap-2">
+                    <PackageCheck className={`h-5 w-5 ${hasInsufficientStock ? 'text-destructive' : 'text-primary'}`} />
+                    <span className="text-sm">
+                      المخزون المتاح: <strong>{inventory.current_balance}</strong> {inventory.unit_name}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">لا توجد معلومات مخزون متاحة</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -241,13 +242,13 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
                 ...eggWeights.map((weight) => ({
                   value: weight.id,
                   label: weight.weight_range,
-                }))
+                })),
               ]}
               value={eggWeightId || 'none'}
               onValueChange={(value) => setValue('egg_weight_id', value === 'none' ? undefined : value)}
               placeholder="اختر وزن البيض"
-              searchPlaceholder="ابحث عن أوزان البيض..."
-              emptyText="لم يتم العثور على أوزان بيض"
+              searchPlaceholder="البحث عن أوزان البيض..."
+              emptyText="لا توجد أوزان بيض"
               disabled={isLoading}
             />
           </div>
@@ -289,19 +290,23 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="unit_id">الوحدة *</Label>
-              <Combobox
-                options={units.map((unit) => ({
-                  value: unit.id,
-                  label: unit.unit_name,
-                }))}
-                value={unitId}
-                onValueChange={(value) => setValue('unit_id', value)}
-                placeholder="اختر الوحدة"
-                searchPlaceholder="ابحث عن الوحدات..."
-                emptyText="لم يتم العثور على وحدات"
-                disabled={isLoading}
-              />
+            <Label htmlFor="unit_id">الوحدة *</Label>
+            <Select
+              value={unitId}
+              onValueChange={(value) => setValue('unit_id', value)}
+              disabled={isLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="اختر الوحدة" />
+              </SelectTrigger>
+              <SelectContent>
+                {units.map((unit) => (
+                  <SelectItem key={unit.id} value={unit.id}>
+                    {unit.unit_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
               {errors.unit_id && (
                 <p className="text-sm text-destructive">{errors.unit_id.message}</p>
               )}
@@ -332,7 +337,7 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
               إلغاء
             </Button>
             <Button type="submit" disabled={isLoading || hasInsufficientStock}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
               إضافة العنصر
             </Button>
           </DialogFooter>
