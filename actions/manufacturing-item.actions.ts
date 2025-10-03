@@ -31,6 +31,55 @@ export type ActionResult<T = void> = {
 };
 
 /**
+ * Validate that all input materials have sufficient stock
+ */
+export async function validateInputMaterialsStock(
+  warehouseId: string,
+  items: Array<{ material_name_id: string; quantity: number }>
+): Promise<ActionResult<Array<{ material_name: string; available: number; required: number }>>> {
+  try {
+    const supabase = await createClient();
+    const insufficientItems: Array<{ material_name: string; available: number; required: number }> = [];
+
+    for (const item of items) {
+      const { data: material } = await supabase
+        .from('materials')
+        .select('current_balance, material_name_id')
+        .eq('warehouse_id', warehouseId)
+        .eq('material_name_id', item.material_name_id)
+        .single();
+
+      const { data: materialName } = await supabase
+        .from('materials_names')
+        .select('material_name')
+        .eq('id', item.material_name_id)
+        .single();
+
+      if (!material || material.current_balance < item.quantity) {
+        insufficientItems.push({
+          material_name: materialName?.material_name || 'Unknown',
+          available: material?.current_balance || 0,
+          required: item.quantity,
+        });
+      }
+    }
+
+    if (insufficientItems.length > 0) {
+      return {
+        success: false,
+        error: 'مخزون غير كافٍ لبعض المواد',
+        data: insufficientItems,
+      };
+    }
+
+    return { success: true, data: [] };
+  } catch (error) {
+    console.error('Error validating input materials:', error);
+    return { success: false, error: 'Failed to validate input materials stock' };
+  }
+}
+
+/**
  * Get manufacturing items
  */
 export async function getManufacturingItems(invoiceId: string): Promise<ActionResult<ManufacturingItem[]>> {
