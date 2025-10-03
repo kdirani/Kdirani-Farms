@@ -26,9 +26,9 @@ export type CreateManufacturingInvoiceInput = {
   invoice_number: string;
   warehouse_id: string;
   blend_name?: string;
-  material_name_id?: string;
-  unit_id?: string;
-  quantity?: number;
+  material_name_id: string;
+  unit_id: string;
+  quantity: number;
   manufacturing_date: string;
   notes?: string;
 };
@@ -268,9 +268,9 @@ export async function createManufacturingInvoice(input: CreateManufacturingInvoi
         invoice_number: input.invoice_number,
         warehouse_id: input.warehouse_id,
         blend_name: input.blend_name?.trim() || null,
-        material_name_id: input.material_name_id || null,
-        unit_id: input.unit_id || null,
-        quantity: input.quantity || 0,
+        material_name_id: input.material_name_id,
+        unit_id: input.unit_id,
+        quantity: input.quantity,
         manufacturing_date: input.manufacturing_date,
         notes: input.notes?.trim() || null,
       })
@@ -428,14 +428,16 @@ export async function addOutputMaterialToInventory(
       return { success: false, error: 'Invoice not found' };
     }
 
-    if (invoice.material_name_id && invoice.warehouse_id && invoice.quantity > 0) {
-      await increaseOutputMaterial(
-        invoice.warehouse_id,
-        invoice.material_name_id,
-        invoice.unit_id!,
-        invoice.quantity
-      );
+    if (!invoice.material_name_id || !invoice.unit_id || !invoice.quantity || invoice.quantity <= 0) {
+      return { success: false, error: 'المادة الناتجة والكمية مطلوبة' };
     }
+
+    await increaseOutputMaterial(
+      invoice.warehouse_id,
+      invoice.material_name_id,
+      invoice.unit_id,
+      invoice.quantity
+    );
 
     revalidatePath('/admin/manufacturing');
     revalidatePath('/farmer');
