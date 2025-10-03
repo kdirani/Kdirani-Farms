@@ -8,7 +8,7 @@ import { createManufacturingInvoice, addOutputMaterialToInventory, rollbackManuf
 import { createManufacturingItem, validateInputMaterialsStock } from '@/actions/manufacturing-item.actions';
 import { createManufacturingExpense } from '@/actions/manufacturing-expense.actions';
 import { createManufacturingAttachment } from '@/actions/manufacturing-attachment.actions';
-import { getWarehousesForMaterials } from '@/actions/material.actions';
+import { getWarehousesForMaterials, getMaterialInventory } from '@/actions/material.actions';
 import { getMaterialNames } from '@/actions/material-name.actions';
 import { getMeasurementUnits } from '@/actions/unit.actions';
 import { getExpenseTypes } from '@/actions/expense-type.actions';
@@ -272,6 +272,38 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
   const [newExpense, setNewExpense] = useState<Partial<ManufacturingExpenseInput>>({
     amount: 0,
   });
+  
+  // State for displaying current stock
+  const [currentStock, setCurrentStock] = useState<{ balance: number; unitName: string } | null>(null);
+  const [isLoadingStock, setIsLoadingStock] = useState(false);
+
+  // Fetch current stock when material or warehouse changes
+  useEffect(() => {
+    const fetchStock = async () => {
+      if (newItem.material_name_id && warehouseId) {
+        setIsLoadingStock(true);
+        try {
+          const result = await getMaterialInventory(warehouseId, newItem.material_name_id);
+          if (result.success && result.data) {
+            setCurrentStock({
+              balance: result.data.current_balance,
+              unitName: result.data.unit_name,
+            });
+          } else {
+            setCurrentStock({ balance: 0, unitName: '' });
+          }
+        } catch (error) {
+          setCurrentStock(null);
+        } finally {
+          setIsLoadingStock(false);
+        }
+      } else {
+        setCurrentStock(null);
+      }
+    };
+
+    fetchStock();
+  }, [newItem.material_name_id, warehouseId]);
 
   const handleAddItem = () => {
     if (!newItem.material_name_id || !newItem.unit_id) {
@@ -283,8 +315,15 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
       return;
     }
 
+    // Check if quantity exceeds available stock
+    if (currentStock && newItem.quantity > currentStock.balance) {
+      toast.error(`الكمية المطلوبة (${newItem.quantity}) تتجاوز المخزون المتوفر (${currentStock.balance})`);
+      return;
+    }
+
     addItem(newItem as ManufacturingItemInput);
     setNewItem({ quantity: 0, blend_count: 1 });
+    setCurrentStock(null); // Reset stock display
   };
 
   const handleAddExpense = () => {
@@ -438,7 +477,7 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
               <h3 className="text-lg font-semibold mb-4">المواد المدخلة ({items.length})</h3>
               
               <div className="grid grid-cols-6 gap-2 mb-4">
-                <div className="col-span-2">
+                <div className="col-span-2 space-y-1">
                   <Combobox
                     options={materials.map((m) => ({
                       value: m.id,
@@ -450,6 +489,17 @@ export function CreateManufacturingDialog({ open, onOpenChange }: CreateManufact
                     searchPlaceholder="البحث عن المواد..."
                     emptyText="لم يتم العثور على مواد"
                   />
+                  {newItem.material_name_id && currentStock !== null && (
+                    <p className={`text-xs ${currentStock.balance > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {isLoadingStock ? (
+                        'جاري التحميل...'
+                      ) : (
+                        <>
+                          المخزون: {currentStock.balance.toFixed(2)} {currentStock.unitName}
+                        </>
+                      )}
+                    </p>
+                  )}
                 </div>
                 <Input
                   type="number"
