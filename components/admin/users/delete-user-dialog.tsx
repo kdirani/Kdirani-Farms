@@ -47,10 +47,10 @@ export function DeleteUserDialog({ user, open, onOpenChange }: DeleteUserDialogP
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            Delete User
+            حذف المستخدم
           </DialogTitle>
           <DialogDescription>
-هل أنت متأكد من حذف هذا المستخدم؟ هذا الإجراء لا يمكن التراجع عنه.
+            هل أنت متأكد من حذف هذا المستخدم؟ هذا الإجراء لا يمكن التراجع عنه.
           </DialogDescription>
         </DialogHeader>
         
@@ -85,7 +85,7 @@ export function DeleteUserDialog({ user, open, onOpenChange }: DeleteUserDialogP
             disabled={isLoading}
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Delete User
+            حذف المستخدم
           </Button>
         </DialogFooter>
       </DialogContent>
