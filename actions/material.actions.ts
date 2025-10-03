@@ -349,3 +349,53 @@ export async function getWarehousesForMaterials(): Promise<ActionResult<Array<{ 
     return { success: false, error: 'Failed to get warehouses' };
   }
 }
+
+/**
+ * Get material inventory for a specific warehouse and material
+ */
+export async function getMaterialInventory(
+  warehouseId: string,
+  materialNameId: string
+): Promise<ActionResult<{ current_balance: number; unit_name: string }>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const { data: material, error } = await supabase
+      .from('materials')
+      .select('current_balance, unit_id')
+      .eq('warehouse_id', warehouseId)
+      .eq('material_name_id', materialNameId)
+      .single();
+
+    if (error) {
+      // Material not found in warehouse
+      return { success: true, data: { current_balance: 0, unit_name: '' } };
+    }
+
+    let unitName = '';
+    if (material.unit_id) {
+      const { data: unit } = await supabase
+        .from('measurement_units')
+        .select('unit_name')
+        .eq('id', material.unit_id)
+        .single();
+      unitName = unit?.unit_name || '';
+    }
+
+    return {
+      success: true,
+      data: {
+        current_balance: material.current_balance || 0,
+        unit_name: unitName,
+      },
+    };
+  } catch (error) {
+    console.error('Error getting material inventory:', error);
+    return { success: false, error: 'Failed to get material inventory' };
+  }
+}

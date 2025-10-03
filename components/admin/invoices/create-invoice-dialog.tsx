@@ -8,7 +8,7 @@ import { createInvoice } from '@/actions/invoice.actions';
 import { createInvoiceItem } from '@/actions/invoice-item.actions';
 import { createInvoiceExpense } from '@/actions/invoice-expense.actions';
 import { createInvoiceAttachment } from '@/actions/invoice-attachment.actions';
-import { getWarehousesForMaterials } from '@/actions/material.actions';
+import { getWarehousesForMaterials, getMaterialInventory } from '@/actions/material.actions';
 import { getClients } from '@/actions/client.actions';
 import { getMaterialNames } from '@/actions/material-name.actions';
 import { getMeasurementUnits } from '@/actions/unit.actions';
@@ -34,9 +34,10 @@ import {
 } from '@/components/ui/select';
 import { Combobox } from '@/components/ui/combobox';
 import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, PackageCheck, AlertTriangle } from 'lucide-react';
 
 const invoiceSchema = z.object({
   invoice_type: z.enum(['buy', 'sell']),
@@ -82,6 +83,8 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
   const [expenses, setExpenses] = useState<InvoiceExpenseInput[]>([]);
   const [attachmentFiles, setAttachmentFiles] = useState<UploadedFile[]>([]);
   const [activeTab, setActiveTab] = useState('info');
+  const [currentItemInventory, setCurrentItemInventory] = useState<{ current_balance: number; unit_name: string } | null>(null);
+  const [loadingInventory, setLoadingInventory] = useState(false);
   
   const {
     register,
@@ -252,13 +255,31 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
     amount: 0,
   });
 
+  // Load inventory when material changes in new item form
+  useEffect(() => {
+    if (newItem.material_name_id && warehouseId && invoiceType === 'sell') {
+      loadInventoryForItem(warehouseId, newItem.material_name_id);
+    } else {
+      setCurrentItemInventory(null);
+    }
+  }, [newItem.material_name_id, warehouseId, invoiceType]);
+
+  const loadInventoryForItem = async (warehouseId: string, materialNameId: string) => {
+    setLoadingInventory(true);
+    const result = await getMaterialInventory(warehouseId, materialNameId);
+    if (result.success && result.data) {
+      setCurrentItemInventory(result.data);
+    }
+    setLoadingInventory(false);
+  };
+
   const handleAddItem = () => {
     if (!newItem.unit_id) {
-      toast.error('الوحدة مطلوبة للبند');
+      toast.error('الوحدة مطلوبة');
       return;
     }
     if (!newItem.quantity || newItem.quantity <= 0) {
-      toast.error('الكمية يجب أن تكون أكبر من صفر');
+      toast.error('الكمية يجب أن تكون أكبر من 0');
       return;
     }
     if (newItem.price === undefined || newItem.price < 0) {
@@ -266,8 +287,21 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
       return;
     }
 
+    // Validate inventory for sell invoices
+    if (invoiceType === 'sell' && newItem.material_name_id && currentItemInventory) {
+      if (currentItemInventory.current_balance <= 0) {
+        toast.error('لا يوجد مخزون متاح لهذه المادة');
+        return;
+      }
+      if (newItem.quantity > currentItemInventory.current_balance) {
+        toast.error(`المخزون غير كافي. المتاح: ${currentItemInventory.current_balance} ${currentItemInventory.unit_name}`);
+        return;
+      }
+    }
+
     addItem(newItem as InvoiceItemInput);
     setNewItem({ quantity: 1, price: 0 });
+    setCurrentItemInventory(null);
   };
 
   const handleAddExpense = () => {
@@ -396,49 +430,82 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
               <h3 className="text-lg font-semibold mb-4">بنود الفاتورة ({items.length})</h3>
               
               {/* Add Item Form */}
-              <div className="grid grid-cols-6 gap-2 mb-4">
-                <div className="col-span-2">
-                  <Combobox
-                    options={[
-                      { value: 'none', label: '-' },
-                      ...materials.map((m) => ({
-                        value: m.id,
-                        label: m.material_name,
-                      }))
-                    ]}
-                    value={newItem.material_name_id || 'none'}
-                    onValueChange={(value) => setNewItem({ ...newItem, material_name_id: value === 'none' ? undefined : value })}
-                    placeholder="المادة"
-                    searchPlaceholder="البحث في المواد..."
-                    emptyText="لا توجد مواد"
+              <div className="space-y-3">
+                <div className="grid grid-cols-6 gap-2">
+                  <div className="col-span-2">
+                    <Combobox
+                      options={[
+                        { value: 'none', label: '-' },
+                        ...materials.map((m) => ({
+                          value: m.id,
+                          label: m.material_name,
+                        }))
+                      ]}
+                      value={newItem.material_name_id || 'none'}
+                      onValueChange={(value) => setNewItem({ ...newItem, material_name_id: value === 'none' ? undefined : value })}
+                      placeholder="المادة"
+                      searchPlaceholder="ابحث عن المواد..."
+                      emptyText="لم يتم العثور على مواد"
+                    />
+                  </div>
+                  <Input
+                    type="number"
+                    placeholder="الكمية"
+                    value={newItem.quantity || ''}
+                    onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
                   />
+                  <Combobox
+                    options={units.map((u) => ({
+                      value: u.id,
+                      label: u.unit_name,
+                    }))}
+                    value={newItem.unit_id || ''}
+                    onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
+                    placeholder="الوحدة"
+                    searchPlaceholder="ابحث عن الوحدات..."
+                    emptyText="لم يتم العثور على وحدات"
+                  />
+                  <Input
+                    type="number"
+                    placeholder="السعر"
+                    value={newItem.price || ''}
+                    onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
+                  />
+                  <Button type="button" size="sm" onClick={handleAddItem}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Input
-                  type="number"
-                  placeholder="الكمية"
-                  value={newItem.quantity || ''}
-                  onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
-                />
-                <Combobox
-                  options={units.map((u) => ({
-                    value: u.id,
-                    label: u.unit_name,
-                  }))}
-                  value={newItem.unit_id || ''}
-                  onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
-                  placeholder="الوحدة"
-                  searchPlaceholder="البحث في الوحدات..."
-                  emptyText="لا توجد وحدات"
-                />
-                <Input
-                  type="number"
-                  placeholder="السعر"
-                  value={newItem.price || ''}
-                  onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
-                />
-                <Button type="button" size="sm" onClick={handleAddItem}>
-                  <Plus className="h-4 w-4" />
-                </Button>
+                
+                {/* Show inventory for sell invoices */}
+                {invoiceType === 'sell' && newItem.material_name_id && newItem.material_name_id !== 'none' && (
+                  <div>
+                    {loadingInventory ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>جاري تحميل المخزون...</span>
+                      </div>
+                    ) : currentItemInventory ? (
+                      <Alert variant={currentItemInventory.current_balance > 0 ? "default" : "destructive"}>
+                        <PackageCheck className="h-4 w-4" />
+                        <AlertDescription className="flex items-center justify-between">
+                          <span>المخزون المتاح:</span>
+                          <span className="font-bold">
+                            {currentItemInventory.current_balance} {currentItemInventory.unit_name}
+                          </span>
+                        </AlertDescription>
+                      </Alert>
+                    ) : null}
+                    
+                    {currentItemInventory && newItem.quantity && newItem.quantity > currentItemInventory.current_balance && (
+                      <Alert variant="destructive" className="mt-2">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription>
+                          الكمية المطلوبة أكبر من المخزون المتاح
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Items List */}

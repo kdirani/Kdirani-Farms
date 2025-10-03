@@ -5,9 +5,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { createInvoiceItem } from '@/actions/invoice-item.actions';
+import { getInvoiceById } from '@/actions/invoice.actions';
 import { getMaterialNames } from '@/actions/material-name.actions';
 import { getMeasurementUnits } from '@/actions/unit.actions';
 import { getEggWeights } from '@/actions/egg-weight.actions';
+import { getMaterialInventory } from '@/actions/material.actions';
 import {
   Dialog,
   DialogContent,
@@ -27,8 +29,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Combobox } from '@/components/ui/combobox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle, PackageCheck } from 'lucide-react';
 
 const itemSchema = z.object({
   material_name_id: z.string().optional(),
@@ -52,6 +55,9 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
   const [materials, setMaterials] = useState<Array<{ id: string; material_name: string }>>([]);
   const [units, setUnits] = useState<Array<{ id: string; unit_name: string }>>([]);
   const [eggWeights, setEggWeights] = useState<Array<{ id: string; weight_range: string }>>([]);
+  const [invoice, setInvoice] = useState<{ invoice_type: 'buy' | 'sell'; warehouse_id: string | null } | null>(null);
+  const [inventory, setInventory] = useState<{ current_balance: number; unit_name: string } | null>(null);
+  const [loadingInventory, setLoadingInventory] = useState(false);
   
   const {
     register,
@@ -71,12 +77,23 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
   const materialId = watch('material_name_id');
   const unitId = watch('unit_id');
   const eggWeightId = watch('egg_weight_id');
+  const quantity = watch('quantity');
 
   useEffect(() => {
     if (open) {
       loadData();
+      loadInvoiceData();
     }
   }, [open]);
+
+  // Load inventory when material changes
+  useEffect(() => {
+    if (materialId && invoice?.warehouse_id && materialId !== 'none') {
+      loadInventory(invoice.warehouse_id, materialId);
+    } else {
+      setInventory(null);
+    }
+  }, [materialId, invoice]);
 
   const loadData = async () => {
     const [materialsResult, unitsResult, eggWeightsResult] = await Promise.all([
@@ -96,7 +113,38 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
     }
   };
 
+  const loadInvoiceData = async () => {
+    const result = await getInvoiceById(invoiceId);
+    if (result.success && result.data) {
+      setInvoice({
+        invoice_type: result.data.invoice_type,
+        warehouse_id: result.data.warehouse_id,
+      });
+    }
+  };
+
+  const loadInventory = async (warehouseId: string, materialNameId: string) => {
+    setLoadingInventory(true);
+    const result = await getMaterialInventory(warehouseId, materialNameId);
+    if (result.success && result.data) {
+      setInventory(result.data);
+    }
+    setLoadingInventory(false);
+  };
+
   const onSubmit = async (data: ItemFormData) => {
+    // Validate inventory for sell invoices
+    if (invoice?.invoice_type === 'sell' && data.material_name_id && inventory) {
+      if (inventory.current_balance <= 0) {
+        toast.error('لا يوجد مخزون متاح لهذه المادة');
+        return;
+      }
+      if (data.quantity > inventory.current_balance) {
+        toast.error(`المخزون غير كافي. المتاح: ${inventory.current_balance} ${inventory.unit_name}`);
+        return;
+      }
+    }
+
     setIsLoading(true);
     try {
       const result = await createInvoiceItem({
@@ -110,7 +158,7 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
       });
       
       if (result.success) {
-        toast.success('Item added successfully');
+        toast.success('تم إضافة العنصر بنجاح');
         reset();
         onOpenChange(false);
 
@@ -119,30 +167,36 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
           window.location.reload();
         }, 1500);
       } else {
-        toast.error(result.error || 'Failed to add item');
+        toast.error(result.error || 'فشل في إضافة العنصر');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('حدث خطأ غير متوقع');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const hasInsufficientStock = !!(invoice?.invoice_type === 'sell' && 
+    materialId && 
+    materialId !== 'none' && 
+    inventory && 
+    (inventory.current_balance <= 0 || (quantity && quantity > inventory.current_balance)));
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add Invoice Item</DialogTitle>
+          <DialogTitle>إضافة عنصر للفاتورة</DialogTitle>
           <DialogDescription>
-            Add a new material or product to this invoice
+            إضافة مادة أو منتج جديد لهذه الفاتورة
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="material_name_id">Material/Product</Label>
+            <Label htmlFor="material_name_id">المادة/المنتج</Label>
             <Combobox
               options={[
-                { value: 'none', label: 'No material' },
+                { value: 'none', label: 'بدون مادة' },
                 ...materials.map((material) => ({
                   value: material.id,
                   label: material.material_name,
@@ -150,18 +204,40 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
               ]}
               value={materialId || 'none'}
               onValueChange={(value) => setValue('material_name_id', value === 'none' ? undefined : value)}
-              placeholder="Select material"
-              searchPlaceholder="Search materials..."
-              emptyText="No materials found"
+              placeholder="اختر المادة"
+              searchPlaceholder="ابحث عن المواد..."
+              emptyText="لم يتم العثور على مواد"
               disabled={isLoading}
             />
+            
+            {/* Show inventory for sell invoices */}
+            {invoice?.invoice_type === 'sell' && materialId && materialId !== 'none' && (
+              <div className="mt-2">
+                {loadingInventory ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>جاري تحميل المخزون...</span>
+                  </div>
+                ) : inventory ? (
+                  <Alert variant={inventory.current_balance > 0 ? "default" : "destructive"}>
+                    <PackageCheck className="h-4 w-4" />
+                    <AlertDescription className="flex items-center justify-between">
+                      <span>المخزون المتاح:</span>
+                      <span className="font-bold">
+                        {inventory.current_balance} {inventory.unit_name}
+                      </span>
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="egg_weight_id">Egg Weight (Optional)</Label>
+            <Label htmlFor="egg_weight_id">وزن البيض (اختياري)</Label>
             <Combobox
               options={[
-                { value: 'none', label: 'No egg weight' },
+                { value: 'none', label: 'بدون وزن بيض' },
                 ...eggWeights.map((weight) => ({
                   value: weight.id,
                   label: weight.weight_range,
@@ -169,16 +245,16 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
               ]}
               value={eggWeightId || 'none'}
               onValueChange={(value) => setValue('egg_weight_id', value === 'none' ? undefined : value)}
-              placeholder="Select egg weight"
-              searchPlaceholder="Search egg weights..."
-              emptyText="No egg weights found"
+              placeholder="اختر وزن البيض"
+              searchPlaceholder="ابحث عن أوزان البيض..."
+              emptyText="لم يتم العثور على أوزان بيض"
               disabled={isLoading}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity *</Label>
+              <Label htmlFor="quantity">الكمية *</Label>
               <Input
                 id="quantity"
                 type="number"
@@ -189,10 +265,18 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
               {errors.quantity && (
                 <p className="text-sm text-destructive">{errors.quantity.message}</p>
               )}
+              {hasInsufficientStock && (
+                <Alert variant="destructive" className="mt-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    الكمية المطلوبة أكبر من المخزون المتاح
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="weight">Weight</Label>
+              <Label htmlFor="weight">الوزن</Label>
               <Input
                 id="weight"
                 type="number"
@@ -205,7 +289,7 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="unit_id">Unit *</Label>
+              <Label htmlFor="unit_id">الوحدة *</Label>
               <Combobox
                 options={units.map((unit) => ({
                   value: unit.id,
@@ -213,9 +297,9 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
                 }))}
                 value={unitId}
                 onValueChange={(value) => setValue('unit_id', value)}
-                placeholder="Select unit"
-                searchPlaceholder="Search units..."
-                emptyText="No units found"
+                placeholder="اختر الوحدة"
+                searchPlaceholder="ابحث عن الوحدات..."
+                emptyText="لم يتم العثور على وحدات"
                 disabled={isLoading}
               />
               {errors.unit_id && (
@@ -224,7 +308,7 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="price">Price *</Label>
+              <Label htmlFor="price">السعر *</Label>
               <Input
                 id="price"
                 type="number"
@@ -245,11 +329,11 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              إلغاء
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading || hasInsufficientStock}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Add Item
+              إضافة العنصر
             </Button>
           </DialogFooter>
         </form>
