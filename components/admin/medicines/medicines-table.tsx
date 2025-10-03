@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 interface MedicinesTableProps {
   medicines: Medicine[];
@@ -135,7 +135,7 @@ export function MedicinesTable({ medicines: initialMedicines }: MedicinesTablePr
                   <TableCell className="font-medium">{medicine.name}</TableCell>
                   <TableCell>{medicine.description || '-'}</TableCell>
                   <TableCell>{medicine.day_of_age}</TableCell>
-                  <TableCell>{format(new Date(medicine.created_at), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>{formatDate(new Date(medicine.created_at))}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-start gap-2">
                       <Button

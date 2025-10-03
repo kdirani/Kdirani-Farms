@@ -3,7 +3,7 @@
 import { ManufacturingInvoice, deleteManufacturingInvoice } from '@/actions/manufacturing.actions';
 import { toast } from 'sonner';
 
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 import { CreateManufacturingDialog } from './create-manufacturing-dialog';
 import { MoreHorizontal, Search, Plus } from 'lucide-react';
 import {
@@ -97,7 +97,7 @@ export function ManufacturingTable({ invoices }: ManufacturingTableProps) {
               filteredInvoices.map((invoice) => (
                 <TableRow key={invoice.id}>
                   <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
-                  <TableCell>{format(new Date(invoice.manufacturing_date), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>{formatDate(new Date(invoice.manufacturing_date))}</TableCell>
                   <TableCell>
                     {invoice.warehouse ? (
                       <div>

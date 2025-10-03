@@ -32,7 +32,7 @@ import {
 import { FileText, MoreHorizontal, Search, Plus, CheckCircle, XCircle } from 'lucide-react';
 import { CreateInvoiceDialog } from './create-invoice-dialog';
 import { DeleteInvoiceDialog } from './delete-invoice-dialog';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface InvoicesTableProps {
@@ -139,7 +139,7 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
                     </div>
                   </TableCell>
                   <TableCell>{getTypeBadge(invoice.invoice_type)}</TableCell>
-                  <TableCell>{format(new Date(invoice.invoice_date), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>{formatDate(new Date(invoice.invoice_date))}</TableCell>
                   <TableCell>
                     {invoice.warehouse ? (
                       <div>

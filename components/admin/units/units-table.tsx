@@ -23,7 +23,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 interface UnitsTableProps {
   units: MeasurementUnit[];
@@ -131,8 +131,8 @@ export function UnitsTable({ units: initialUnits }: UnitsTableProps) {
               filteredUnits.map((unit) => (
                 <TableRow key={unit.id}>
                   <TableCell className="font-medium">{unit.unit_name}</TableCell>
-                  <TableCell>{format(new Date(unit.created_at), 'د MMM، yyyy')}</TableCell>
-                  <TableCell>{format(new Date(unit.updated_at), 'د MMM، yyyy')}</TableCell>
+                  <TableCell>{formatDate(new Date(unit.created_at))}</TableCell>
+                  <TableCell>{formatDate(new Date(unit.updated_at))}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-start gap-2">
                       <Button

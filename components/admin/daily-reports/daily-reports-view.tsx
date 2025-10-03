@@ -29,7 +29,7 @@ import {
   TrendingUp,
   Package
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface DailyReport {
@@ -142,7 +142,7 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                       <TableCell>
                         <div>
                           <div className="font-medium">
-                            {format(new Date(report.report_date), 'MMM dd, yyyy')}
+                            {formatDate(new Date(report.report_date))}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {report.report_time}

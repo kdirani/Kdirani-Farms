@@ -25,7 +25,7 @@ import { UserCog, MoreHorizontal, Search, Plus } from 'lucide-react';
 import { CreatePoultryDialog } from './create-poultry-dialog';
 import { EditPoultryDialog } from './edit-poultry-dialog';
 import { DeletePoultryDialog } from './delete-poultry-dialog';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 interface PoultryTableProps {
   poultryStatuses: PoultryStatus[];
@@ -139,7 +139,7 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
                     {getStatusBadge(poultry)}
                   </TableCell>
                   <TableCell>
-                    {format(new Date(poultry.created_at), 'MMM dd, yyyy')}
+                    {formatDate(new Date(poultry.created_at))}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>

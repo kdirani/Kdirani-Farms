@@ -23,7 +23,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 interface ExpenseTypesTableProps {
   expenseTypes: ExpenseType[];
@@ -131,8 +131,8 @@ export function ExpenseTypesTable({ expenseTypes: initialExpenseTypes }: Expense
               filteredExpenseTypes.map((expenseType) => (
                 <TableRow key={expenseType.id}>
                   <TableCell className="font-medium">{expenseType.name}</TableCell>
-                  <TableCell>{format(new Date(expenseType.created_at), 'MMM dd, yyyy')}</TableCell>
-                  <TableCell>{format(new Date(expenseType.updated_at), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>{formatDate(new Date(expenseType.created_at))}</TableCell>
+                  <TableCell>{formatDate(new Date(expenseType.updated_at))}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-start gap-2">
                       <Button

@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Search, Plus } from 'lucide-react';
 import { CreateMedicineInvoiceDialog } from './create-medicine-invoice-dialog';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface MedicineInvoicesTableProps { 
@@ -96,7 +96,7 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
               filteredInvoices.map((invoice) => (
                 <TableRow key={invoice.id}>
                   <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
-                  <TableCell>{format(new Date(invoice.invoice_date), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>{formatDate(new Date(invoice.invoice_date))}</TableCell>
                   <TableCell>
                     {invoice.warehouse ? (
                       <div>

@@ -23,7 +23,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 interface MaterialNamesTableProps {
   materialNames: MaterialName[];
@@ -130,8 +130,8 @@ export function MaterialNamesTable({ materialNames: initialMaterialNames }: Mate
               filteredMaterials.map((material) => (
                 <TableRow key={material.id}>
                   <TableCell className="font-medium">{material.material_name}</TableCell>
-                  <TableCell>{format(new Date(material.created_at), 'د MMM، yyyy')}</TableCell>
-                  <TableCell>{format(new Date(material.updated_at), 'د MMM، yyyy')}</TableCell>
+                  <TableCell>{formatDate(new Date(material.created_at))}</TableCell>
+                  <TableCell>{formatDate(new Date(material.updated_at))}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-start gap-2">
                       <Button

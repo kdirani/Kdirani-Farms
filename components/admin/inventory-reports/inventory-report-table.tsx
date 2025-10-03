@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Search } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 interface InventoryReportTableProps {
   inventory: InventoryReport[];
@@ -143,7 +143,7 @@ export function InventoryReportTable({ inventory }: InventoryReportTableProps) {
                   <TableCell>{item.unit_name}</TableCell>
                   <TableCell>{getStockBadge(item.current_balance)}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">
-                    {format(new Date(item.updated_at), 'MMM dd, yyyy')}
+                    {formatDate(new Date(item.updated_at))}
                   </TableCell>
                 </TableRow>
               ))

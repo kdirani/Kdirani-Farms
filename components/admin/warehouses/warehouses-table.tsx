@@ -24,7 +24,7 @@ import { Warehouse as WarehouseIcon, MoreHorizontal, Search, Plus } from 'lucide
 import { CreateWarehouseDialog } from './create-warehouse-dialog';
 import { EditWarehouseDialog } from './edit-warehouse-dialog';
 import { DeleteWarehouseDialog } from './delete-warehouse-dialog';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 interface WarehousesTableProps {
   warehouses: Warehouse[];
@@ -107,7 +107,7 @@ export function WarehousesTable({ warehouses }: WarehousesTableProps) {
                     )}
                   </TableCell>
                   <TableCell>
-                    {format(new Date(warehouse.created_at), 'MMM dd, yyyy')}
+                    {formatDate(new Date(warehouse.created_at))}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>

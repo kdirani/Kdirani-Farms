@@ -23,7 +23,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 interface EggWeightsTableProps {
   eggWeights: EggWeight[];
@@ -131,8 +131,8 @@ export function EggWeightsTable({ eggWeights: initialEggWeights }: EggWeightsTab
               filteredEggWeights.map((eggWeight) => (
                 <TableRow key={eggWeight.id}>
                   <TableCell className="font-medium">{eggWeight.weight_range}</TableCell>
-                  <TableCell>{format(new Date(eggWeight.created_at), 'د MMM، yyyy')}</TableCell>
-                  <TableCell>{format(new Date(eggWeight.updated_at), 'د MMM، yyyy')}</TableCell>
+                  <TableCell>{formatDate(new Date(eggWeight.created_at))}</TableCell>
+                  <TableCell>{formatDate(new Date(eggWeight.updated_at))}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-start gap-2">
                       <Button
