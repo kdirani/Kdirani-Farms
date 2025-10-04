@@ -36,7 +36,7 @@ const farmSetupSchema = z.object({
   }),
   poultry: z.object({
     batch_name: z.string().min(2, 'اسم القطيع يجب أن يكون حرفين على الأقل'),
-    opening_chicks: z.number().min(1, 'عدد الدجاج الابتدائي يجب أن يكون 1 على الأقل'),
+    opening_chicks: z.number().min(0, 'عدد الدجاج الابتدائي لا يمكن أن يكون سالباً'),
   }),
   materials: z.array(
     z.object({
@@ -84,7 +84,7 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
       },
       poultry: {
         batch_name: '',
-        opening_chicks: 1000,
+        opening_chicks: 0,
       },
       materials: [],
     },
@@ -304,10 +304,13 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
               <Label htmlFor="poultry.opening_chicks">عدد الدجاج الابتدائي *</Label>
               <Input
                 id="poultry.opening_chicks"
-                type="number"
-                min="1"
-                placeholder="مثال: 1000"
-                {...register('poultry.opening_chicks', { valueAsNumber: true })}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="مثال: 0"
+                {...register('poultry.opening_chicks', { 
+                  setValueAs: (value) => value === '' ? 0 : parseInt(value, 10) 
+                })}
                 disabled={isLoading}
               />
               {errors.poultry?.opening_chicks && (
