@@ -193,11 +193,16 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
             <Label htmlFor="opening_balance">الرصيد الافتتاحي *</Label>
             <Input
               id="opening_balance"
-              type="number"
-              min="0"
-              step="0.01"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*\.?[0-9]*"
               placeholder="0.00"
-              {...register('opening_balance', { valueAsNumber: true })}
+              {...register('opening_balance', { 
+                setValueAs: (value) => {
+                  const parsed = parseFloat(value);
+                  return isNaN(parsed) ? 0 : parsed;
+                }
+              })}
               disabled={isLoading}
             />
             {errors.opening_balance && (

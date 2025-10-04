@@ -206,12 +206,12 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
                   <TableCell>{material.warehouse?.name || '-'}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">{material.warehouse?.farm_name || '-'}</TableCell>
                   <TableCell>{material.unit_name || '-'}</TableCell>
-                  <TableCell className="text-right">{material.opening_balance.toLocaleString()}</TableCell>
-                  <TableCell className="text-right text-green-600">+{material.purchases.toLocaleString()}</TableCell>
-                  <TableCell className="text-right text-red-600">-{material.sales.toLocaleString()}</TableCell>
-                  <TableCell className="text-right text-orange-600">-{material.consumption.toLocaleString()}</TableCell>
-                  <TableCell className="text-right text-blue-600">+{material.manufacturing.toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-bold text-lg">{material.current_balance.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">{material.opening_balance.toLocaleString('en-US')}</TableCell>
+                  <TableCell className="text-right text-green-600">+{material.purchases.toLocaleString('en-US')}</TableCell>
+                  <TableCell className="text-right text-red-600">-{material.sales.toLocaleString('en-US')}</TableCell>
+                  <TableCell className="text-right text-orange-600">-{material.consumption.toLocaleString('en-US')}</TableCell>
+                  <TableCell className="text-right text-blue-600">+{material.manufacturing.toLocaleString('en-US')}</TableCell>
+                  <TableCell className="text-right font-bold text-lg">{material.current_balance.toLocaleString('en-US')}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     <div className="flex flex-col">
                       <span>{formatDate(new Date(material.updated_at))}</span>
