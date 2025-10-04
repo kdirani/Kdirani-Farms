@@ -292,6 +292,11 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
   };
 
   const handleAddItem = () => {
+    // Validate material name is required
+    if (!newItem.material_name_id || newItem.material_name_id === 'none') {
+      toast.error('اسم المادة مطلوب - يجب اختيار مادة من القائمة');
+      return;
+    }
     if (!newItem.unit_id) {
       toast.error('الوحدة مطلوبة');
       return;
