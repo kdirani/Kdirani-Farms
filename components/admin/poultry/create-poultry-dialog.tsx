@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { createPoultryStatus, getActiveFarms } from '@/actions/poultry.actions';
+import { createPoultryStatus, getAvailableFarmsForPoultry } from '@/actions/poultry.actions';
 import {
   Dialog,
   DialogContent,
@@ -68,7 +68,7 @@ export function CreatePoultryDialog({ open, onOpenChange }: CreatePoultryDialogP
 
   const loadAvailableFarms = async () => {
     setLoadingFarms(true);
-    const result = await getActiveFarms();
+    const result = await getAvailableFarmsForPoultry();
     if (result.success && result.data) {
       setAvailableFarms(result.data);
     }
@@ -143,8 +143,8 @@ export function CreatePoultryDialog({ open, onOpenChange }: CreatePoultryDialogP
               <p className="text-sm text-destructive">{errors.farm_id.message}</p>
             )}
             {availableFarms.length === 0 && !loadingFarms && (
-              <p className="text-xs text-muted-foreground">
-                لا توجد مزارع متاحة. يرجى إنشاء مزرعة أولاً.
+              <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                ⚠️ جميع المزارع لديها قطيع بالفعل. كل مزرعة يمكن أن يكون لها قطيع واحد فقط.
               </p>
             )}
           </div>

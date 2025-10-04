@@ -8,7 +8,7 @@ import { AlertCircle } from 'lucide-react';
 
 export const metadata = {
   title: 'إدارة القطعان - لوحة التحكم الإدارية',
-  description: 'إدارة دفعات القطعان وتتبع أعداد الكتاكيت',
+  description: 'إدارة القطعان وتتبع أعداد الكتاكيت (قطيع واحد لكل مزرعة)',
 };
 
 async function PoultryContent() {
@@ -34,15 +34,15 @@ export default function PoultryPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">إدارة القطعان</h1>
         <p className="text-muted-foreground mt-2">
-          إدارة دفعات القطعان وتتبع أعداد الكتاكيت في جميع المزارع
+          إدارة القطعان وتتبع أعداد الكتاكيت (كل مزرعة لها قطيع واحد فقط)
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>جميع دفعات القطعان</CardTitle>
+          <CardTitle>جميع القطعان</CardTitle>
           <CardDescription>
-            عرض وإدارة جميع دفعات القطعان في النظام
+            عرض وإدارة القطعان في النظام (قطيع واحد لكل مزرعة)
           </CardDescription>
         </CardHeader>
         <CardContent>

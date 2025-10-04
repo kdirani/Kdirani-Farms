@@ -400,9 +400,10 @@ export async function deletePoultryStatus(poultryId: string): Promise<ActionResu
 }
 
 /**
- * Get all active farms (for assignment)
+ * Get farms without poultry status (available for assignment)
+ * Since each farm can have only ONE poultry status, we filter out farms that already have one
  */
-export async function getActiveFarms(): Promise<ActionResult<Array<{ id: string; name: string; location: string | null }>>> {
+export async function getAvailableFarmsForPoultry(): Promise<ActionResult<Array<{ id: string; name: string; location: string | null }>>> {
   try {
     const supabase = await createClient();
 
@@ -423,14 +424,36 @@ export async function getActiveFarms(): Promise<ActionResult<Array<{ id: string;
     }
 
     // Get all farms
-    const { data: farms } = await supabase
+    const { data: allFarms } = await supabase
       .from('farms')
       .select('id, name, location')
       .order('name');
 
-    return { success: true, data: farms || [] };
+    if (!allFarms) {
+      return { success: true, data: [] };
+    }
+
+    // Get all farm IDs that already have poultry status
+    const { data: existingPoultry } = await supabase
+      .from('poultry_status')
+      .select('farm_id');
+
+    const farmsWithPoultry = new Set(existingPoultry?.map(p => p.farm_id) || []);
+
+    // Filter out farms that already have poultry
+    const availableFarms = allFarms.filter(farm => !farmsWithPoultry.has(farm.id));
+
+    return { success: true, data: availableFarms };
   } catch (error) {
-    console.error('Error getting farms:', error);
-    return { success: false, error: 'Failed to get farms' };
+    console.error('Error getting available farms:', error);
+    return { success: false, error: 'Failed to get available farms' };
   }
+}
+
+/**
+ * @deprecated Use getAvailableFarmsForPoultry() instead
+ * This function is kept for backward compatibility
+ */
+export async function getActiveFarms(): Promise<ActionResult<Array<{ id: string; name: string; location: string | null }>>> {
+  return getAvailableFarmsForPoultry();
 }

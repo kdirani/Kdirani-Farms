@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import DailyReportForm from "@/components/farmer/daily-report-form";
+import IntegratedDailyReportForm from "@/components/farmer/integrated-daily-report-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata: Metadata = {
@@ -79,12 +79,12 @@ export default async function DailyReportPage() {
     .select("*")
     .order("name");
 
-  // Get poultry status
+  // Get poultry status (one per farm)
   const { data: poultryStatus } = await supabase
     .from("poultry_status")
     .select("*")
     .eq("farm_id", farm.id)
-    .order("batch_name");
+    .maybeSingle();
 
   return (
     <div className="space-y-6">
@@ -105,7 +105,7 @@ export default async function DailyReportPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DailyReportForm
+          <IntegratedDailyReportForm
             warehouseId={farm.warehouses?.[0]?.id || ""}
             warehouseName={farm.warehouses?.[0]?.name || ""}
             farmId={farm.id}
@@ -115,7 +115,7 @@ export default async function DailyReportPage() {
             expenseTypes={expenseTypes || []}
             clients={clients || []}
             medicines={medicines || []}
-            poultryStatus={poultryStatus || []}
+            poultryStatus={poultryStatus || null}
           />
         </CardContent>
       </Card>

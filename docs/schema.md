@@ -157,16 +157,16 @@ CREATE TABLE public.materials (
 );
 
 -- القطيع أو الدجاج يحوي العدد الأولي والنفوق والمتبقي
+-- علاقة واحد لواحد: كل مزرعة لها قطيع واحد فقط
 CREATE TABLE public.poultry_status (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(), -- معرف القطيع uuid
-  farm_id uuid REFERENCES public.farms(id) ON DELETE CASCADE, -- معرف المزرعة
+  farm_id uuid UNIQUE REFERENCES public.farms(id) ON DELETE CASCADE, -- معرف المزرعة (UNIQUE لضمان قطيع واحد لكل مزرعة)
   batch_name VARCHAR(255), -- اسم قطيع الدجاج
   opening_chicks INTEGER DEFAULT 0, -- عدد الدجاج الابتدائي
   dead_chicks INTEGER DEFAULT 0, -- النفوق
   remaining_chicks INTEGER DEFAULT 0, -- الدجاج المتبقي
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  CONSTRAINT unique_farm_batch UNIQUE (farm_id, batch_name)
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 
