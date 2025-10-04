@@ -8,7 +8,7 @@ import { AlertCircle, Loader2 } from 'lucide-react';
 
 export const metadata = {
   title: 'إعداد مزرعة كاملة - لوحة التحكم',
-  description: 'إنشاء إعداد مزرعة كامل مع المستخدم والمزرعة والمستودع والقطيع والمواد',
+  description: 'إنشاء إعداد مزرعة كامل مع المستخدم والمزرعة والمستودع والقطيع والمواد الغذائية والأدوية',
 };
 
 async function SetupFormContent() {
@@ -61,7 +61,7 @@ export default function CompleteFarmSetupPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">إعداد مزرعة كاملة</h1>
         <p className="text-muted-foreground mt-2">
-          إنشاء تكوين مزرعة كامل في مكان واحد: المزارع، المزرعة، المستودع، القطيع، والمواد
+          إنشاء تكوين مزرعة كامل في مكان واحد: المزارع، المزرعة، المستودع، القطيع، المواد الغذائية والأدوية
         </p>
       </div>
 
@@ -79,7 +79,8 @@ export default function CompleteFarmSetupPage() {
                 <li>مزرعة مخصصة للمزارع</li>
                 <li>مستودع للمزرعة</li>
                 <li>قطيع أولي (دجاج)</li>
-                <li>مواد الرصيد الافتتاحي في المستودع (اختياري)</li>
+                <li>الأرصدة الافتتاحية للمواد الغذائية في المستودع (اختياري)</li>
+                <li>الأرصدة الافتتاحية للأدوية في المستودع (اختياري)</li>
               </ol>
             </div>
           </div>

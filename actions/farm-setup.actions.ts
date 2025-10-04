@@ -40,6 +40,13 @@ export type FarmSetupInput = {
     unit_id: string;
     opening_balance: number;
   }>;
+  
+  // Medicines (array of medicines to create)
+  medicines: Array<{
+    medicine_id: string;
+    unit_id: string;
+    opening_balance: number;
+  }>;
 };
 
 export type ActionResult<T = void> = {
@@ -54,6 +61,7 @@ export type SetupResult = {
   warehouseId?: string;
   poultryId?: string;
   materialIds?: string[];
+  medicineIds?: string[];
 };
 
 /**
@@ -166,6 +174,23 @@ export async function createCompleteFarmSetup(
         result.materialIds.push(materialResult.data.id);
       }
       // Continue even if some materials fail - we'll still create the others
+    }
+
+    // Step 6: Create medicines (opening stocks)
+    result.medicineIds = [];
+    for (const medicine of input.medicines || []) {
+      const medicineInput: CreateMaterialInput = {
+        warehouse_id: result.warehouseId,
+        medicine_id: medicine.medicine_id,
+        unit_id: medicine.unit_id,
+        opening_balance: medicine.opening_balance,
+      };
+
+      const medicineResult = await createMaterial(medicineInput);
+      if (medicineResult.success && medicineResult.data) {
+        result.medicineIds.push(medicineResult.data.id);
+      }
+      // Continue even if some medicines fail - we'll still create the others
     }
 
     // Revalidate all relevant paths

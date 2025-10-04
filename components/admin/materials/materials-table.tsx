@@ -49,6 +49,7 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const selectedWarehouse = searchParams.get('warehouse') || 'all';
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>('all');
   
   // استخدام useDeferredValue للأداء الأفضل
   const deferredSearchTerm = useDeferredValue(searchTerm);
@@ -107,8 +108,15 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
       filtered = filtered.filter(m => m.current_balance >= 100);
     }
     
+    // فلترة حسب النوع (مواد أو أدوية)
+    if (filterType === 'materials') {
+      filtered = filtered.filter(m => m.material_name_id && !m.medicine_id);
+    } else if (filterType === 'medicines') {
+      filtered = filtered.filter(m => m.medicine_id && !m.material_name_id);
+    }
+    
     return filtered;
-  }, [materials, deferredSearchTerm, filterStatus]);
+  }, [materials, deferredSearchTerm, filterStatus, filterType]);
 
 
   return (
@@ -158,6 +166,16 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
               <SelectItem value="good">متوفر</SelectItem>
               <SelectItem value="low">مخزون قليل</SelectItem>
               <SelectItem value="out">نفد المخزون</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">الكل</SelectItem>
+              <SelectItem value="materials">مواد غذائية</SelectItem>
+              <SelectItem value="medicines">أدوية</SelectItem>
             </SelectContent>
           </Select>
         </div>

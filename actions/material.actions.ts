@@ -7,6 +7,7 @@ export type Material = {
   id: string;
   warehouse_id: string | null;
   material_name_id: string | null;
+  medicine_id: string | null;
   unit_id: string | null;
   opening_balance: number;
   purchases: number;
@@ -26,7 +27,8 @@ export type Material = {
 
 export type CreateMaterialInput = {
   warehouse_id: string;
-  material_name_id: string;
+  material_name_id?: string;
+  medicine_id?: string;
   unit_id: string;
   opening_balance: number;
 };
@@ -317,23 +319,45 @@ export async function createMaterial(input: CreateMaterialInput): Promise<Action
       return { success: false, error: 'Opening balance cannot be negative' };
     }
 
-    // Check if material already exists for this warehouse
-    const { data: existing } = await supabase
-      .from('materials')
-      .select('id')
-      .eq('warehouse_id', input.warehouse_id)
-      .eq('material_name_id', input.material_name_id)
-      .single();
+    // Validate that either material_name_id or medicine_id is provided
+    if (!input.material_name_id && !input.medicine_id) {
+      return { success: false, error: 'Either material name or medicine must be provided' };
+    }
+
+    if (input.material_name_id && input.medicine_id) {
+      return { success: false, error: 'Cannot provide both material name and medicine' };
+    }
+
+    // Check if material/medicine already exists for this warehouse
+    let existing;
+    if (input.material_name_id) {
+      const { data } = await supabase
+        .from('materials')
+        .select('id')
+        .eq('warehouse_id', input.warehouse_id)
+        .eq('material_name_id', input.material_name_id)
+        .maybeSingle();
+      existing = data;
+    } else if (input.medicine_id) {
+      const { data } = await supabase
+        .from('materials')
+        .select('id')
+        .eq('warehouse_id', input.warehouse_id)
+        .eq('medicine_id', input.medicine_id)
+        .maybeSingle();
+      existing = data;
+    }
 
     if (existing) {
-      return { success: false, error: 'This material already exists in the selected warehouse' };
+      return { success: false, error: 'This item already exists in the selected warehouse' };
     }
 
     const { data: newMaterial, error } = await supabase
       .from('materials')
       .insert({
         warehouse_id: input.warehouse_id,
-        material_name_id: input.material_name_id,
+        material_name_id: input.material_name_id || null,
+        medicine_id: input.medicine_id || null,
         unit_id: input.unit_id,
         opening_balance: input.opening_balance,
         current_balance: input.opening_balance,

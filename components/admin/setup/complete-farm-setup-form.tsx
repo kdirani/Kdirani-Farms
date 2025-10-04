@@ -45,6 +45,13 @@ const farmSetupSchema = z.object({
       opening_balance: z.number().min(0, 'الرصيد الافتتاحي لا يمكن أن يكون سالباً'),
     })
   ).default([]),
+  medicines: z.array(
+    z.object({
+      medicine_id: z.string().min(1, 'الدواء مطلوب'),
+      unit_id: z.string().min(1, 'الوحدة مطلوبة'),
+      opening_balance: z.number().min(0, 'الرصيد الافتتاحي لا يمكن أن يكون سالباً'),
+    })
+  ).default([]),
 });
 
 type FarmSetupFormData = z.infer<typeof farmSetupSchema>;
@@ -54,9 +61,15 @@ interface CompleteFarmSetupFormProps {
   units: Array<{ id: string; unit_name: string }>;
 }
 
+interface Medicine {
+  id: string;
+  name: string;
+}
+
 export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetupFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [setupComplete, setSetupComplete] = useState(false);
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
 
   const {
     register,
@@ -87,13 +100,30 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
         opening_chicks: 0,
       },
       materials: [],
+      medicines: [],
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields: materialFields, append: appendMaterial, remove: removeMaterial } = useFieldArray({
     control,
     name: 'materials',
   });
+
+  const { fields: medicineFields, append: appendMedicine, remove: removeMedicine } = useFieldArray({
+    control,
+    name: 'medicines',
+  });
+
+  useEffect(() => {
+    const loadMedicines = async () => {
+      const { getMedicines } = await import('@/actions/medicine.actions');
+      const result = await getMedicines();
+      if (result.success && result.data) {
+        setMedicines(result.data);
+      }
+    };
+    loadMedicines();
+  }, []);
 
   const onSubmit = async (data: FarmSetupFormData) => {
     setIsLoading(true);
@@ -101,8 +131,13 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
       const result = await createCompleteFarmSetup(data as FarmSetupInput);
       
       if (result.success) {
+        const itemsCreated = [];
+        if (data.materials.length > 0) itemsCreated.push('المواد');
+        if (data.medicines.length > 0) itemsCreated.push('الأدوية');
+        const itemsText = itemsCreated.length > 0 ? `، و${itemsCreated.join(' و')}` : '';
+        
         toast.success('تم إكمال إعداد المزرعة بنجاح!', {
-          description: `تم إنشاء: المستخدم، المزرعة، المستودع، القطيع${data.materials.length > 0 ? '، والمواد' : ''}`,
+          description: `تم إنشاء: المستخدم، المزرعة، المستودع، القطيع${itemsText}`,
         });
         setSetupComplete(true);
         reset();
@@ -124,8 +159,16 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
   };
 
   const addMaterial = () => {
-    append({
+    appendMaterial({
       material_name_id: '',
+      unit_id: '',
+      opening_balance: 0,
+    });
+  };
+
+  const addMedicine = () => {
+    appendMedicine({
+      medicine_id: '',
       unit_id: '',
       opening_balance: 0,
     });
@@ -324,26 +367,26 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
       {/* Materials Section */}
       <Card>
         <CardHeader>
-          <CardTitle>5. مواد الرصيد الافتتاحي (اختياري)</CardTitle>
+          <CardTitle>5. الأرصدة الافتتاحية للمواد الغذائية (اختياري)</CardTitle>
           <CardDescription>
-            إضافة مواد أولية إلى مخزون المستودع
+            إضافة مواد غذائية أولية إلى مخزون المستودع
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {fields.length === 0 ? (
+          {materialFields.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <p>لم تتم إضافة مواد بعد. انقر على الزر أدناه لإضافة المواد.</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {fields.map((field, index) => (
+              {materialFields.map((field, index) => (
                 <div key={field.id} className="border rounded-lg p-4 space-y-4 relative">
                   <div className="absolute top-2 left-2">
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => remove(index)}
+                      onClick={() => removeMaterial(index)}
                       disabled={isLoading}
                       className="h-8 w-8 p-0"
                     >
@@ -443,7 +486,134 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
             className="w-full"
           >
             <Plus className="ml-2 h-4 w-4" />
-            إضافة مادة
+            إضافة مادة غذائية
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Medicines Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>6. الأرصدة الافتتاحية للأدوية (اختياري)</CardTitle>
+          <CardDescription>
+            إضافة أدوية أولية إلى مخزون المستودع
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {medicineFields.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>لم تتم إضافة أدوية بعد. انقر على الزر أدناه لإضافة الأدوية.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {medicineFields.map((field, index) => (
+                <div key={field.id} className="border rounded-lg p-4 space-y-4 relative">
+                  <div className="absolute top-2 left-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeMedicine(index)}
+                      disabled={isLoading}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pl-12">
+                    <div className="space-y-2">
+                      <Label htmlFor={`medicines.${index}.medicine_id`}>
+                        الدواء *
+                      </Label>
+                      <Select
+                        value={watch(`medicines.${index}.medicine_id`)}
+                        onValueChange={(value) =>
+                          setValue(`medicines.${index}.medicine_id`, value)
+                        }
+                        disabled={isLoading}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الدواء" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {medicines.map((medicine) => (
+                            <SelectItem key={medicine.id} value={medicine.id}>
+                              💊 {medicine.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.medicines?.[index]?.medicine_id && (
+                        <p className="text-sm text-destructive">
+                          {errors.medicines[index]?.medicine_id?.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor={`medicines.${index}.unit_id`}>الوحدة *</Label>
+                      <Select
+                        value={watch(`medicines.${index}.unit_id`)}
+                        onValueChange={(value) =>
+                          setValue(`medicines.${index}.unit_id`, value)
+                        }
+                        disabled={isLoading}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الوحدة" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {units.map((unit) => (
+                            <SelectItem key={unit.id} value={unit.id}>
+                              {unit.unit_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.medicines?.[index]?.unit_id && (
+                        <p className="text-sm text-destructive">
+                          {errors.medicines[index]?.unit_id?.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor={`medicines.${index}.opening_balance`}>
+                        الرصيد الافتتاحي *
+                      </Label>
+                      <Input
+                        id={`medicines.${index}.opening_balance`}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        {...register(`medicines.${index}.opening_balance`, {
+                          valueAsNumber: true,
+                        })}
+                        disabled={isLoading}
+                      />
+                      {errors.medicines?.[index]?.opening_balance && (
+                        <p className="text-sm text-destructive">
+                          {errors.medicines[index]?.opening_balance?.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={addMedicine}
+            disabled={isLoading}
+            className="w-full"
+          >
+            <Plus className="ml-2 h-4 w-4" />
+            إضافة دواء
           </Button>
         </CardContent>
       </Card>
