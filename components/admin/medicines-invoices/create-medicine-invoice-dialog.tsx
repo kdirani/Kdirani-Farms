@@ -181,7 +181,9 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
       setExpenses([]);
       setAttachmentFiles([]);
       onOpenChange(false);
-      window.location.reload();
+      
+      // Revalidation is handled by server actions (revalidatePath)
+      // No need for full page reload
     } catch (error) {
       toast.error('حدث خطأ غير متوقع');
     } finally {

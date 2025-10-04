@@ -222,10 +222,8 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
       setActiveTab('info');
       onOpenChange(false);
 
-      // Delay page reload to allow user to see success message
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      // Revalidation is handled by server actions (revalidatePath)
+      // No need for full page reload
     } catch (error) {
       toast.error('حدث خطأ غير متوقع');
     } finally {
