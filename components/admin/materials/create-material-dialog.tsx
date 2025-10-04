@@ -30,9 +30,20 @@ import { Loader2 } from 'lucide-react';
 
 const materialSchema = z.object({
   warehouse_id: z.string().min(1, 'المستودع مطلوب'),
-  material_name_id: z.string().min(1, 'اسم المادة مطلوب'),
+  item_type: z.enum(['material', 'medicine']),
+  material_name_id: z.string().optional(),
+  medicine_id: z.string().optional(),
   unit_id: z.string().min(1, 'الوحدة مطلوبة'),
   opening_balance: z.number().min(0, 'الرصيد الافتتاحي لا يمكن أن يكون سالباً'),
+}).refine((data) => {
+  if (data.item_type === 'material') {
+    return !!data.material_name_id;
+  } else {
+    return !!data.medicine_id;
+  }
+}, {
+  message: 'يجب اختيار مادة أو دواء',
+  path: ['material_name_id'],
 });
 
 type MaterialFormData = z.infer<typeof materialSchema>;
@@ -46,6 +57,7 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
   const [isLoading, setIsLoading] = useState(false);
   const [warehouses, setWarehouses] = useState<Array<{ id: string; name: string; farm_name: string }>>([]);
   const [materialNames, setMaterialNames] = useState<Array<{ id: string; material_name: string }>>([]);
+  const [medicines, setMedicines] = useState<Array<{ id: string; name: string }>>([]);
   const [units, setUnits] = useState<Array<{ id: string; unit_name: string }>>([]);
   
   const {
@@ -59,11 +71,14 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
     resolver: zodResolver(materialSchema),
     defaultValues: {
       opening_balance: 0,
+      item_type: 'material',
     },
   });
 
   const warehouseId = watch('warehouse_id');
+  const itemType = watch('item_type');
   const materialNameId = watch('material_name_id');
+  const medicineId = watch('medicine_id');
   const unitId = watch('unit_id');
 
   useEffect(() => {
@@ -73,9 +88,11 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
   }, [open]);
 
   const loadData = async () => {
-    const [warehousesResult, materialNamesResult, unitsResult] = await Promise.all([
+    const { getMedicines } = await import('@/actions/medicine.actions');
+    const [warehousesResult, materialNamesResult, medicinesResult, unitsResult] = await Promise.all([
       getWarehousesForMaterials(),
       getMaterialNames(),
+      getMedicines(),
       getMeasurementUnits(),
     ]);
 
@@ -85,6 +102,9 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
     if (materialNamesResult.success && materialNamesResult.data) {
       setMaterialNames(materialNamesResult.data);
     }
+    if (medicinesResult.success && medicinesResult.data) {
+      setMedicines(medicinesResult.data);
+    }
     if (unitsResult.success && unitsResult.data) {
       setUnits(unitsResult.data);
     }
@@ -93,15 +113,23 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
   const onSubmit = async (data: MaterialFormData) => {
     setIsLoading(true);
     try {
-      const result = await createMaterial(data);
+      const input = {
+        warehouse_id: data.warehouse_id,
+        material_name_id: data.item_type === 'material' ? data.material_name_id : undefined,
+        medicine_id: data.item_type === 'medicine' ? data.medicine_id : undefined,
+        unit_id: data.unit_id,
+        opening_balance: data.opening_balance,
+      };
+      
+      const result = await createMaterial(input);
       
       if (result.success) {
-        toast.success('تم إنشاء المادة بنجاح');
+        toast.success(data.item_type === 'material' ? 'تم إنشاء المادة بنجاح' : 'تم إنشاء الدواء بنجاح');
         reset();
         onOpenChange(false);
         window.location.reload();
       } else {
-        toast.error(result.error || 'فشل في إنشاء المادة');
+        toast.error(result.error || 'فشل في الإنشاء');
       }
     } catch (error) {
       toast.error('حدث خطأ غير متوقع');
@@ -114,12 +142,46 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>إضافة مادة جديدة</DialogTitle>
+          <DialogTitle>إضافة إلى المخزون</DialogTitle>
           <DialogDescription>
-            إضافة مادة جديدة إلى مخزون المستودع
+            إضافة مادة غذائية أو دواء إلى مخزون المستودع
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label>نوع الصنف *</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="material"
+                  checked={itemType === 'material'}
+                  onChange={(e) => {
+                    setValue('item_type', 'material');
+                    setValue('medicine_id', undefined);
+                  }}
+                  disabled={isLoading}
+                  className="rounded-full"
+                />
+                <span>مادة غذائية</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="medicine"
+                  checked={itemType === 'medicine'}
+                  onChange={(e) => {
+                    setValue('item_type', 'medicine');
+                    setValue('material_name_id', undefined);
+                  }}
+                  disabled={isLoading}
+                  className="rounded-full"
+                />
+                <span>دواء</span>
+              </label>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="warehouse_id">المستودع *</Label>
             <Select
@@ -143,28 +205,53 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="material_name_id">اسم المادة *</Label>
-            <Select
-              value={materialNameId}
-              onValueChange={(value) => setValue('material_name_id', value)}
-              disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="اختر المادة" />
-              </SelectTrigger>
-              <SelectContent>
-                {materialNames.map((material) => (
-                  <SelectItem key={material.id} value={material.id}>
-                    {material.material_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.material_name_id && (
-              <p className="text-sm text-destructive">{errors.material_name_id.message}</p>
-            )}
-          </div>
+          {itemType === 'material' ? (
+            <div className="space-y-2">
+              <Label htmlFor="material_name_id">اسم المادة *</Label>
+              <Select
+                value={materialNameId}
+                onValueChange={(value) => setValue('material_name_id', value)}
+                disabled={isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر المادة" />
+                </SelectTrigger>
+                <SelectContent>
+                  {materialNames.map((material) => (
+                    <SelectItem key={material.id} value={material.id}>
+                      {material.material_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.material_name_id && (
+                <p className="text-sm text-destructive">{errors.material_name_id.message}</p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="medicine_id">اسم الدواء *</Label>
+              <Select
+                value={medicineId}
+                onValueChange={(value) => setValue('medicine_id', value)}
+                disabled={isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الدواء" />
+                </SelectTrigger>
+                <SelectContent>
+                  {medicines.map((medicine) => (
+                    <SelectItem key={medicine.id} value={medicine.id}>
+                      💊 {medicine.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.medicine_id && (
+                <p className="text-sm text-destructive">{errors.medicine_id.message}</p>
+              )}
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="unit_id">الوحدة *</Label>
@@ -221,7 +308,7 @@ export function CreateMaterialDialog({ open, onOpenChange }: CreateMaterialDialo
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-              إنشاء مادة
+              {itemType === 'material' ? 'إنشاء مادة' : 'إنشاء دواء'}
             </Button>
           </DialogFooter>
         </form>
