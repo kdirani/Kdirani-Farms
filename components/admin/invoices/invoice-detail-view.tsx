@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Invoice } from '@/actions/invoice.actions';
+import { useRouter } from 'next/navigation';
+import { Invoice, toggleInvoiceStatus } from '@/actions/invoice.actions';
 import { InvoiceItem } from '@/actions/invoice-item.actions';
 import { InvoiceExpense } from '@/actions/invoice-expense.actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +16,7 @@ import { formatCurrency } from '@/lib/utils';
 import { InvoiceItemsSection } from './invoice-items-section';
 import { InvoiceExpensesSection } from './invoice-expenses-section';
 import { InvoiceAttachmentsSection } from './invoice-attachments-section';
+import { toast } from 'sonner';
 
 interface InvoiceDetailViewProps {
   invoice: Invoice;
@@ -23,6 +25,28 @@ interface InvoiceDetailViewProps {
 }
 
 export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailViewProps) {
+  const router = useRouter();
+  const [isToggling, setIsToggling] = useState(false);
+
+  const handleToggleStatus = async () => {
+    setIsToggling(true);
+    try {
+      const result = await toggleInvoiceStatus(invoice.id);
+      if (result.success) {
+        toast.success(
+          result.data?.checked ? 'تم وضع علامة مدققة على الفاتورة' : 'تم إلغاء علامة التدقيق'
+        );
+        router.refresh();
+      } else {
+        toast.error(result.error || 'فشل تحديث حالة الفاتورة');
+      }
+    } catch (error) {
+      toast.error('حدث خطأ أثناء تحديث حالة الفاتورة');
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   const getTypeBadge = (type: 'buy' | 'sell') => {
     return type === 'buy' ? (
       <Badge variant="default">فاتورة شراء</Badge>
@@ -66,6 +90,24 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
             </p>
           </div>
         </div>
+        <Button
+          onClick={handleToggleStatus}
+          disabled={isToggling}
+          variant={invoice.checked ? "outline" : "default"}
+          className="gap-2"
+        >
+          {invoice.checked ? (
+            <>
+              <XCircle className="h-4 w-4" />
+              إلغاء التدقيق
+            </>
+          ) : (
+            <>
+              <CheckCircle className="h-4 w-4" />
+              تعيين كمدققة
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Invoice Information */}

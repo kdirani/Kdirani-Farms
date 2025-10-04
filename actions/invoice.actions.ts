@@ -333,6 +333,60 @@ export async function getInvoiceById(invoiceId: string): Promise<ActionResult<In
 }
 
 /**
+ * Toggle invoice checked status
+ */
+export async function toggleInvoiceStatus(id: string): Promise<ActionResult<Invoice>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_role')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile || profile.user_role !== 'admin') {
+      return { success: false, error: 'Unauthorized - Admin access required' };
+    }
+
+    // Get current invoice status
+    const { data: currentInvoice, error: fetchError } = await supabase
+      .from('invoices')
+      .select('checked')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      return { success: false, error: fetchError.message };
+    }
+
+    // Toggle the checked status
+    const { data: updatedInvoice, error: updateError } = await supabase
+      .from('invoices')
+      .update({ checked: !currentInvoice.checked })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateError) {
+      return { success: false, error: updateError.message };
+    }
+
+    revalidatePath('/admin/invoices');
+    revalidatePath(`/admin/invoices/${id}`);
+    return { success: true, data: updatedInvoice };
+  } catch (error) {
+    console.error('Error toggling invoice status:', error);
+    return { success: false, error: 'Failed to toggle invoice status' };
+  }
+}
+
+/**
  * Delete an invoice
  */
 export async function deleteInvoice(id: string): Promise<ActionResult> {
