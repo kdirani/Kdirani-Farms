@@ -195,6 +195,7 @@ export type Database = {
           id: string
           warehouse_id: string | null
           material_name_id: string | null
+          medicine_id: string | null
           unit_id: string | null
           opening_balance: number
           purchases: number
@@ -209,6 +210,7 @@ export type Database = {
           id?: string
           warehouse_id?: string | null
           material_name_id?: string | null
+          medicine_id?: string | null
           unit_id?: string | null
           opening_balance?: number
           purchases?: number
@@ -223,6 +225,7 @@ export type Database = {
           id?: string
           warehouse_id?: string | null
           material_name_id?: string | null
+          medicine_id?: string | null
           unit_id?: string | null
           opening_balance?: number
           purchases?: number
@@ -435,6 +438,7 @@ export type Database = {
           id: string
           invoice_id: string | null
           material_name_id: string | null
+          medicine_id: string | null
           unit_id: string | null
           egg_weight_id: string | null
           quantity: number
@@ -446,6 +450,7 @@ export type Database = {
           id?: string
           invoice_id?: string | null
           material_name_id?: string | null
+          medicine_id?: string | null
           unit_id?: string | null
           egg_weight_id?: string | null
           quantity?: number
@@ -457,6 +462,7 @@ export type Database = {
           id?: string
           invoice_id?: string | null
           material_name_id?: string | null
+          medicine_id?: string | null
           unit_id?: string | null
           egg_weight_id?: string | null
           quantity?: number

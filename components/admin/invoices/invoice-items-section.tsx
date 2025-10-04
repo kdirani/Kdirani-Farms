@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Pill } from 'lucide-react';
 import { toast } from 'sonner';
 import { AddInvoiceItemDialog } from './add-invoice-item-dialog';
 import { formatCurrency } from '@/lib/utils';
@@ -47,7 +47,7 @@ export function InvoiceItemsSection({ invoiceId, items }: InvoiceItemsSectionPro
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>عناصر الفاتورة</CardTitle>
-            <CardDescription>المواد والمنتجات في هذه الفاتورة</CardDescription>
+            <CardDescription>المواد والأدوية والمنتجات في هذه الفاتورة</CardDescription>
           </div>
           <Button onClick={() => setAddDialogOpen(true)} size="sm">
             <Plus className="h-4 w-4 mr-2" />
@@ -65,8 +65,8 @@ export function InvoiceItemsSection({ invoiceId, items }: InvoiceItemsSectionPro
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>المادة/المنتج</TableHead>
-                  <TableHead>وزن البيض</TableHead>
+                  <TableHead>المادة/الدواء/المنتج</TableHead>
+                  <TableHead>تفاصيل إضافية</TableHead>
                   <TableHead className="text-right">الكمية</TableHead>
                   <TableHead className="text-right">الوزن</TableHead>
                   <TableHead>الوحدة</TableHead>
@@ -78,8 +78,25 @@ export function InvoiceItemsSection({ invoiceId, items }: InvoiceItemsSectionPro
               <TableBody>
                 {items.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.material_name || '-'}</TableCell>
-                    <TableCell>{item.egg_weight || '-'}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        {item.medicine_id && (
+                          <Pill className="h-4 w-4 text-primary" />
+                        )}
+                        <span>
+                          {item.material_name || item.medicine_name || '-'}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {item.medicine_day_of_age ? (
+                        <span className="text-sm text-muted-foreground">
+                          اليوم: {item.medicine_day_of_age}
+                        </span>
+                      ) : item.egg_weight ? (
+                        <span>{item.egg_weight}</span>
+                      ) : '-'}
+                    </TableCell>
                     <TableCell className="text-right">{item.quantity.toLocaleString()}</TableCell>
                     <TableCell className="text-right">{item.weight ? item.weight.toLocaleString() : '-'}</TableCell>
                     <TableCell>{item.unit_name || '-'}</TableCell>

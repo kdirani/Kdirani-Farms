@@ -107,21 +107,10 @@ export async function createMedicineItem(input: CreateMedicineItemInput): Promis
       return { success: false, error: 'Invoice or warehouse not found' };
     }
 
-    // Get medicine to find material_name_id
-    const { data: medicine } = await supabase
-      .from('medicines')
-      .select('material_name_id')
-      .eq('id', input.medicine_id)
-      .single();
-
-    if (!medicine || !medicine.material_name_id) {
-      return { success: false, error: 'Medicine not linked to material' };
-    }
-
-    // Decrease medicine from warehouse inventory
+    // Decrease medicine from warehouse inventory directly using medicine_id
     const inventoryResult = await decreaseMedicineInventory(
       invoice.warehouse_id,
-      medicine.material_name_id,
+      input.medicine_id,
       input.quantity
     );
 
@@ -183,22 +172,13 @@ export async function deleteMedicineItem(id: string): Promise<ActionResult> {
       .eq('id', item.consumption_invoice_id)
       .single();
 
-    // Get medicine to find material_name_id
-    if (item.medicine_id) {
-      const { data: medicine } = await supabase
-        .from('medicines')
-        .select('material_name_id')
-        .eq('id', item.medicine_id)
-        .single();
-
-      // Reverse the inventory decrease
-      if (invoice?.warehouse_id && medicine?.material_name_id) {
-        await increaseMedicineInventory(
-          invoice.warehouse_id,
-          medicine.material_name_id,
-          item.quantity
-        );
-      }
+    // Reverse the inventory decrease directly using medicine_id
+    if (item.medicine_id && invoice?.warehouse_id) {
+      await increaseMedicineInventory(
+        invoice.warehouse_id,
+        item.medicine_id,
+        item.quantity
+      );
     }
 
     const { error } = await supabase
@@ -225,17 +205,18 @@ export async function deleteMedicineItem(id: string): Promise<ActionResult> {
  */
 async function decreaseMedicineInventory(
   warehouseId: string,
-  materialNameId: string,
+  medicineId: string,
   quantity: number
 ): Promise<ActionResult> {
   const supabase = await createClient();
 
+  // Search by medicine_id in materials table
   const { data: existingMaterial } = await supabase
     .from('materials')
     .select('*')
     .eq('warehouse_id', warehouseId)
-    .eq('material_name_id', materialNameId)
-    .single();
+    .eq('medicine_id', medicineId)
+    .maybeSingle();
 
   if (!existingMaterial) {
     return { success: false, error: 'Medicine not found in warehouse inventory' };
@@ -270,17 +251,18 @@ async function decreaseMedicineInventory(
  */
 async function increaseMedicineInventory(
   warehouseId: string,
-  materialNameId: string,
+  medicineId: string,
   quantity: number
 ): Promise<ActionResult> {
   const supabase = await createClient();
 
+  // Search by medicine_id in materials table
   const { data: existingMaterial } = await supabase
     .from('materials')
     .select('*')
     .eq('warehouse_id', warehouseId)
-    .eq('material_name_id', materialNameId)
-    .single();
+    .eq('medicine_id', medicineId)
+    .maybeSingle();
 
   if (existingMaterial) {
     // Reverse: decrease consumption, increase balance

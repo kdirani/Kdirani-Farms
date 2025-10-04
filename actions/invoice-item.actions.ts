@@ -7,6 +7,7 @@ export type InvoiceItem = {
   id: string;
   invoice_id: string;
   material_name_id: string | null;
+  medicine_id: string | null;
   unit_id: string | null;
   egg_weight_id: string | null;
   quantity: number;
@@ -14,6 +15,8 @@ export type InvoiceItem = {
   price: number;
   value: number;
   material_name?: string;
+  medicine_name?: string;
+  medicine_day_of_age?: string;
   unit_name?: string;
   egg_weight?: string;
 };
@@ -21,6 +24,7 @@ export type InvoiceItem = {
 export type CreateInvoiceItemInput = {
   invoice_id: string;
   material_name_id?: string;
+  medicine_id?: string;
   unit_id: string;
   egg_weight_id?: string;
   quantity: number;
@@ -61,7 +65,7 @@ export async function getInvoiceItems(invoiceId: string): Promise<ActionResult<I
     const enrichedItems: InvoiceItem[] = [];
     
     for (const item of items || []) {
-      let materialName, unitName, eggWeight;
+      let materialName, medicineName, medicineDayOfAge, unitName, eggWeight;
 
       if (item.material_name_id) {
         const { data } = await supabase
@@ -70,6 +74,16 @@ export async function getInvoiceItems(invoiceId: string): Promise<ActionResult<I
           .eq('id', item.material_name_id)
           .single();
         materialName = data?.material_name;
+      }
+
+      if (item.medicine_id) {
+        const { data } = await supabase
+          .from('medicines')
+          .select('name, day_of_age')
+          .eq('id', item.medicine_id)
+          .single();
+        medicineName = data?.name;
+        medicineDayOfAge = data?.day_of_age;
       }
 
       if (item.unit_id) {
@@ -93,6 +107,8 @@ export async function getInvoiceItems(invoiceId: string): Promise<ActionResult<I
       enrichedItems.push({
         ...item,
         material_name: materialName,
+        medicine_name: medicineName,
+        medicine_day_of_age: medicineDayOfAge,
         unit_name: unitName,
         egg_weight: eggWeight,
       });
@@ -125,18 +141,33 @@ export async function createInvoiceItem(input: CreateInvoiceItemInput): Promise<
       return { success: false, error: 'Invoice not found' };
     }
 
-    // Update warehouse inventory if material_name_id is provided
-    if (input.material_name_id && invoice.warehouse_id) {
-      const inventoryResult = await updateWarehouseInventory(
-        invoice.warehouse_id,
-        input.material_name_id,
-        input.unit_id,
-        input.quantity,
-        invoice.invoice_type
-      );
+    // Update warehouse inventory if material_name_id or medicine_id is provided
+    if (invoice.warehouse_id) {
+      if (input.material_name_id) {
+        const inventoryResult = await updateWarehouseInventory(
+          invoice.warehouse_id,
+          input.material_name_id,
+          input.unit_id,
+          input.quantity,
+          invoice.invoice_type
+        );
 
-      if (!inventoryResult.success) {
-        return { success: false, error: inventoryResult.error };
+        if (!inventoryResult.success) {
+          return { success: false, error: inventoryResult.error };
+        }
+      } else if (input.medicine_id) {
+        // Update warehouse inventory for medicine
+        const inventoryResult = await updateWarehouseInventory(
+          invoice.warehouse_id,
+          input.medicine_id,
+          input.unit_id,
+          input.quantity,
+          invoice.invoice_type
+        );
+
+        if (!inventoryResult.success) {
+          return { success: false, error: inventoryResult.error };
+        }
       }
     }
 
@@ -145,6 +176,7 @@ export async function createInvoiceItem(input: CreateInvoiceItemInput): Promise<
       .insert({
         invoice_id: input.invoice_id,
         material_name_id: input.material_name_id || null,
+        medicine_id: input.medicine_id || null,
         unit_id: input.unit_id,
         egg_weight_id: input.egg_weight_id || null,
         quantity: input.quantity,
@@ -226,7 +258,7 @@ export async function deleteInvoiceItem(id: string): Promise<ActionResult> {
 
     const { data: item } = await supabase
       .from('invoice_items')
-      .select('invoice_id, material_name_id, unit_id, quantity')
+      .select('invoice_id, material_name_id, medicine_id, unit_id, quantity')
       .eq('id', id)
       .single();
 
@@ -241,15 +273,18 @@ export async function deleteInvoiceItem(id: string): Promise<ActionResult> {
       .eq('id', item.invoice_id)
       .single();
 
-    // Reverse inventory update if material exists
-    if (item.material_name_id && invoice?.warehouse_id) {
-      // Reverse the exact operation that was performed
-      await reverseWarehouseInventory(
-        invoice.warehouse_id,
-        item.material_name_id,
-        item.quantity,
-        invoice.invoice_type
-      );
+    // Reverse inventory update if material or medicine exists
+    if (invoice?.warehouse_id) {
+      const itemId = item.material_name_id || item.medicine_id;
+      if (itemId) {
+        // Reverse the exact operation that was performed
+        await reverseWarehouseInventory(
+          invoice.warehouse_id,
+          itemId,
+          item.quantity,
+          invoice.invoice_type
+        );
+      }
     }
 
     const { error } = await supabase
@@ -273,23 +308,40 @@ export async function deleteInvoiceItem(id: string): Promise<ActionResult> {
 
 /**
  * Update warehouse inventory based on invoice type
+ * This function handles both materials (material_name_id) and medicines (medicine_id)
  */
 async function updateWarehouseInventory(
   warehouseId: string,
-  materialNameId: string,
+  materialOrMedicineId: string,
   unitId: string,
   quantity: number,
   invoiceType: 'buy' | 'sell'
 ): Promise<ActionResult> {
   const supabase = await createClient();
 
-  // Check if material exists in warehouse
-  const { data: existingMaterial } = await supabase
+  // Check if this is a medicine or material by checking which column has this ID
+  let existingMaterial;
+  
+  // First try to find by material_name_id
+  const { data: materialData } = await supabase
     .from('materials')
     .select('*')
     .eq('warehouse_id', warehouseId)
-    .eq('material_name_id', materialNameId)
-    .single();
+    .eq('material_name_id', materialOrMedicineId)
+    .maybeSingle();
+  
+  // If not found, try medicine_id
+  if (!materialData) {
+    const { data: medicineData } = await supabase
+      .from('materials')
+      .select('*')
+      .eq('warehouse_id', warehouseId)
+      .eq('medicine_id', materialOrMedicineId)
+      .maybeSingle();
+    existingMaterial = medicineData;
+  } else {
+    existingMaterial = materialData;
+  }
 
   if (invoiceType === 'sell') {
     // SELL: Deduct from inventory
@@ -321,7 +373,7 @@ async function updateWarehouseInventory(
   } else {
     // BUY: Add to inventory
     if (existingMaterial) {
-      // Material exists, update it
+      // Material/Medicine exists, update it
       const newPurchases = existingMaterial.purchases + quantity;
       const newBalance = existingMaterial.current_balance + quantity;
 
@@ -334,12 +386,22 @@ async function updateWarehouseInventory(
         })
         .eq('id', existingMaterial.id);
     } else {
-      // Material doesn't exist, create it
+      // Material/Medicine doesn't exist, create it
+      // Determine if this is a material or medicine by checking medicines table
+      const { data: medicineCheck } = await supabase
+        .from('medicines')
+        .select('id')
+        .eq('id', materialOrMedicineId)
+        .maybeSingle();
+      
+      const isMedicine = !!medicineCheck;
+      
       await supabase
         .from('materials')
         .insert({
           warehouse_id: warehouseId,
-          material_name_id: materialNameId,
+          material_name_id: isMedicine ? null : materialOrMedicineId,
+          medicine_id: isMedicine ? materialOrMedicineId : null,
           unit_id: unitId,
           opening_balance: 0,
           purchases: quantity,
@@ -356,25 +418,42 @@ async function updateWarehouseInventory(
 
 /**
  * Reverse warehouse inventory when deleting an invoice item
+ * This function handles both materials (material_name_id) and medicines (medicine_id)
  */
 async function reverseWarehouseInventory(
   warehouseId: string,
-  materialNameId: string,
+  materialOrMedicineId: string,
   quantity: number,
   originalInvoiceType: 'buy' | 'sell'
 ): Promise<ActionResult> {
   const supabase = await createClient();
 
-  // Get existing material
-  const { data: existingMaterial } = await supabase
+  // Get existing material or medicine (same logic as updateWarehouseInventory)
+  let existingMaterial;
+  
+  // First try to find by material_name_id
+  const { data: materialData } = await supabase
     .from('materials')
     .select('*')
     .eq('warehouse_id', warehouseId)
-    .eq('material_name_id', materialNameId)
-    .single();
+    .eq('material_name_id', materialOrMedicineId)
+    .maybeSingle();
+  
+  // If not found, try medicine_id
+  if (!materialData) {
+    const { data: medicineData } = await supabase
+      .from('materials')
+      .select('*')
+      .eq('warehouse_id', warehouseId)
+      .eq('medicine_id', materialOrMedicineId)
+      .maybeSingle();
+    existingMaterial = medicineData;
+  } else {
+    existingMaterial = materialData;
+  }
 
   if (!existingMaterial) {
-    return { success: false, error: 'Material not found in warehouse inventory' };
+    return { success: false, error: 'Material/Medicine not found in warehouse inventory' };
   }
 
   if (originalInvoiceType === 'buy') {

@@ -268,32 +268,24 @@ export async function deleteMedicineInvoice(id: string): Promise<ActionResult> {
     if (invoice?.warehouse_id && items && items.length > 0) {
       for (const item of items) {
         if (item.medicine_id) {
-          // Find the medicine material in warehouse
-          const { data: medicine } = await supabase
-            .from('medicines')
-            .select('material_name_id')
-            .eq('id', item.medicine_id)
-            .single();
+          // Search directly in materials table using medicine_id
+          const { data: material } = await supabase
+            .from('materials')
+            .select('*')
+            .eq('warehouse_id', invoice.warehouse_id)
+            .eq('medicine_id', item.medicine_id)
+            .maybeSingle();
 
-          if (medicine?.material_name_id) {
-            const { data: material } = await supabase
+          if (material) {
+            // Reverse consumption: decrease consumption, increase balance
+            await supabase
               .from('materials')
-              .select('*')
-              .eq('warehouse_id', invoice.warehouse_id)
-              .eq('material_name_id', medicine.material_name_id)
-              .single();
-
-            if (material) {
-              // Reverse consumption: decrease consumption, increase balance
-              await supabase
-                .from('materials')
-                .update({
-                  consumption: material.consumption - item.quantity,
-                  current_balance: material.current_balance + item.quantity,
-                  updated_at: new Date().toISOString(),
-                })
-                .eq('id', material.id);
-            }
+              .update({
+                consumption: material.consumption - item.quantity,
+                current_balance: material.current_balance + item.quantity,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', material.id);
           }
         }
       }

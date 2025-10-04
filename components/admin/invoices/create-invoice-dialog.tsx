@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -14,6 +14,7 @@ import { getMaterialNames } from '@/actions/material-name.actions';
 import { getMeasurementUnits } from '@/actions/unit.actions';
 import { getEggWeights } from '@/actions/egg-weight.actions';
 import { getExpenseTypes } from '@/actions/expense-type.actions';
+import { getMedicines } from '@/actions/medicine.actions';
 import {
   Dialog,
   DialogContent,
@@ -36,8 +37,9 @@ import { Combobox } from '@/components/ui/combobox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, PackageCheck, AlertTriangle } from 'lucide-react';
+import { Loader2, Plus, Trash2, PackageCheck, AlertTriangle, Pill } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 const invoiceSchema = z.object({
@@ -59,6 +61,7 @@ interface CreateInvoiceDialogProps {
 
 type InvoiceItemInput = {
   material_name_id?: string;
+  medicine_id?: string;
   unit_id: string;
   egg_weight_id?: string;
   quantity: number;
@@ -77,6 +80,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
   const [warehouses, setWarehouses] = useState<Array<{ id: string; name: string; farm_name: string }>>([]);
   const [clients, setClients] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [materials, setMaterials] = useState<Array<{ id: string; material_name: string }>>([]);
+  const [medicines, setMedicines] = useState<Array<{ id: string; name: string; day_of_age: string }>>([]);
   const [units, setUnits] = useState<Array<{ id: string; unit_name: string }>>([]);
   const [eggWeights, setEggWeights] = useState<Array<{ id: string; weight_range: string }>>([]);
   const [expenseTypes, setExpenseTypes] = useState<Array<{ id: string; name: string }>>([]);
@@ -85,6 +89,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
   const [expenses, setExpenses] = useState<InvoiceExpenseInput[]>([]);
   const [attachmentFiles, setAttachmentFiles] = useState<UploadedFile[]>([]);
   const [activeTab, setActiveTab] = useState('info');
+  const [itemType, setItemType] = useState<'material' | 'medicine'>('material');
   const [currentItemInventory, setCurrentItemInventory] = useState<{ current_balance: number; unit_name: string } | null>(null);
   const [loadingInventory, setLoadingInventory] = useState(false);
   
@@ -107,6 +112,24 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
   const warehouseId = watch('warehouse_id');
   const clientId = watch('client_id');
 
+  // Filter clients based on invoice type
+  const filteredClients = useMemo(() => {
+    if (invoiceType === 'buy') {
+      // For buy invoices, show providers (suppliers)
+      return clients.filter(c => c.type === 'provider');
+    } else {
+      // For sell invoices, show customers
+      return clients.filter(c => c.type === 'customer');
+    }
+  }, [clients, invoiceType]);
+
+  // Dynamic label and placeholder based on invoice type
+  const clientFieldLabel = invoiceType === 'buy' ? 'المورد (اختياري)' : 'العميل (اختياري)';
+  const clientFieldPlaceholder = invoiceType === 'buy' ? 'اختر المورد' : 'اختر العميل';
+  const clientFieldSearchPlaceholder = invoiceType === 'buy' ? 'البحث في الموردين...' : 'البحث في العملاء...';
+  const clientFieldEmptyText = invoiceType === 'buy' ? 'لا يوجد موردين' : 'لا يوجد عملاء';
+  const clientFieldNoneLabel = invoiceType === 'buy' ? 'بدون مورد' : 'بدون عميل';
+
   useEffect(() => {
     if (open) {
       loadData();
@@ -126,11 +149,17 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
     }
   }, [open]);
 
+  // Reset client selection when invoice type changes
+  useEffect(() => {
+    setValue('client_id', undefined);
+  }, [invoiceType, setValue]);
+
   const loadData = async () => {
     const [
       warehousesResult, 
       clientsResult, 
-      materialsResult, 
+      materialsResult,
+      medicinesResult,
       unitsResult, 
       eggWeightsResult,
       expenseTypesResult
@@ -138,6 +167,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
       getWarehousesForMaterials(),
       getClients(),
       getMaterialNames(),
+      getMedicines(),
       getMeasurementUnits(),
       getEggWeights(),
       getExpenseTypes(),
@@ -151,6 +181,9 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
     }
     if (materialsResult.success && materialsResult.data) {
       setMaterials(materialsResult.data);
+    }
+    if (medicinesResult.success && medicinesResult.data) {
+      setMedicines(medicinesResult.data);
     }
     if (unitsResult.success && unitsResult.data) {
       setUnits(unitsResult.data);
@@ -292,10 +325,17 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
   };
 
   const handleAddItem = () => {
-    // Validate material name is required
-    if (!newItem.material_name_id || newItem.material_name_id === 'none') {
-      toast.error('اسم المادة مطلوب - يجب اختيار مادة من القائمة');
-      return;
+    // Validate material or medicine is required
+    if (itemType === 'material') {
+      if (!newItem.material_name_id || newItem.material_name_id === 'none') {
+        toast.error('اسم المادة مطلوب - يجب اختيار مادة من القائمة');
+        return;
+      }
+    } else {
+      if (!newItem.medicine_id || newItem.medicine_id === 'none') {
+        toast.error('اسم الدواء مطلوب - يجب اختيار دواء من القائمة');
+        return;
+      }
     }
     if (!newItem.unit_id) {
       toast.error('الوحدة مطلوبة');
@@ -429,20 +469,20 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="client_id">العميل (اختياري)</Label>
+            <Label htmlFor="client_id">{clientFieldLabel}</Label>
             <Combobox
               options={[
-                { value: 'none', label: 'بدون عميل' },
-                ...clients.map((client) => ({
+                { value: 'none', label: clientFieldNoneLabel },
+                ...filteredClients.map((client) => ({
                   value: client.id,
-                  label: `${client.name} (${client.type})`,
+                  label: client.name,
                 }))
               ]}
               value={clientId || 'none'}
               onValueChange={(value) => setValue('client_id', value === 'none' ? undefined : value)}
-              placeholder="اختر العميل"
-              searchPlaceholder="البحث في العملاء..."
-              emptyText="لا يوجد عملاء"
+              placeholder={clientFieldPlaceholder}
+              searchPlaceholder={clientFieldSearchPlaceholder}
+              emptyText={clientFieldEmptyText}
               disabled={isLoading}
             />
           </div>
@@ -462,116 +502,190 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
             <CardContent className="pt-6">
               <h3 className="text-lg font-semibold mb-4">بنود الفاتورة ({items.length})</h3>
               
-              {/* Add Item Form */}
-              <div className="space-y-3">
-                {/* Column Labels */}
-                <div className="grid grid-cols-8 gap-2 text-sm font-medium text-muted-foreground">
-                  <div className="col-span-2">المادة</div>
-                  <div>وزن البيض</div>
-                  <div>الكمية</div>
-                  <div>الوحدة</div>
-                  <div>السعر</div>
-                  <div>القيمة</div>
-                  <div></div>
-                </div>
+              {/* Tabs for Material vs Medicine */}
+              <Tabs value={itemType} onValueChange={(value) => setItemType(value as 'material' | 'medicine')} className="mb-4">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="material">مواد</TabsTrigger>
+                  <TabsTrigger value="medicine">
+                    <Pill className="h-4 w-4 ml-2" />
+                    أدوية
+                  </TabsTrigger>
+                </TabsList>
                 
-                <div className="grid grid-cols-8 gap-2">
-                  <div className="col-span-2">
+                <TabsContent value="material" className="space-y-3 mt-4">
+                  {/* Column Labels */}
+                  <div className="grid grid-cols-8 gap-2 text-sm font-medium text-muted-foreground">
+                    <div></div>
+                    <div className="text-right">القيمة</div>
+                    <div className="text-right">السعر</div>
+                    <div className="text-right">الوحدة</div>
+                    <div className="text-right">الكمية</div>
+                    <div className="text-right">وزن البيض</div>
+                    <div className="text-right col-span-2">المادة</div>
+                  </div>
+                  
+                  <div className="grid grid-cols-8 gap-2">
+                    <Button type="button" size="sm" onClick={handleAddItem}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                    <Input
+                      type="text"
+                      value={formatCurrency((newItem.quantity || 0) * (newItem.price || 0))}
+                      readOnly
+                      disabled
+                      className="bg-muted text-center font-semibold"
+                    />
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={newItem.price || ''}
+                      onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
+                    />
+                    <Combobox
+                      options={units.map((u) => ({
+                        value: u.id,
+                        label: u.unit_name,
+                      }))}
+                      value={newItem.unit_id || ''}
+                      onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
+                      placeholder="اختر الوحدة"
+                      searchPlaceholder="ابحث عن الوحدات..."
+                      emptyText="لم يتم العثور على وحدات"
+                    />
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={newItem.quantity || ''}
+                      onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
+                    />
                     <Combobox
                       options={[
                         { value: 'none', label: '-' },
-                        ...materials.map((m) => ({
-                          value: m.id,
-                          label: m.material_name,
+                        ...eggWeights.map((w) => ({
+                          value: w.id,
+                          label: w.weight_range,
                         }))
                       ]}
-                      value={newItem.material_name_id || 'none'}
-                      onValueChange={(value) => setNewItem({ ...newItem, material_name_id: value === 'none' ? undefined : value })}
-                      placeholder="اختر المادة"
-                      searchPlaceholder="ابحث عن المواد..."
-                      emptyText="لم يتم العثور على مواد"
+                      value={newItem.egg_weight_id || 'none'}
+                      onValueChange={(value) => setNewItem({ ...newItem, egg_weight_id: value === 'none' ? undefined : value })}
+                      placeholder="اختر الوزن"
+                      searchPlaceholder="ابحث عن الأوزان..."
+                      emptyText="لم يتم العثور على أوزان"
                     />
+                    <div className="col-span-2">
+                      <Combobox
+                        options={[
+                          { value: 'none', label: '-' },
+                          ...materials.map((m) => ({
+                            value: m.id,
+                            label: m.material_name,
+                          }))
+                        ]}
+                        value={newItem.material_name_id || 'none'}
+                        onValueChange={(value) => setNewItem({ ...newItem, material_name_id: value === 'none' ? undefined : value, medicine_id: undefined })}
+                        placeholder="اختر المادة"
+                        searchPlaceholder="ابحث عن المواد..."
+                        emptyText="لم يتم العثور على مواد"
+                      />
+                    </div>
                   </div>
-                  <Combobox
-                    options={[
-                      { value: 'none', label: '-' },
-                      ...eggWeights.map((w) => ({
-                        value: w.id,
-                        label: w.weight_range,
-                      }))
-                    ]}
-                    value={newItem.egg_weight_id || 'none'}
-                    onValueChange={(value) => setNewItem({ ...newItem, egg_weight_id: value === 'none' ? undefined : value })}
-                    placeholder="اختر الوزن"
-                    searchPlaceholder="ابحث عن الأوزان..."
-                    emptyText="لم يتم العثور على أوزان"
-                  />
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    value={newItem.quantity || ''}
-                    onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
-                  />
-                  <Combobox
-                    options={units.map((u) => ({
-                      value: u.id,
-                      label: u.unit_name,
-                    }))}
-                    value={newItem.unit_id || ''}
-                    onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
-                    placeholder="اختر الوحدة"
-                    searchPlaceholder="ابحث عن الوحدات..."
-                    emptyText="لم يتم العثور على وحدات"
-                  />
-                  <Input
-                    type="number"
-                    placeholder="0.00"
-                    value={newItem.price || ''}
-                    onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
-                  />
-                  <Input
-                    type="text"
-                    value={formatCurrency((newItem.quantity || 0) * (newItem.price || 0))}
-                    readOnly
-                    disabled
-                    className="bg-muted text-center font-semibold"
-                  />
-                  <Button type="button" size="sm" onClick={handleAddItem}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
+                </TabsContent>
                 
-                {/* Show inventory for sell invoices */}
-                {invoiceType === 'sell' && newItem.material_name_id && newItem.material_name_id !== 'none' && (
-                  <div>
-                    {loadingInventory ? (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>جاري تحميل المخزون...</span>
-                      </div>
-                    ) : currentItemInventory ? (
-                      <Alert variant={currentItemInventory.current_balance > 0 ? "default" : "destructive"}>
-                        <PackageCheck className="h-4 w-4" />
-                        <AlertDescription className="flex items-center justify-between">
-                          <span>المخزون المتاح:</span>
-                          <span className="font-bold">
-                            {currentItemInventory.current_balance} {currentItemInventory.unit_name}
-                          </span>
-                        </AlertDescription>
-                      </Alert>
-                    ) : null}
-                    
-                    {currentItemInventory && newItem.quantity && newItem.quantity > currentItemInventory.current_balance && (
-                      <Alert variant="destructive" className="mt-2">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertDescription>
-                          الكمية المطلوبة أكبر من المخزون المتاح
-                        </AlertDescription>
-                      </Alert>
-                    )}
+                <TabsContent value="medicine" className="space-y-3 mt-4">
+                  {/* Column Labels */}
+                  <div className="grid grid-cols-7 gap-2 text-sm font-medium text-muted-foreground">
+                    <div></div>
+                    <div className="text-right">القيمة</div>
+                    <div className="text-right">السعر</div>
+                    <div className="text-right">الوحدة</div>
+                    <div className="text-right">الكمية</div>
+                    <div className=" text-right  col-span-2">الدواء</div>
                   </div>
-                )}
-              </div>
+                  
+                  <div className="grid grid-cols-7 gap-2">
+                    <Button type="button" size="sm" onClick={handleAddItem}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                    <Input
+                      type="text"
+                      value={formatCurrency((newItem.quantity || 0) * (newItem.price || 0))}
+                      readOnly
+                      disabled
+                      className="bg-muted text-center font-semibold"
+                    />
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={newItem.price || ''}
+                      onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
+                    />
+                    <Combobox
+                      options={units.map((u) => ({
+                        value: u.id,
+                        label: u.unit_name,
+                      }))}
+                      value={newItem.unit_id || ''}
+                      onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
+                      placeholder="اختر الوحدة"
+                      searchPlaceholder="ابحث عن الوحدات..."
+                      emptyText="لم يتم العثور على وحدات"
+                    />
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={newItem.quantity || ''}
+                      onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
+                    />
+                    <div className="col-span-2">
+                      <Combobox
+                        options={[
+                          { value: 'none', label: '-' },
+                          ...medicines.map((m) => ({
+                            value: m.id,
+                            label: `${m.name} (${m.day_of_age})`,
+                          }))
+                        ]}
+                        value={newItem.medicine_id || 'none'}
+                        onValueChange={(value) => setNewItem({ ...newItem, medicine_id: value === 'none' ? undefined : value, material_name_id: undefined, egg_weight_id: undefined })}
+                        placeholder="اختر الدواء"
+                        searchPlaceholder="ابحث عن الأدوية..."
+                        emptyText="لم يتم العثور على أدوية"
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+              
+              {/* Show inventory for sell invoices */}
+              {invoiceType === 'sell' && itemType === 'material' && newItem.material_name_id && newItem.material_name_id !== 'none' && (
+                <div className="mt-3">
+                  {loadingInventory ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>جاري تحميل المخزون...</span>
+                    </div>
+                  ) : currentItemInventory ? (
+                    <Alert variant={currentItemInventory.current_balance > 0 ? "default" : "destructive"}>
+                      <PackageCheck className="h-4 w-4" />
+                      <AlertDescription className="flex items-center justify-between">
+                        <span>المخزون المتاح:</span>
+                        <span className="font-bold">
+                          {currentItemInventory.current_balance} {currentItemInventory.unit_name}
+                        </span>
+                      </AlertDescription>
+                    </Alert>
+                  ) : null}
+                  
+                  {currentItemInventory && newItem.quantity && newItem.quantity > currentItemInventory.current_balance && (
+                    <Alert variant="destructive" className="mt-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        الكمية المطلوبة أكبر من المخزون المتاح
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+              )}
 
               {/* Items List */}
               {items.length > 0 && (
@@ -580,10 +694,22 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
                   {items.map((item, index) => (
                     <div key={index} className="flex justify-between items-center p-3 bg-muted rounded">
                       <div className="flex-1">
-                        <div className="text-sm">
+                        <div className="text-sm flex items-center gap-2">
+                          {item.medicine_id && (
+                            <Pill className="h-4 w-4 text-primary" />
+                          )}
                           <span className="font-medium">
-                            {materials.find(m => m.id === item.material_name_id)?.material_name || 'البند'}
+                            {item.material_name_id 
+                              ? materials.find(m => m.id === item.material_name_id)?.material_name 
+                              : item.medicine_id
+                                ? medicines.find(m => m.id === item.medicine_id)?.name
+                                : 'البند'}
                           </span>
+                          {item.medicine_id && (
+                            <span className="text-muted-foreground text-xs">
+                              ({medicines.find(m => m.id === item.medicine_id)?.day_of_age})
+                            </span>
+                          )}
                           {item.egg_weight_id && (
                             <span className="text-muted-foreground mx-2">
                               ({eggWeights.find(w => w.id === item.egg_weight_id)?.weight_range})

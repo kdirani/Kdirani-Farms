@@ -8,7 +8,7 @@ import { createMedicineInvoice } from '@/actions/medicine-invoice.actions';
 import { createMedicineItem } from '@/actions/medicine-item.actions';
 import { createMedicineExpense } from '@/actions/medicine-expense.actions';
 import { createMedicineConsumptionAttachment } from '@/actions/medicine-consumption-attachment.actions';
-import { getWarehousesForMaterials } from '@/actions/material.actions';
+import { getWarehousesForMaterials, getMaterialInventory } from '@/actions/material.actions';
 import { getMedicines } from '@/actions/medicine.actions';
 import { getMeasurementUnits } from '@/actions/unit.actions';
 import { getExpenseTypes } from '@/actions/expense-type.actions';
@@ -34,8 +34,9 @@ import { Combobox } from '@/components/ui/combobox';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, PackageCheck, AlertTriangle } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const medicineInvoiceSchema = z.object({
   invoice_number: z.string().min(1, 'رقم الفاتورة مطلوب'),
@@ -78,6 +79,8 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
   const [items, setItems] = useState<MedicineItemInput[]>([]);
   const [expenses, setExpenses] = useState<MedicineExpenseInput[]>([]);
   const [attachmentFiles, setAttachmentFiles] = useState<UploadedFile[]>([]);
+  const [medicineInventory, setMedicineInventory] = useState<{ current_balance: number; unit_name: string } | null>(null);
+  const [loadingInventory, setLoadingInventory] = useState(false);
   
   const {
     register,
@@ -94,6 +97,36 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
   });
 
   const warehouseId = watch('warehouse_id');
+
+  // Define newItem and newExpense states before using them in useEffect
+  const [newItem, setNewItem] = useState<Partial<MedicineItemInput>>({
+    quantity: 0,
+    price: 0,
+  });
+  const [newExpense, setNewExpense] = useState<Partial<MedicineExpenseInput>>({
+    amount: 0,
+    account_name: '',
+  });
+
+  // Load inventory when medicine or warehouse changes
+  useEffect(() => {
+    if (newItem.medicine_id && warehouseId) {
+      loadMedicineInventory(warehouseId, newItem.medicine_id);
+    } else {
+      setMedicineInventory(null);
+    }
+  }, [newItem.medicine_id, warehouseId]);
+
+  const loadMedicineInventory = async (warehouseId: string, medicineId: string) => {
+    setLoadingInventory(true);
+    const result = await getMaterialInventory(warehouseId, medicineId);
+    if (result.success && result.data) {
+      setMedicineInventory(result.data);
+    } else {
+      setMedicineInventory(null);
+    }
+    setLoadingInventory(false);
+  };
 
   useEffect(() => {
     if (open) {
@@ -191,15 +224,6 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
     }
   };
 
-  const [newItem, setNewItem] = useState<Partial<MedicineItemInput>>({
-    quantity: 0,
-    price: 0,
-  });
-  const [newExpense, setNewExpense] = useState<Partial<MedicineExpenseInput>>({
-    amount: 0,
-    account_name: '',
-  });
-
   const handleAddItem = () => {
     if (!newItem.medicine_id || !newItem.unit_id) {
       toast.error('الدواء والوحدة مطلوبة');
@@ -210,8 +234,21 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
       return;
     }
 
+    // Check if enough inventory available
+    if (medicineInventory) {
+      if (medicineInventory.current_balance <= 0) {
+        toast.error('لا يوجد مخزون متاح لهذا الدواء');
+        return;
+      }
+      if (newItem.quantity > medicineInventory.current_balance) {
+        toast.error(`المخزون غير كافي. المتاح: ${medicineInventory.current_balance} ${medicineInventory.unit_name}`);
+        return;
+      }
+    }
+
     setItems([...items, newItem as MedicineItemInput]);
     setNewItem({ quantity: 0, price: 0 });
+    setMedicineInventory(null);
     toast.success('تم إضافة الدواء');
   };
 
@@ -320,53 +357,94 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                 <div></div>
               </div>
               
-              <div className="grid grid-cols-6 gap-2 mb-4">
-                <div className="col-span-2">
-                  <Combobox
-                    options={medicines.map((m) => ({
-                      value: m.id,
-                      label: m.name,
-                    }))}
-                    value={newItem.medicine_id || ''}
-                    onValueChange={(value) => setNewItem({ ...newItem, medicine_id: value })}
-                    placeholder="اختر الدواء"
-                    searchPlaceholder="البحث عن الأدوية..."
-                    emptyText="لم يتم العثور على أدوية"
+              <div className="space-y-3">
+                <div className="grid grid-cols-6 gap-2">
+                  <div className="col-span-2">
+                    <Combobox
+                      options={medicines.map((m) => ({
+                        value: m.id,
+                        label: m.name,
+                      }))}
+                      value={newItem.medicine_id || ''}
+                      onValueChange={(value) => setNewItem({ ...newItem, medicine_id: value })}
+                      placeholder="اختر الدواء"
+                      searchPlaceholder="البحث عن الأدوية..."
+                      emptyText="لم يتم العثور على أدوية"
+                    />
+                  </div>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={newItem.quantity || ''}
+                    onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
                   />
+                  <Combobox
+                    options={units.map((u) => ({
+                      value: u.id,
+                      label: u.unit_name,
+                    }))}
+                    value={newItem.unit_id || ''}
+                    onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
+                    placeholder="اختر الوحدة"
+                    searchPlaceholder="البحث عن الوحدات..."
+                    emptyText="لم يتم العثور على وحدات"
+                  />
+                  <Input
+                    type="number"
+                    placeholder="0.00"
+                    value={newItem.price || ''}
+                    onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
+                  />
+                  <Input
+                    type="text"
+                    value={formatCurrency((newItem.quantity || 0) * (newItem.price || 0))}
+                    readOnly
+                    disabled
+                    className="bg-muted text-center font-semibold"
+                  />
+                  <Button type="button" size="sm" onClick={handleAddItem}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={newItem.quantity || ''}
-                  onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
-                />
-                <Combobox
-                  options={units.map((u) => ({
-                    value: u.id,
-                    label: u.unit_name,
-                  }))}
-                  value={newItem.unit_id || ''}
-                  onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
-                  placeholder="اختر الوحدة"
-                  searchPlaceholder="البحث عن الوحدات..."
-                  emptyText="لم يتم العثور على وحدات"
-                />
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  value={newItem.price || ''}
-                  onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
-                />
-                <Input
-                  type="text"
-                  value={formatCurrency((newItem.quantity || 0) * (newItem.price || 0))}
-                  readOnly
-                  disabled
-                  className="bg-muted text-center font-semibold"
-                />
-                <Button type="button" size="sm" onClick={handleAddItem}>
-                  <Plus className="h-4 w-4" />
-                </Button>
+                
+                {/* Show inventory information */}
+                {newItem.medicine_id && warehouseId && (
+                  <div className="bg-muted p-3 rounded-md">
+                    {loadingInventory ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>جاري تحميل معلومات المخزون...</span>
+                      </div>
+                    ) : medicineInventory ? (
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <PackageCheck className={`h-5 w-5 ${
+                            medicineInventory.current_balance <= 0 || 
+                            (newItem.quantity && newItem.quantity > medicineInventory.current_balance)
+                              ? 'text-destructive' 
+                              : 'text-primary'
+                          }`} />
+                          <span className="text-sm font-medium">
+                            المخزون المتاح: <strong>{medicineInventory.current_balance}</strong> {medicineInventory.unit_name}
+                          </span>
+                        </div>
+                        {newItem.quantity && newItem.quantity > medicineInventory.current_balance && (
+                          <Alert variant="destructive" className="mt-2">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertDescription>
+                              الكمية المطلوبة أكبر من المخزون المتاح
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <AlertTriangle className="h-5 w-5" />
+                        <span>لا يوجد مخزون لهذا الدواء في المستودع</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {items.length > 0 && (

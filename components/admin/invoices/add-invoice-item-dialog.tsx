@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,6 +10,7 @@ import { getMaterialNames } from '@/actions/material-name.actions';
 import { getMeasurementUnits } from '@/actions/unit.actions';
 import { getEggWeights } from '@/actions/egg-weight.actions';
 import { getMaterialInventory } from '@/actions/material.actions';
+import { getMedicines } from '@/actions/medicine.actions';
 import {
   Dialog,
   DialogContent,
@@ -30,11 +31,13 @@ import {
 } from '@/components/ui/select';
 import { Combobox } from '@/components/ui/combobox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Loader2, AlertTriangle, PackageCheck } from 'lucide-react';
+import { Loader2, AlertTriangle, PackageCheck, Pill } from 'lucide-react';
 
 const itemSchema = z.object({
   material_name_id: z.string().optional(),
+  medicine_id: z.string().optional(),
   unit_id: z.string().min(1, 'الوحدة مطلوبة'),
   egg_weight_id: z.string().optional(),
   quantity: z.number().min(0.01, 'الكمية يجب أن تكون أكبر من 0'),
@@ -53,11 +56,13 @@ interface AddInvoiceItemDialogProps {
 export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoiceItemDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [materials, setMaterials] = useState<Array<{ id: string; material_name: string }>>([]);
+  const [medicines, setMedicines] = useState<Array<{ id: string; name: string; day_of_age: string }>>([]);
   const [units, setUnits] = useState<Array<{ id: string; unit_name: string }>>([]);
   const [eggWeights, setEggWeights] = useState<Array<{ id: string; weight_range: string }>>([]);
   const [invoice, setInvoice] = useState<{ invoice_type: 'buy' | 'sell'; warehouse_id: string | null } | null>(null);
   const [inventory, setInventory] = useState<{ current_balance: number; unit_name: string } | null>(null);
   const [loadingInventory, setLoadingInventory] = useState(false);
+  const [itemType, setItemType] = useState<'material' | 'medicine'>('material');
   
   const {
     register,
@@ -96,14 +101,18 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
   }, [materialId, invoice]);
 
   const loadData = async () => {
-    const [materialsResult, unitsResult, eggWeightsResult] = await Promise.all([
+    const [materialsResult, medicinesResult, unitsResult, eggWeightsResult] = await Promise.all([
       getMaterialNames(),
+      getMedicines(),
       getMeasurementUnits(),
       getEggWeights(),
     ]);
 
     if (materialsResult.success && materialsResult.data) {
       setMaterials(materialsResult.data);
+    }
+    if (medicinesResult.success && medicinesResult.data) {
+      setMedicines(medicinesResult.data);
     }
     if (unitsResult.success && unitsResult.data) {
       setUnits(unitsResult.data);
@@ -133,6 +142,12 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
   };
 
   const onSubmit = async (data: ItemFormData) => {
+    // Validate that either material or medicine is selected
+    if (!data.material_name_id && !data.medicine_id) {
+      toast.error('يجب اختيار مادة أو دواء');
+      return;
+    }
+
     // Validate inventory for sell invoices
     if (invoice?.invoice_type === 'sell' && data.material_name_id && inventory) {
       if (inventory.current_balance <= 0) {
@@ -150,6 +165,7 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
       const result = await createInvoiceItem({
         invoice_id: invoiceId,
         material_name_id: data.material_name_id,
+        medicine_id: data.medicine_id,
         unit_id: data.unit_id,
         egg_weight_id: data.egg_weight_id,
         quantity: data.quantity,
@@ -192,66 +208,106 @@ export function AddInvoiceItemDialog({ invoiceId, open, onOpenChange }: AddInvoi
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="material_name_id">المادة/المنتج</Label>
-            <Combobox
-              options={[
-                { value: 'none', label: 'بدون مادة' },
-                ...materials.map((material) => ({
-                  value: material.id,
-                  label: material.material_name,
-                })),
-              ]}
-              value={materialId || 'none'}
-              onValueChange={(value) => setValue('material_name_id', value === 'none' ? undefined : value)}
-              placeholder="اختر المادة"
-              searchPlaceholder="البحث عن المواد..."
-              emptyText="لا توجد مواد"
-              disabled={isLoading}
-            />
+          <Tabs value={itemType} onValueChange={(value) => setItemType(value as 'material' | 'medicine')}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="material">مواد</TabsTrigger>
+              <TabsTrigger value="medicine">
+                <Pill className="h-4 w-4 ml-2" />
+                أدوية
+              </TabsTrigger>
+            </TabsList>
             
-            {invoice?.invoice_type === 'sell' && materialId && materialId !== 'none' && (
-              <div className="bg-muted p-3 rounded-md">
-                {loadingInventory ? (
-                  <div className="flex items-center justify-center py-2">
-                    <Loader2 className="h-4 w-4 animate-spin ml-2" />
-                    <span className="text-sm">جاري تحميل معلومات المخزون...</span>
-                  </div>
-                ) : inventory ? (
-                  <div className="flex items-center gap-2">
-                    <PackageCheck className={`h-5 w-5 ${hasInsufficientStock ? 'text-destructive' : 'text-primary'}`} />
-                    <span className="text-sm">
-                      المخزون المتاح: <strong>{inventory.current_balance}</strong> {inventory.unit_name}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">لا توجد معلومات مخزون متاحة</span>
+            <TabsContent value="material" className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="material_name_id">المادة/المنتج</Label>
+                <Combobox
+                  options={[
+                    { value: 'none', label: 'بدون مادة' },
+                    ...materials.map((material) => ({
+                      value: material.id,
+                      label: material.material_name,
+                    })),
+                  ]}
+                  value={materialId || 'none'}
+                  onValueChange={(value) => {
+                    setValue('material_name_id', value === 'none' ? undefined : value);
+                    setValue('medicine_id', undefined);
+                  }}
+                  placeholder="اختر المادة"
+                  searchPlaceholder="البحث عن المواد..."
+                  emptyText="لا توجد مواد"
+                  disabled={isLoading}
+                />
+                
+                {invoice?.invoice_type === 'sell' && materialId && materialId !== 'none' && (
+                  <div className="bg-muted p-3 rounded-md">
+                    {loadingInventory ? (
+                      <div className="flex items-center justify-center py-2">
+                        <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                        <span className="text-sm">جاري تحميل معلومات المخزون...</span>
+                      </div>
+                    ) : inventory ? (
+                      <div className="flex items-center gap-2">
+                        <PackageCheck className={`h-5 w-5 ${hasInsufficientStock ? 'text-destructive' : 'text-primary'}`} />
+                        <span className="text-sm">
+                          المخزون المتاح: <strong>{inventory.current_balance}</strong> {inventory.unit_name}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">لا توجد معلومات مخزون متاحة</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="egg_weight_id">وزن البيض (اختياري)</Label>
-            <Combobox
-              options={[
-                { value: 'none', label: 'بدون وزن بيض' },
-                ...eggWeights.map((weight) => ({
-                  value: weight.id,
-                  label: weight.weight_range,
-                })),
-              ]}
-              value={eggWeightId || 'none'}
-              onValueChange={(value) => setValue('egg_weight_id', value === 'none' ? undefined : value)}
-              placeholder="اختر وزن البيض"
-              searchPlaceholder="البحث عن أوزان البيض..."
-              emptyText="لا توجد أوزان بيض"
-              disabled={isLoading}
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="egg_weight_id">وزن البيض (اختياري)</Label>
+                <Combobox
+                  options={[
+                    { value: 'none', label: 'بدون وزن بيض' },
+                    ...eggWeights.map((weight) => ({
+                      value: weight.id,
+                      label: weight.weight_range,
+                    })),
+                  ]}
+                  value={eggWeightId || 'none'}
+                  onValueChange={(value) => setValue('egg_weight_id', value === 'none' ? undefined : value)}
+                  placeholder="اختر وزن البيض"
+                  searchPlaceholder="البحث عن أوزان البيض..."
+                  emptyText="لا توجد أوزان بيض"
+                  disabled={isLoading}
+                />
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="medicine" className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="medicine_id">الدواء</Label>
+                <Combobox
+                  options={[
+                    { value: 'none', label: 'اختر دواء' },
+                    ...medicines.map((medicine) => ({
+                      value: medicine.id,
+                      label: `${medicine.name} (${medicine.day_of_age})`,
+                    })),
+                  ]}
+                  value={watch('medicine_id') || 'none'}
+                  onValueChange={(value) => {
+                    setValue('medicine_id', value === 'none' ? undefined : value);
+                    setValue('material_name_id', undefined);
+                    setValue('egg_weight_id', undefined);
+                  }}
+                  placeholder="اختر الدواء"
+                  searchPlaceholder="البحث عن الأدوية..."
+                  emptyText="لا توجد أدوية"
+                  disabled={isLoading}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

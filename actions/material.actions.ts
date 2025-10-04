@@ -94,7 +94,9 @@ export async function getMaterialsAggregated(): Promise<ActionResult<Material[]>
       const grouped = new Map<string, any>();
 
       for (const material of materials || []) {
-        const key = `${material.material_name_id}-${material.unit_id}`;
+        // Create unique key based on material_name_id or medicine_id
+        const itemId = material.material_name_id || material.medicine_id;
+        const key = `${itemId}-${material.unit_id}`;
         
         if (grouped.has(key)) {
           const existing = grouped.get(key);
@@ -109,6 +111,7 @@ export async function getMaterialsAggregated(): Promise<ActionResult<Material[]>
             id: key,
             warehouse_id: null,
             material_name_id: material.material_name_id,
+            medicine_id: material.medicine_id,
             unit_id: material.unit_id,
             opening_balance: material.opening_balance,
             purchases: material.purchases,
@@ -128,6 +131,7 @@ export async function getMaterialsAggregated(): Promise<ActionResult<Material[]>
         let materialName = undefined;
         let unitName = undefined;
 
+        // Check if it's a material or medicine
         if (material.material_name_id) {
           const { data: matName } = await supabase
             .from('materials_names')
@@ -135,6 +139,14 @@ export async function getMaterialsAggregated(): Promise<ActionResult<Material[]>
             .eq('id', material.material_name_id)
             .single();
           materialName = matName?.material_name;
+        } else if (material.medicine_id) {
+          // Get medicine name
+          const { data: medicine } = await supabase
+            .from('medicines')
+            .select('name')
+            .eq('id', material.medicine_id)
+            .single();
+          materialName = medicine?.name ? `💊 ${medicine.name}` : undefined;
         }
 
         if (material.unit_id) {
@@ -227,6 +239,7 @@ export async function getMaterials(warehouseFilter?: string): Promise<ActionResu
         }
       }
 
+      // Check if it's a material or medicine
       if (material.material_name_id) {
         const { data: matName } = await supabase
           .from('materials_names')
@@ -234,6 +247,14 @@ export async function getMaterials(warehouseFilter?: string): Promise<ActionResu
           .eq('id', material.material_name_id)
           .single();
         materialName = matName?.material_name;
+      } else if (material.medicine_id) {
+        // Get medicine name
+        const { data: medicine } = await supabase
+          .from('medicines')
+          .select('name')
+          .eq('id', material.medicine_id)
+          .single();
+        materialName = medicine?.name ? `💊 ${medicine.name}` : undefined;
       }
 
       if (material.unit_id) {
@@ -482,11 +503,12 @@ export async function getWarehousesForMaterials(): Promise<ActionResult<Array<{ 
 }
 
 /**
- * Get material inventory for a specific warehouse and material
+ * Get material or medicine inventory for a specific warehouse
+ * Supports both material_name_id and medicine_id
  */
 export async function getMaterialInventory(
   warehouseId: string,
-  materialNameId: string
+  materialOrMedicineId: string
 ): Promise<ActionResult<{ current_balance: number; unit_name: string }>> {
   try {
     const supabase = await createClient();
@@ -496,24 +518,35 @@ export async function getMaterialInventory(
       return { success: false, error: 'Unauthorized' };
     }
 
-    const { data: material, error } = await supabase
+    // Try to find by material_name_id first
+    let material = await supabase
       .from('materials')
       .select('current_balance, unit_id')
       .eq('warehouse_id', warehouseId)
-      .eq('material_name_id', materialNameId)
-      .single();
+      .eq('material_name_id', materialOrMedicineId)
+      .maybeSingle();
 
-    if (error) {
-      // Material not found in warehouse
+    // If not found, try medicine_id
+    if (!material.data) {
+      material = await supabase
+        .from('materials')
+        .select('current_balance, unit_id')
+        .eq('warehouse_id', warehouseId)
+        .eq('medicine_id', materialOrMedicineId)
+        .maybeSingle();
+    }
+
+    if (!material.data) {
+      // Material/Medicine not found in warehouse
       return { success: true, data: { current_balance: 0, unit_name: '' } };
     }
 
     let unitName = '';
-    if (material.unit_id) {
+    if (material.data.unit_id) {
       const { data: unit } = await supabase
         .from('measurement_units')
         .select('unit_name')
-        .eq('id', material.unit_id)
+        .eq('id', material.data.unit_id)
         .single();
       unitName = unit?.unit_name || '';
     }
@@ -521,7 +554,7 @@ export async function getMaterialInventory(
     return {
       success: true,
       data: {
-        current_balance: material.current_balance || 0,
+        current_balance: material.data.current_balance || 0,
         unit_name: unitName,
       },
     };
