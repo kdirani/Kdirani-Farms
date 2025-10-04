@@ -428,7 +428,7 @@ export function CreateMedicineInvoiceDialog({ open, onOpenChange }: CreateMedici
                             المخزون المتاح: <strong>{medicineInventory.current_balance}</strong> {medicineInventory.unit_name}
                           </span>
                         </div>
-                        {newItem.quantity && newItem.quantity > medicineInventory.current_balance && (
+                        {!!(newItem.quantity && newItem.quantity > medicineInventory.current_balance) && (
                           <Alert variant="destructive" className="mt-2">
                             <AlertTriangle className="h-4 w-4" />
                             <AlertDescription>
