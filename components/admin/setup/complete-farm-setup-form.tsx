@@ -1,11 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { createCompleteFarmSetup, FarmSetupInput } from '@/actions/farm-setup.actions';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -15,10 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, CheckCircle2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CheckCircle2, Loader2, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import * as z from 'zod';
 
 const farmSetupSchema = z.object({
   user: z.object({
@@ -129,19 +129,19 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
     setIsLoading(true);
     try {
       const result = await createCompleteFarmSetup(data as FarmSetupInput);
-      
+
       if (result.success) {
         const itemsCreated = [];
         if (data.materials.length > 0) itemsCreated.push('المواد');
         if (data.medicines.length > 0) itemsCreated.push('الأدوية');
         const itemsText = itemsCreated.length > 0 ? `، و${itemsCreated.join(' و')}` : '';
-        
+
         toast.success('تم إكمال إعداد المزرعة بنجاح!', {
           description: `تم إنشاء: المستخدم، المزرعة، المستودع، القطيع${itemsText}`,
         });
         setSetupComplete(true);
         reset();
-        
+
         // Reset setup complete after 5 seconds
         setTimeout(() => {
           setSetupComplete(false);
@@ -351,8 +351,8 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
                 inputMode="numeric"
                 pattern="[0-9]*"
                 placeholder="مثال: 0"
-                {...register('poultry.opening_chicks', { 
-                  setValueAs: (value) => value === '' ? 0 : parseInt(value, 10) 
+                {...register('poultry.opening_chicks', {
+                  setValueAs: (value) => value === '' ? 0 : parseInt(value, 10)
                 })}
                 disabled={isLoading}
               />
