@@ -21,7 +21,7 @@ import { Loader2 } from 'lucide-react';
 
 const poultrySchema = z.object({
   batch_name: z.string().min(2, 'اسم الدفعة يجب أن يكون حرفين على الأقل'),
-  opening_chicks: z.number().min(1, 'عدد الكتاكيت الافتتاحي يجب أن يكون 1 على الأقل'),
+  opening_chicks: z.number().min(0, 'عدد الكتاكيت الافتتاحي لا يمكن أن يكون سالباً'),
   dead_chicks: z.number().min(0, 'عدد الكتاكيت النافقة لا يمكن أن يكون سالباً'),
 });
 
@@ -119,10 +119,13 @@ export function EditPoultryDialog({ poultry, open, onOpenChange }: EditPoultryDi
             <Label htmlFor="opening_chicks">عدد الكتاكيت الافتتاحي *</Label>
             <Input
               id="opening_chicks"
-              type="number"
-              min="1"
-              placeholder="مثال: 1000"
-              {...register('opening_chicks', { valueAsNumber: true })}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="مثال: 0"
+              {...register('opening_chicks', { 
+                setValueAs: (value) => value === '' ? 0 : parseInt(value, 10) 
+              })}
               disabled={isLoading}
             />
             {errors.opening_chicks && (
@@ -134,10 +137,13 @@ export function EditPoultryDialog({ poultry, open, onOpenChange }: EditPoultryDi
             <Label htmlFor="dead_chicks">عدد الكتاكيت النافقة *</Label>
             <Input
               id="dead_chicks"
-              type="number"
-              min="0"
-              placeholder="مثال: 50"
-              {...register('dead_chicks', { valueAsNumber: true })}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="مثال: 0"
+              {...register('dead_chicks', { 
+                setValueAs: (value) => value === '' ? 0 : parseInt(value, 10) 
+              })}
               disabled={isLoading}
             />
             {errors.dead_chicks && (

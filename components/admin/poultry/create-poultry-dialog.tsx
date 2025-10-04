@@ -29,7 +29,7 @@ import { Loader2 } from 'lucide-react';
 const poultrySchema = z.object({
   batch_name: z.string().min(2, 'اسم الدفعة يجب أن يكون حرفين على الأقل'),
   farm_id: z.string().min(1, 'المزرعة مطلوبة'),
-  opening_chicks: z.number().min(1, 'عدد الكتاكيت الافتتاحي يجب أن يكون 1 على الأقل'),
+  opening_chicks: z.number().min(0, 'عدد الكتاكيت الافتتاحي لا يمكن أن يكون سالباً'),
 });
 
 type PoultryFormData = z.infer<typeof poultrySchema>;
@@ -54,8 +54,8 @@ export function CreatePoultryDialog({ open, onOpenChange }: CreatePoultryDialogP
   } = useForm<PoultryFormData>({
     resolver: zodResolver(poultrySchema),
     defaultValues: {
-      opening_chicks: 1000,
-    },
+    opening_chicks: 0,
+  },
   });
 
   const farmId = watch('farm_id');
@@ -150,20 +150,28 @@ export function CreatePoultryDialog({ open, onOpenChange }: CreatePoultryDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="opening_chicks">عدد الكتاكيت الافتتاحي *</Label>
+            <Label htmlFor="opening_chicks">عدد الدجاج الافتتاحي *</Label>
             <Input
               id="opening_chicks"
-              type="number"
-              min="1"
-              placeholder="مثال: 1000"
-              {...register('opening_chicks', { valueAsNumber: true })}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="مثال: 0"
+              {...register('opening_chicks', { 
+                setValueAs: (value) => {
+                  if (value === '' || isNaN(parseInt(value, 10))) {
+                    return 0;
+                  }
+                  return parseInt(value, 10);
+                }
+              })}
               disabled={isLoading}
             />
             {errors.opening_chicks && (
               <p className="text-sm text-destructive">{errors.opening_chicks.message}</p>
             )}
             <p className="text-xs text-muted-foreground">
-              العدد الأولي للكتاكيت في هذه الدفعة
+              العدد الأولي للدجاج في هذه الدفعة
             </p>
           </div>
 
