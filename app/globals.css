@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --red: #da3231;
+  --redark: #b91c1c;
+  --yellowlight: #fbbf22;
+  --yellowdark: #dd9f13;
+  --black: #2d2d2d;
+  --white: #ffffff;
+  --blacklight: #4f4b4b;
+}
 /* تعريف الخط العربي */
 @font-face {
   font-family: 'ExpoArabic';
