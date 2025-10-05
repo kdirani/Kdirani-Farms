@@ -16,6 +16,7 @@ import { formatCurrency } from '@/lib/utils';
 import { InvoiceItemsSection } from './invoice-items-section';
 import { InvoiceExpensesSection } from './invoice-expenses-section';
 import { InvoiceAttachmentsSection } from './invoice-attachments-section';
+import { PrintInvoiceButton } from './print-invoice-button';
 import { toast } from 'sonner';
 
 interface InvoiceDetailViewProps {
@@ -90,24 +91,27 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
             </p>
           </div>
         </div>
-        <Button
-          onClick={handleToggleStatus}
-          disabled={isToggling}
-          variant={invoice.checked ? "outline" : "default"}
-          className="gap-2"
-        >
-          {invoice.checked ? (
-            <>
-              <XCircle className="h-4 w-4" />
-              إلغاء التدقيق
-            </>
-          ) : (
-            <>
-              <CheckCircle className="h-4 w-4" />
-              تعيين كمدققة
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <PrintInvoiceButton invoice={invoice} items={items} expenses={expenses} />
+          <Button
+            onClick={handleToggleStatus}
+            disabled={isToggling}
+            variant={invoice.checked ? "outline" : "default"}
+            className="gap-2"
+          >
+            {invoice.checked ? (
+              <>
+                <XCircle className="h-4 w-4" />
+                إلغاء التدقيق
+              </>
+            ) : (
+              <>
+                <CheckCircle className="h-4 w-4" />
+                تعيين كمدققة
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Invoice Information */}

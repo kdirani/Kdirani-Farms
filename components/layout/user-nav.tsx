@@ -12,17 +12,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, User, Settings } from "lucide-react";
-import type { UserRole } from "@/types/database.types";
-
 interface UserNavProps {
   user: {
     name: string;
     email: string;
-    role: UserRole;
+    role: 'admin' | 'sub_admin' | 'farmer';
   };
 }
 
-const roleLabels: Record<UserRole, string> = {
+const roleLabels: Record<'admin' | 'sub_admin' | 'farmer', string> = {
   admin: "مدير النظام",
   sub_admin: "مدير فرعي",
   farmer: "مزارع",

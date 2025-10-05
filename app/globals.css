@@ -11,6 +11,37 @@
   --white: #ffffff;
   --blacklight: #4f4b4b;
 }
+
+/* أنماط خاصة بالطباعة */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-container,
+  .print-container * {
+    visibility: visible;
+  }
+  
+  .print-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background-color: white;
+    direction: rtl;
+    text-align: right;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+}
 /* تعريف الخط العربي */
 @font-face {
   font-family: 'ExpoArabic';
