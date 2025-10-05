@@ -208,23 +208,110 @@ async function getChicksFromPoultryStatus(
   supabase: any,
   warehouseId: string
 ): Promise<number> {
+  console.log('[getChicksFromPoultryStatus] Starting for warehouse:', warehouseId);
+  
   // Get farm_id from warehouse
-  const { data: warehouse } = await supabase
+  const { data: warehouse, error: warehouseError } = await supabase
     .from('warehouses')
     .select('farm_id')
     .eq('id', warehouseId)
     .single();
 
-  if (!warehouse) return 0;
+  if (warehouseError) {
+    console.error('[getChicksFromPoultryStatus] Error fetching warehouse:', warehouseError);
+    return 0;
+  }
+
+  if (!warehouse) {
+    console.warn('[getChicksFromPoultryStatus] Warehouse not found');
+    return 0;
+  }
+
+  console.log('[getChicksFromPoultryStatus] Found farm_id:', warehouse.farm_id);
 
   // Get the single poultry status for this farm
-  const { data: poultryStatus } = await supabase
+  const { data: poultryStatus, error: poultryError } = await supabase
     .from('poultry_status')
     .select('remaining_chicks')
     .eq('farm_id', warehouse.farm_id)
     .maybeSingle();
 
+  if (poultryError) {
+    console.error('[getChicksFromPoultryStatus] Error fetching poultry status:', poultryError);
+    return 0;
+  }
+
+  if (!poultryStatus) {
+    console.warn('[getChicksFromPoultryStatus] No poultry status found for farm:', warehouse.farm_id);
+    return 0;
+  }
+
+  console.log('[getChicksFromPoultryStatus] Found remaining_chicks:', poultryStatus.remaining_chicks);
   return poultryStatus?.remaining_chicks || 0;
+}
+
+/**
+ * Get chicks_before value automatically:
+ * - First report: from poultry_status.remaining_chicks
+ * - Subsequent reports: from last daily_report.chicks_after
+ */
+async function getChicksBeforeValue(
+  supabase: any,
+  warehouseId: string
+): Promise<number> {
+  console.log('[getChicksBeforeValue] Starting for warehouse:', warehouseId);
+  
+  // Check if this is the first report
+  const firstReport = await isFirstReport(supabase, warehouseId);
+  console.log('[getChicksBeforeValue] Is first report:', firstReport);
+  
+  if (firstReport) {
+    // First report: get from poultry status
+    console.log('[getChicksBeforeValue] Getting from poultry status...');
+    const value = await getChicksFromPoultryStatus(supabase, warehouseId);
+    console.log('[getChicksBeforeValue] Returning value from poultry:', value);
+    return value;
+  } else {
+    // Subsequent reports: get from last report's chicks_after
+    console.log('[getChicksBeforeValue] Getting from last report...');
+    const { data: lastReport } = await supabase
+      .from('daily_reports')
+      .select('chicks_after')
+      .eq('warehouse_id', warehouseId)
+      .order('report_date', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    const value = lastReport?.chicks_after || 0;
+    console.log('[getChicksBeforeValue] Returning value from last report:', value);
+    return value;
+  }
+}
+
+/**
+ * Public function to get chicks_before value for UI
+ */
+export async function getChicksBeforeForNewReport(
+  warehouseId: string
+): Promise<ActionResult<number>> {
+  console.log('[getChicksBeforeForNewReport] Called for warehouse:', warehouseId);
+  
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      console.warn('[getChicksBeforeForNewReport] User not authenticated');
+      return { success: false, error: 'غير مصرح' };
+    }
+
+    const supabase = await createClient();
+    const chicksBeforeValue = await getChicksBeforeValue(supabase, warehouseId);
+    
+    console.log('[getChicksBeforeForNewReport] Success! Returning value:', chicksBeforeValue);
+    return { success: true, data: chicksBeforeValue };
+  } catch (error) {
+    console.error('[getChicksBeforeForNewReport] Error getting chicks before:', error);
+    return { success: false, error: 'فشل في جلب عدد الدجاج' };
+  }
 }
 
 // ==================== Main Function ====================
@@ -240,14 +327,10 @@ export async function createIntegratedDailyReport(
 
     const supabase = await createClient();
 
-    // Check if this is the first report
-    const firstReport = await isFirstReport(supabase, input.warehouse_id);
-    
-    // If first report, get chicks from poultry status
-    let chicksBeforeValue = input.chicks_before;
-    if (firstReport && chicksBeforeValue === 0) {
-      chicksBeforeValue = await getChicksFromPoultryStatus(supabase, input.warehouse_id);
-    }
+    // Get chicks_before value automatically
+    // First report: from poultry_status.remaining_chicks
+    // Subsequent reports: from last daily_report.chicks_after
+    const chicksBeforeValue = await getChicksBeforeValue(supabase, input.warehouse_id);
 
     // Calculate computed fields
     const productionEggs = input.production_eggs_healthy + input.production_eggs_deformed;

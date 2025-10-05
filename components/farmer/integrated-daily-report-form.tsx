@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { 
   createIntegratedDailyReport,
   getWarehouseMedicines,
+  getChicksBeforeForNewReport,
   type EggSaleInvoiceItem,
   type DroppingsSaleInvoiceData,
   type MedicineConsumptionItem,
@@ -138,6 +139,24 @@ export default function IntegratedDailyReportForm({
     };
     loadMedicines();
   }, [warehouseId]);
+
+  // Load chicks_before value automatically
+  useEffect(() => {
+    const loadChicksBefore = async () => {
+      const result = await getChicksBeforeForNewReport(warehouseId);
+      if (result.success && result.data !== undefined) {
+        setValue('chicks_before', result.data, { 
+          shouldValidate: true, 
+          shouldDirty: true,
+          shouldTouch: true 
+        });
+      } else if (result.error) {
+        console.error('Error loading chicks before:', result.error);
+        toast.error('فشل في جلب عدد الدجاج');
+      }
+    };
+    loadChicksBefore();
+  }, [warehouseId, setValue]);
 
   const watchHealthy = watch('production_eggs_healthy');
   const watchDeformed = watch('production_eggs_deformed');
@@ -405,13 +424,19 @@ export default function IntegratedDailyReportForm({
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="chicks_before">العدد قبل</Label>
+              <Label htmlFor="chicks_before_display">العدد قبل (تلقائي)</Label>
               <Input
-                id="chicks_before"
+                id="chicks_before_display"
                 type="number"
-                {...register('chicks_before', { valueAsNumber: true })}
-                disabled={isLoading}
+                value={watchChicksBefore || 0}
+                readOnly
+                className="bg-muted cursor-not-allowed"
               />
+              {/* Hidden input to submit the value */}
+              <input type="hidden" {...register('chicks_before', { valueAsNumber: true })} />
+              <p className="text-xs text-muted-foreground">
+                يُحسب تلقائياً من القطيع أو التقرير السابق
+              </p>
             </div>
 
             <div className="space-y-2">
