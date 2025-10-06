@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { getManufacturingInvoices } from '@/actions/manufacturing.actions';
 import { ManufacturingTable } from '@/components/admin/manufacturing/manufacturing-table';
+import { ExportManufacturingButton } from '@/components/admin/manufacturing/export-manufacturing-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,11 +32,14 @@ async function ManufacturingContent() {
 export default function ManufacturingPage() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">إدارة التصنيع</h1>
-        <p className="text-muted-foreground mt-2">
-          إدارة فواتير التصنيع والمواد والمصاريف
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">إدارة التصنيع</h1>
+          <p className="text-muted-foreground mt-2">
+            إدارة فواتير التصنيع والمواد والمصاريف
+          </p>
+        </div>
+        <ExportManufacturingButton />
       </div>
 
       <Card>

@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { getMedicineInvoices } from '@/actions/medicine-invoice.actions';
 import { MedicineInvoicesTable } from '@/components/admin/medicines-invoices/medicine-invoices-table';
+import { ExportMedicinesInvoicesButton } from '@/components/admin/medicines-invoices/export-medicines-invoices-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,11 +32,14 @@ async function MedicineInvoicesContent() {
 export default function MedicineInvoicesPage() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">فواتير استهلاك الأدوية</h1>
-        <p className="text-muted-foreground mt-2">
-          إدارة استهلاك الأدوية واللقاحات مع تتبع المخزون التلقائي
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">فواتير استهلاك الأدوية</h1>
+          <p className="text-muted-foreground mt-2">
+            إدارة استهلاك الأدوية واللقاحات مع تتبع المخزون التلقائي
+          </p>
+        </div>
+        <ExportMedicinesInvoicesButton />
       </div>
 
       <Card>
