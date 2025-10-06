@@ -5,6 +5,7 @@ import { FarmsTableSkeleton } from '@/components/admin/farms/farms-table-skeleto
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { ExportFarmsData } from '@/components/admin/farms/export-farms-data';
 
 export const metadata = {
   title: 'إدارة المزارع - لوحة التحكم الإدارية',
@@ -25,7 +26,14 @@ async function FarmsContent() {
     );
   }
 
-  return <FarmsTable farms={result.data} />;
+  return (
+    <>
+      <div className="flex justify-end mb-4">
+        <ExportFarmsData farms={result.data} />
+      </div>
+      <FarmsTable farms={result.data} />
+    </>
+  );
 }
 
 export default function FarmsPage() {

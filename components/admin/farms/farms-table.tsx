@@ -25,6 +25,7 @@ import { Building2, MoreHorizontal, Search, Plus } from 'lucide-react';
 import { CreateFarmDialog } from './create-farm-dialog';
 import { EditFarmDialog } from './edit-farm-dialog';
 import { DeleteFarmDialog } from './delete-farm-dialog';
+import { ExportSingleFarmData } from './export-single-farm-data';
 import { formatDate } from '@/lib/utils';
 
 interface FarmsTableProps {
@@ -112,36 +113,39 @@ export function FarmsTable({ farms }: FarmsTableProps) {
                     {formatDate(new Date(farm.created_at))}
                   </TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">فتح القائمة</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedFarm(farm);
-                            setEditDialogOpen(true);
-                          }}
-                        >
-                          تعديل المزرعة
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedFarm(farm);
-                            setDeleteDialogOpen(true);
-                          }}
-                          className="text-destructive"
-                        >
-                          حذف المزرعة
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex justify-end items-center gap-2">
+                      <ExportSingleFarmData farm={farm} />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">فتح القائمة</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedFarm(farm);
+                              setEditDialogOpen(true);
+                            }}
+                          >
+                            تعديل المزرعة
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedFarm(farm);
+                              setDeleteDialogOpen(true);
+                            }}
+                            className="text-destructive"
+                          >
+                            حذف المزرعة
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

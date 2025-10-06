@@ -15,6 +15,18 @@ export type Farm = {
     fname: string;
     email: string;
   };
+  type?: string;
+  warehouses_count?: number;
+  warehouses_names?: string[];
+  poultry_name?: string;
+  poultry_opening_chicks?: number;
+  poultry_current_chicks?: number;
+  reports_count?: number;
+  last_report_date?: string;
+  avg_egg_production?: number;
+  invoices_count?: number;
+  last_invoice_date?: string;
+  total_invoices_value?: number;
 };
 
 export type CreateFarmInput = {

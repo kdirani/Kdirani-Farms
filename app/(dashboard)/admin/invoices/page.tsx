@@ -5,6 +5,7 @@ import { InvoicesTableSkeleton } from '@/components/admin/invoices/invoices-tabl
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { ExportInvoicesButton } from '@/components/admin/invoices/export-invoices-button';
 
 export const metadata = {
   title: 'إدارة الفواتير - لوحة التحكم الإدارية',
@@ -31,11 +32,14 @@ async function InvoicesContent() {
 export default function InvoicesPage() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">إدارة الفواتير</h1>
-        <p className="text-muted-foreground mt-2">
-          إدارة فواتير البيع والشراء للمواد والمنتجات
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">إدارة الفواتير</h1>
+          <p className="text-muted-foreground mt-2">
+            إدارة فواتير البيع والشراء للمواد والمنتجات
+          </p>
+        </div>
+        <ExportInvoicesButton />
       </div>
 
       <Card>
