@@ -19,10 +19,10 @@ export default async function DailyReportPage() {
 
   const supabase = await createClient();
 
-  // Get user's farm and warehouse
+  // Get user's farm
   const { data: farm } = await supabase
     .from("farms")
-    .select("id, name, warehouses(id, name)")
+    .select("id, name")
     .eq("user_id", session.user.id)
     .single();
 
@@ -42,6 +42,32 @@ export default async function DailyReportPage() {
       </div>
     );
   }
+
+  // Get warehouse for this farm
+  const { data: warehouses } = await supabase
+    .from("warehouses")
+    .select("id, name")
+    .eq("farm_id", farm.id)
+    .limit(1);
+
+  if (!warehouses || warehouses.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">التقرير اليومي</h1>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground">
+              لا يوجد مستودع مرتبط بمزرعتك. يرجى التواصل مع المدير.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const warehouse = warehouses[0];
 
   // Get egg weights for invoices
   const { data: eggWeights } = await supabase
@@ -86,6 +112,7 @@ export default async function DailyReportPage() {
     .eq("farm_id", farm.id)
     .maybeSingle();
 
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -106,8 +133,8 @@ export default async function DailyReportPage() {
         </CardHeader>
         <CardContent>
           <IntegratedDailyReportForm
-            warehouseId={farm.warehouses?.[0]?.id || ""}
-            warehouseName={farm.warehouses?.[0]?.name || ""}
+            warehouseId={warehouse.id}
+            warehouseName={warehouse.name}
             farmId={farm.id}
             eggWeights={eggWeights || []}
             materialsNames={materialsNames || []}

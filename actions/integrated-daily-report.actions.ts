@@ -191,7 +191,9 @@ async function updateMaterialInventory(
 /**
  * Check if this is the first report for the warehouse
  */
-async function isFirstReport(supabase: any, warehouseId: string): Promise<boolean> {
+async function isFirstReport(supabase: any, warehouseId: string | undefined | null): Promise<boolean> {
+  // If no warehouse specified, treat as first to avoid scanning unrelated data
+  if (!warehouseId) return true;
   const { count } = await supabase
     .from('daily_reports')
     .select('id', { count: 'exact', head: true })
@@ -206,9 +208,13 @@ async function isFirstReport(supabase: any, warehouseId: string): Promise<boolea
  */
 async function getChicksFromPoultryStatus(
   supabase: any,
-  warehouseId: string
+  warehouseId: string | undefined | null
 ): Promise<number> {
   console.log('[getChicksFromPoultryStatus] Starting for warehouse:', warehouseId);
+  if (!warehouseId) {
+    console.warn('[getChicksFromPoultryStatus] No warehouseId provided');
+    return 0;
+  }
   
   // Get farm_id from warehouse
   const { data: warehouse, error: warehouseError } = await supabase
@@ -257,7 +263,7 @@ async function getChicksFromPoultryStatus(
  */
 async function getChicksBeforeValue(
   supabase: any,
-  warehouseId: string
+  warehouseId: string | undefined | null
 ): Promise<number> {
   console.log('[getChicksBeforeValue] Starting for warehouse:', warehouseId);
   
@@ -274,6 +280,10 @@ async function getChicksBeforeValue(
   } else {
     // Subsequent reports: get from last report's chicks_after
     console.log('[getChicksBeforeValue] Getting from last report...');
+    if (!warehouseId) {
+      console.warn('[getChicksBeforeValue] warehouseId missing; cannot get last report');
+      return 0;
+    }
     const { data: lastReport } = await supabase
       .from('daily_reports')
       .select('chicks_after')
@@ -304,6 +314,46 @@ export async function getChicksBeforeForNewReport(
     }
 
     const supabase = await createClient();
+
+    // If warehouseId is empty, do not attempt cross-warehouse queries
+    if (!warehouseId) {
+      console.warn('[getChicksBeforeForNewReport] No warehouseId provided; returning 0');
+      return { success: true, data: 0 };
+    }
+
+    // Validate warehouse belongs to the current user's farm
+    const { data: wh, error: whErr } = await supabase
+      .from('warehouses')
+      .select('id, farm_id')
+      .eq('id', warehouseId)
+      .maybeSingle();
+
+    if (whErr) {
+      console.error('[getChicksBeforeForNewReport] Error fetching warehouse:', whErr);
+      return { success: false, error: 'خطأ في التحقق من المستودع' };
+    }
+
+    if (!wh) {
+      console.warn('[getChicksBeforeForNewReport] Warehouse not found');
+      return { success: false, error: 'المستودع غير موجود' };
+    }
+
+    const { data: farmRow, error: farmErr } = await supabase
+      .from('farms')
+      .select('user_id')
+      .eq('id', wh.farm_id)
+      .maybeSingle();
+
+    if (farmErr) {
+      console.error('[getChicksBeforeForNewReport] Error fetching farm:', farmErr);
+      return { success: false, error: 'خطأ في التحقق من المزرعة' };
+    }
+
+    if (!farmRow || farmRow.user_id !== session.user.id) {
+      console.warn('[getChicksBeforeForNewReport] Warehouse does not belong to current user');
+      return { success: false, error: 'غير مصرح' };
+    }
+
     const chicksBeforeValue = await getChicksBeforeValue(supabase, warehouseId);
     
     console.log('[getChicksBeforeForNewReport] Success! Returning value:', chicksBeforeValue);
