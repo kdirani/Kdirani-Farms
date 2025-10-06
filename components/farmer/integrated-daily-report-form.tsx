@@ -240,8 +240,8 @@ export default function IntegratedDailyReportForm({
 
   // Egg Sale Functions
   const addEggSaleItem = () => {
-    if (!newEggSaleItem.egg_weight_id || !newEggSaleItem.unit_id || !newEggSaleItem.quantity || !newEggSaleItem.price) {
-      toast.error('يرجى ملء جميع حقول بند البيع');
+    if (!newEggSaleItem.egg_weight_id || !newEggSaleItem.unit_id || !newEggSaleItem.quantity) {
+      toast.error('يرجى ملء الحقول المطلوبة (وزن البيض، الوحدة، الكمية)');
       return;
     }
 
@@ -256,7 +256,7 @@ export default function IntegratedDailyReportForm({
   // Medicine Consumption Functions
   const addMedicineItem = () => {
     if (!newMedicineItem.medicine_id || !newMedicineItem.unit_id || !newMedicineItem.quantity) {
-      toast.error('يرجى ملء جميع حقول بند الدواء');
+      toast.error('يرجى ملء الحقول المطلوبة (الدواء، الوحدة، الكمية)');
       return;
     }
 
@@ -694,7 +694,7 @@ export default function IntegratedDailyReportForm({
             </div>
 
             <div className="space-y-2">
-              <Label>السعر</Label>
+              <Label>السعر (اختياري)</Label>
               <Input
                 type="number"
                 step="0.01"
@@ -705,7 +705,7 @@ export default function IntegratedDailyReportForm({
             </div>
 
             <div className="space-y-2">
-              <Label>المبلغ</Label>
+              <Label>المبلغ (اختياري)</Label>
               <div className="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm font-bold">
                 {((newEggSaleItem.quantity || 0) * (newEggSaleItem.price || 0)).toFixed(2)}
               </div>
@@ -822,7 +822,7 @@ export default function IntegratedDailyReportForm({
             </div>
 
             <div className="space-y-2">
-              <Label>السعر</Label>
+              <Label>السعر (اختياري)</Label>
               <Input
                 type="number"
                 step="0.01"
@@ -833,7 +833,7 @@ export default function IntegratedDailyReportForm({
             </div>
 
             <div className="space-y-2">
-              <Label>المبلغ</Label>
+              <Label>المبلغ (اختياري)</Label>
               <div className="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm font-bold">
                 {((droppingsSale.quantity || 0) * (droppingsSale.price || 0)).toFixed(2)}
               </div>
@@ -916,7 +916,7 @@ export default function IntegratedDailyReportForm({
             </div>
 
             <div className="space-y-2">
-              <Label>السعر</Label>
+              <Label>السعر (اختياري)</Label>
               <Input
                 type="number"
                 step="0.01"
@@ -927,7 +927,7 @@ export default function IntegratedDailyReportForm({
             </div>
 
             <div className="space-y-2">
-              <Label>المبلغ</Label>
+              <Label>المبلغ (اختياري)</Label>
               <div className="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm font-bold">
                 {((newMedicineItem.quantity || 0) * (newMedicineItem.price || 0)).toFixed(2)}
               </div>
