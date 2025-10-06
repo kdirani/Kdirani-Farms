@@ -2,10 +2,14 @@ import { Suspense } from 'react';
 import { getDailyReports } from '@/actions/daily-report.actions';
 import { getWarehousesForMaterials } from '@/actions/material.actions';
 import { DailyReportsView } from '@/components/admin/daily-reports/daily-reports-view';
+import { ExportDailyReportsButton } from '@/components/admin/daily-reports/export-daily-reports-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata = {
   title: 'التقارير اليومية - لوحة الإدارة',
@@ -61,6 +65,9 @@ export default async function DailyReportsPage({ searchParams }: DailyReportsPag
   const params = await searchParams;
   const page = parseInt(params.page || '1');
   
+  // Fetch warehouses data for the export button
+  const warehousesResult = await getWarehousesForMaterials();
+  
   return (
     <div className="space-y-6">
       <div>
@@ -71,11 +78,19 @@ export default async function DailyReportsPage({ searchParams }: DailyReportsPag
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>التقارير التشغيلية اليومية</CardTitle>
-          <CardDescription>
-            تتبع إنتاج البيض واستهلاك العلف واستخدام الأدوية ونشاط المبيعات
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>التقارير التشغيلية اليومية</CardTitle>
+            <CardDescription>
+              تتبع إنتاج البيض واستهلاك العلف واستخدام الأدوية ونشاط المبيعات
+            </CardDescription>
+          </div>
+          {params.warehouse && warehousesResult.success && (
+            <ExportDailyReportsButton 
+              warehouseId={params.warehouse}
+              warehouseName={warehousesResult.data?.find(w => w.id === params.warehouse)?.name}
+            />
+          )}
         </CardHeader>
         <CardContent>
           <Suspense fallback={<Skeleton className="h-96 w-full" />}>

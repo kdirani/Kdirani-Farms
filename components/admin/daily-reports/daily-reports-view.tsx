@@ -151,25 +151,30 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                       </TableCell>
                       <TableCell className="text-right">
                         <div>
-                          <div className="font-semibold">{report.production_eggs.toLocaleString()}</div>
+                          <div className="font-semibold">{report.production_eggs.toLocaleString('en-US')}</div>
                           <div className="text-xs text-muted-foreground">
                             {report.production_egg_rate}% rate
                           </div>
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {report.eggs_sold.toLocaleString()}
+                        {report.eggs_sold.toLocaleString('en-US')}
                       </TableCell>
-                      <TableCell className="text-right font-bold text-primary">
-                        {report.current_eggs_balance.toLocaleString()}
+                      <TableCell className="text-right font-medium">
+                        {report.current_eggs_balance.toLocaleString('en-US')}
                       </TableCell>
                       <TableCell className="text-right">
                         <span className="text-xs">
                           {report.chicks_before} / {report.chicks_dead} / {report.chicks_after}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {report.feed_daily_kg.toLocaleString()}
+                      <TableCell className="text-right">
+                        <div className="flex flex-col items-end">
+                          <div>{report.feed_daily_kg.toLocaleString('en-US')}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {report.feed_ratio}
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
                         {report.checked ? (
