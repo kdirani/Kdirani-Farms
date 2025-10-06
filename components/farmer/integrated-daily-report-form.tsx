@@ -196,6 +196,18 @@ export default function IntegratedDailyReportForm({
   const productionEggRate = watchChicksBefore > 0 ? (productionEggs / watchChicksBefore) * 100 : 0;
   const currentEggsBalance = watchPreviousBalance + watchHealthy - watchSold - watchGift;
   const chicksAfter = watchChicksBefore - watchChicksDead;
+  
+  // Calculate feed ratio: (feed in grams / chicks after) rounded to 2 decimals
+  const feedRatio = chicksAfter > 0 
+    ? parseFloat(((watchFeedDaily * 1000) / chicksAfter).toFixed(2))
+    : 0;
+
+  // Auto-update feed_ratio when values change
+  useEffect(() => {
+    setValue('feed_ratio', feedRatio, {
+      shouldValidate: true,
+    });
+  }, [feedRatio, setValue]);
 
   // Egg Sale Functions
   const addEggSaleItem = () => {
@@ -527,14 +539,20 @@ export default function IntegratedDailyReportForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="feed_ratio">معدل التحويل</Label>
+              <Label htmlFor="feed_ratio_display">معدل استهلاك العلف (تلقائي - جرام/طائر)</Label>
               <Input
-                id="feed_ratio"
+                id="feed_ratio_display"
                 type="number"
                 step="0.01"
-                {...register('feed_ratio', { valueAsNumber: true })}
-                disabled={isLoading}
+                value={feedRatio}
+                readOnly
+                className="bg-muted cursor-not-allowed"
               />
+              {/* Hidden input to submit the value */}
+              <input type="hidden" {...register('feed_ratio', { valueAsNumber: true })} />
+              <p className="text-xs text-muted-foreground">
+                يُحسب تلقائياً: (العلف اليومي × 1000) ÷ عدد الدجاج بعد، مقرب لمنزلتين
+              </p>
             </div>
           </div>
 

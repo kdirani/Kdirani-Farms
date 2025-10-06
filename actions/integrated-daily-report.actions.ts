@@ -497,6 +497,13 @@ export async function createIntegratedDailyReport(
       input.eggs_sold - 
       input.eggs_gift;
     const chicksAfter = chicksBeforeValue - input.chicks_dead;
+    
+    // Calculate feed ratio: (feed in grams / chicks after) rounded to 2 decimals
+    // Example: (4200 kg × 1000) / 30000 chicks = 140.00 grams/chick
+    // Example: (300 kg × 1000) / 2853 chicks = 105.026 → 105.03 grams/chick
+    const feedRatio = chicksAfter > 0
+      ? parseFloat((((input.feed_daily_kg * 1000) / chicksAfter)).toFixed(2))
+      : 0;
 
     // Get default unit (كرتونة for eggs)
     const { data: cartonUnit } = await supabase
@@ -566,7 +573,7 @@ export async function createIntegratedDailyReport(
         chicks_after: chicksAfter,
         feed_daily_kg: input.feed_daily_kg,
         feed_monthly_kg: feedMonthlyKg, // Calculated automatically
-        feed_ratio: input.feed_ratio,
+        feed_ratio: feedRatio, // Calculated automatically: (feed_kg * 1000) / chicks_after (grams/chick)
         production_droppings: input.production_droppings,
         notes: input.notes,
         checked: false,
