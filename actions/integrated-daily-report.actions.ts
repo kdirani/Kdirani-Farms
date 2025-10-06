@@ -395,6 +395,99 @@ export async function getMonthlyFeedPreview(
 }
 
 /**
+ * Get previous eggs balance from last report
+ */
+async function getPreviousEggsBalance(
+  supabase: any,
+  warehouseId: string | undefined | null
+): Promise<number> {
+  console.log('[getPreviousEggsBalance] Starting for warehouse:', warehouseId);
+  
+  if (!warehouseId) {
+    return 0;
+  }
+
+  // Get last report's current_eggs_balance
+  const { data: lastReport } = await supabase
+    .from('daily_reports')
+    .select('current_eggs_balance')
+    .eq('warehouse_id', warehouseId)
+    .order('report_date', { ascending: false })
+    .order('report_time', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const balance = lastReport?.current_eggs_balance || 0;
+  console.log('[getPreviousEggsBalance] Returning balance:', balance);
+  return balance;
+}
+
+/**
+ * Public function to get previous eggs balance for UI
+ */
+export async function getPreviousEggsBalanceForNewReport(
+  warehouseId: string
+): Promise<ActionResult<number>> {
+  console.log('[getPreviousEggsBalanceForNewReport] Called for warehouse:', warehouseId);
+  
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      console.warn('[getPreviousEggsBalanceForNewReport] User not authenticated');
+      return { success: false, error: 'غير مصرح' };
+    }
+
+    const supabase = await createClient();
+
+    if (!warehouseId) {
+      console.warn('[getPreviousEggsBalanceForNewReport] No warehouseId provided');
+      return { success: true, data: 0 };
+    }
+
+    // Validate warehouse belongs to user's farm (same as chicks_before)
+    const { data: wh, error: whErr } = await supabase
+      .from('warehouses')
+      .select('id, farm_id')
+      .eq('id', warehouseId)
+      .maybeSingle();
+
+    if (whErr) {
+      console.error('[getPreviousEggsBalanceForNewReport] Error fetching warehouse:', whErr);
+      return { success: false, error: 'خطأ في التحقق من المستودع' };
+    }
+
+    if (!wh) {
+      console.warn('[getPreviousEggsBalanceForNewReport] Warehouse not found');
+      return { success: false, error: 'المستودع غير موجود' };
+    }
+
+    const { data: farmRow, error: farmErr } = await supabase
+      .from('farms')
+      .select('user_id')
+      .eq('id', wh.farm_id)
+      .maybeSingle();
+
+    if (farmErr) {
+      console.error('[getPreviousEggsBalanceForNewReport] Error fetching farm:', farmErr);
+      return { success: false, error: 'خطأ في التحقق من المزرعة' };
+    }
+
+    if (!farmRow || farmRow.user_id !== session.user.id) {
+      console.warn('[getPreviousEggsBalanceForNewReport] Warehouse does not belong to current user');
+      return { success: false, error: 'غير مصرح' };
+    }
+
+    const previousBalance = await getPreviousEggsBalance(supabase, warehouseId);
+    
+    console.log('[getPreviousEggsBalanceForNewReport] Success! Returning value:', previousBalance);
+    return { success: true, data: previousBalance };
+  } catch (error) {
+    console.error('[getPreviousEggsBalanceForNewReport] Error getting previous balance:', error);
+    return { success: false, error: 'فشل في جلب الرصيد السابق' };
+  }
+}
+
+/**
  * Public function to get chicks_before value for UI
  */
 export async function getChicksBeforeForNewReport(

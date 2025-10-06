@@ -8,6 +8,7 @@ import {
   createIntegratedDailyReport,
   getWarehouseMedicines,
   getChicksBeforeForNewReport,
+  getPreviousEggsBalanceForNewReport,
   getMonthlyFeedPreview,
   type EggSaleInvoiceItem,
   type DroppingsSaleInvoiceData,
@@ -159,6 +160,24 @@ export default function IntegratedDailyReportForm({
     loadChicksBefore();
   }, [warehouseId, setValue]);
 
+  // Load previous_eggs_balance value automatically
+  useEffect(() => {
+    const loadPreviousBalance = async () => {
+      const result = await getPreviousEggsBalanceForNewReport(warehouseId);
+      if (result.success && result.data !== undefined) {
+        setValue('previous_eggs_balance', result.data, { 
+          shouldValidate: true, 
+          shouldDirty: true,
+          shouldTouch: true 
+        });
+      } else if (result.error) {
+        console.error('Error loading previous eggs balance:', result.error);
+        toast.error('فشل في جلب الرصيد السابق');
+      }
+    };
+    loadPreviousBalance();
+  }, [warehouseId, setValue]);
+
   // Watch for changes in feed_daily_kg and report_date
   const watchFeedDaily = watch('feed_daily_kg');
   const watchReportDate = watch('report_date');
@@ -202,12 +221,22 @@ export default function IntegratedDailyReportForm({
     ? parseFloat(((watchFeedDaily * 1000) / chicksAfter).toFixed(2))
     : 0;
 
+  // Calculate total eggs sold from egg sale items
+  const totalEggsSold = eggSaleItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+
   // Auto-update feed_ratio when values change
   useEffect(() => {
     setValue('feed_ratio', feedRatio, {
       shouldValidate: true,
     });
   }, [feedRatio, setValue]);
+
+  // Auto-update eggs_sold when egg sale items change
+  useEffect(() => {
+    setValue('eggs_sold', totalEggsSold, {
+      shouldValidate: true,
+    });
+  }, [totalEggsSold, setValue]);
 
   // Egg Sale Functions
   const addEggSaleItem = () => {
@@ -404,23 +433,35 @@ export default function IntegratedDailyReportForm({
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="previous_eggs_balance">الرصيد السابق</Label>
+              <Label htmlFor="previous_eggs_balance_display">الرصيد السابق (تلقائي)</Label>
               <Input
-                id="previous_eggs_balance"
+                id="previous_eggs_balance_display"
                 type="number"
-                {...register('previous_eggs_balance', { valueAsNumber: true })}
-                disabled={isLoading}
+                value={watch('previous_eggs_balance') || 0}
+                readOnly
+                className="bg-muted cursor-not-allowed"
               />
+              {/* Hidden input to submit the value */}
+              <input type="hidden" {...register('previous_eggs_balance', { valueAsNumber: true })} />
+              <p className="text-xs text-muted-foreground">
+                يُجلب تلقائياً من الرصيد الحالي لآخر تقرير
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="eggs_sold">البيض المباع</Label>
+              <Label htmlFor="eggs_sold_display">البيض المباع (تلقائي)</Label>
               <Input
-                id="eggs_sold"
+                id="eggs_sold_display"
                 type="number"
-                {...register('eggs_sold', { valueAsNumber: true })}
-                disabled={isLoading}
+                value={totalEggsSold}
+                readOnly
+                className="bg-muted cursor-not-allowed"
               />
+              {/* Hidden input to submit the value */}
+              <input type="hidden" {...register('eggs_sold', { valueAsNumber: true })} />
+              <p className="text-xs text-muted-foreground">
+                يُحسب تلقائياً من مجموع كميات بنود مبيع البيض
+              </p>
             </div>
 
             <div className="space-y-2">
