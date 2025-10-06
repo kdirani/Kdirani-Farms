@@ -224,6 +224,11 @@ export default function IntegratedDailyReportForm({
   // Calculate total eggs sold from egg sale items
   const totalEggsSold = eggSaleItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
+  // Calculate carton consumption: (healthy_eggs / 100) + (healthy_eggs / 1000)
+  const cartonConsumption = watchHealthy > 0
+    ? parseFloat(((watchHealthy / 100) + (watchHealthy / 1000)).toFixed(2))
+    : 0;
+
   // Auto-update feed_ratio when values change
   useEffect(() => {
     setValue('feed_ratio', feedRatio, {
@@ -237,6 +242,13 @@ export default function IntegratedDailyReportForm({
       shouldValidate: true,
     });
   }, [totalEggsSold, setValue]);
+
+  // Auto-update carton_consumption when healthy eggs change
+  useEffect(() => {
+    setValue('carton_consumption', cartonConsumption, {
+      shouldValidate: true,
+    });
+  }, [cartonConsumption, setValue]);
 
   // Egg Sale Functions
   const addEggSaleItem = () => {
@@ -483,13 +495,20 @@ export default function IntegratedDailyReportForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="carton_consumption">استهلاك الكراتين</Label>
+            <Label htmlFor="carton_consumption_display">استهلاك الكراتين (تلقائي)</Label>
             <Input
-              id="carton_consumption"
+              id="carton_consumption_display"
               type="number"
-              {...register('carton_consumption', { valueAsNumber: true })}
-              disabled={isLoading}
+              step="0.01"
+              value={cartonConsumption}
+              readOnly
+              className="bg-muted cursor-not-allowed"
             />
+            {/* Hidden input to submit the value */}
+            <input type="hidden" {...register('carton_consumption', { valueAsNumber: true })} />
+            <p className="text-xs text-muted-foreground">
+              يُحسب تلقائياً: (بيض صحي ÷ 100) + (بيض صحي ÷ 1000)
+            </p>
           </div>
         </CardContent>
       </Card>
