@@ -8,6 +8,7 @@ import {
   createIntegratedDailyReport,
   getWarehouseMedicines,
   getChicksBeforeForNewReport,
+  getMonthlyFeedPreview,
   type EggSaleInvoiceItem,
   type DroppingsSaleInvoiceData,
   type MedicineConsumptionItem,
@@ -158,6 +159,29 @@ export default function IntegratedDailyReportForm({
     loadChicksBefore();
   }, [warehouseId, setValue]);
 
+  // Watch for changes in feed_daily_kg and report_date
+  const watchFeedDaily = watch('feed_daily_kg');
+  const watchReportDate = watch('report_date');
+
+  // Calculate monthly feed automatically
+  useEffect(() => {
+    const calculateMonthlyFeed = async () => {
+      if (warehouseId && watchReportDate && watchFeedDaily >= 0) {
+        const result = await getMonthlyFeedPreview(
+          warehouseId,
+          watchReportDate,
+          watchFeedDaily
+        );
+        if (result.success && result.data !== undefined) {
+          setValue('feed_monthly_kg', result.data, {
+            shouldValidate: true,
+          });
+        }
+      }
+    };
+    calculateMonthlyFeed();
+  }, [warehouseId, watchReportDate, watchFeedDaily, setValue]);
+
   const watchHealthy = watch('production_eggs_healthy');
   const watchDeformed = watch('production_eggs_deformed');
   const watchPreviousBalance = watch('previous_eggs_balance');
@@ -165,6 +189,7 @@ export default function IntegratedDailyReportForm({
   const watchGift = watch('eggs_gift');
   const watchChicksBefore = watch('chicks_before');
   const watchChicksDead = watch('chicks_dead');
+  const watchFeedMonthly = watch('feed_monthly_kg');
 
   // Calculate totals
   const productionEggs = watchHealthy + watchDeformed;
@@ -485,14 +510,20 @@ export default function IntegratedDailyReportForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="feed_monthly_kg">العلف الشهري (كجم)</Label>
+              <Label htmlFor="feed_monthly_kg_display">العلف الشهري (تلقائي - كجم)</Label>
               <Input
-                id="feed_monthly_kg"
+                id="feed_monthly_kg_display"
                 type="number"
                 step="0.01"
-                {...register('feed_monthly_kg', { valueAsNumber: true })}
-                disabled={isLoading}
+                value={watch('feed_monthly_kg') || 0}
+                readOnly
+                className="bg-muted cursor-not-allowed"
               />
+              {/* Hidden input to submit the value */}
+              <input type="hidden" {...register('feed_monthly_kg', { valueAsNumber: true })} />
+              <p className="text-xs text-muted-foreground">
+                يُحسب تلقائياً بجمع العلف اليومي لكل تقارير الشهر الحالي
+              </p>
             </div>
 
             <div className="space-y-2">

@@ -299,6 +299,102 @@ async function getChicksBeforeValue(
 }
 
 /**
+ * Calculate monthly feed total for the current month
+ * Sums up all daily feed from reports in the same month/year
+ */
+async function calculateMonthlyFeed(
+  supabase: any,
+  warehouseId: string | undefined | null,
+  reportDate: string,
+  currentDailyFeed: number
+): Promise<number> {
+  console.log('[calculateMonthlyFeed] Starting for warehouse:', warehouseId, 'date:', reportDate);
+  
+  if (!warehouseId || !reportDate) {
+    return currentDailyFeed;
+  }
+
+  // Extract year and month from report date
+  const date = new Date(reportDate);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // 0-indexed, so add 1
+  
+  // Get start and end of the month
+  const startOfMonth = `${year}-${String(month).padStart(2, '0')}-01`;
+  const endOfMonth = new Date(year, month, 0); // Last day of month
+  const endOfMonthStr = `${year}-${String(month).padStart(2, '0')}-${String(endOfMonth.getDate()).padStart(2, '0')}`;
+  
+  console.log('[calculateMonthlyFeed] Month range:', startOfMonth, 'to', endOfMonthStr);
+
+  // Get all reports in the same month
+  const { data: monthlyReports, error } = await supabase
+    .from('daily_reports')
+    .select('feed_daily_kg')
+    .eq('warehouse_id', warehouseId)
+    .gte('report_date', startOfMonth)
+    .lte('report_date', endOfMonthStr)
+    .order('report_date', { ascending: true });
+
+  if (error) {
+    console.error('[calculateMonthlyFeed] Error fetching monthly reports:', error);
+    return currentDailyFeed;
+  }
+
+  // Sum all daily feed from previous reports in this month
+  const previousMonthlyTotal = monthlyReports?.reduce(
+    (sum: number, report: any) => sum + (Number(report.feed_daily_kg) || 0),
+    0
+  ) || 0;
+
+  const totalMonthlyFeed = previousMonthlyTotal + currentDailyFeed;
+  
+  console.log('[calculateMonthlyFeed] Previous monthly total:', previousMonthlyTotal);
+  console.log('[calculateMonthlyFeed] Current daily feed:', currentDailyFeed);
+  console.log('[calculateMonthlyFeed] Total monthly feed:', totalMonthlyFeed);
+
+  return totalMonthlyFeed;
+}
+
+/**
+ * Public function to calculate expected monthly feed for UI preview
+ */
+export async function getMonthlyFeedPreview(
+  warehouseId: string,
+  reportDate: string,
+  currentDailyFeed: number
+): Promise<ActionResult<number>> {
+  console.log('[getMonthlyFeedPreview] Called for warehouse:', warehouseId, 'date:', reportDate);
+  
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      console.warn('[getMonthlyFeedPreview] User not authenticated');
+      return { success: false, error: 'غير مصرح' };
+    }
+
+    const supabase = await createClient();
+
+    if (!warehouseId) {
+      console.warn('[getMonthlyFeedPreview] No warehouseId provided');
+      return { success: true, data: currentDailyFeed };
+    }
+
+    const monthlyFeed = await calculateMonthlyFeed(
+      supabase,
+      warehouseId,
+      reportDate,
+      currentDailyFeed
+    );
+    
+    console.log('[getMonthlyFeedPreview] Success! Returning value:', monthlyFeed);
+    return { success: true, data: monthlyFeed };
+  } catch (error) {
+    console.error('[getMonthlyFeedPreview] Error calculating monthly feed:', error);
+    return { success: false, error: 'فشل في حساب العلف الشهري' };
+  }
+}
+
+/**
  * Public function to get chicks_before value for UI
  */
 export async function getChicksBeforeForNewReport(
@@ -382,6 +478,14 @@ export async function createIntegratedDailyReport(
     // Subsequent reports: from last daily_report.chicks_after
     const chicksBeforeValue = await getChicksBeforeValue(supabase, input.warehouse_id);
 
+    // Calculate monthly feed automatically (sum of all daily feeds in the same month)
+    const feedMonthlyKg = await calculateMonthlyFeed(
+      supabase,
+      input.warehouse_id,
+      input.report_date,
+      input.feed_daily_kg
+    );
+
     // Calculate computed fields
     const productionEggs = input.production_eggs_healthy + input.production_eggs_deformed;
     const productionEggRate = chicksBeforeValue > 0 
@@ -461,7 +565,7 @@ export async function createIntegratedDailyReport(
         chicks_dead: input.chicks_dead,
         chicks_after: chicksAfter,
         feed_daily_kg: input.feed_daily_kg,
-        feed_monthly_kg: input.feed_monthly_kg,
+        feed_monthly_kg: feedMonthlyKg, // Calculated automatically
         feed_ratio: input.feed_ratio,
         production_droppings: input.production_droppings,
         notes: input.notes,
