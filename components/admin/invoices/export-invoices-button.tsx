@@ -88,7 +88,6 @@ export function ExportInvoicesButton() {
           'القيمة الصافية': formatCurrency(invoice.net_value),
           'الحالة': invoice.checked ? 'مدققة' : 'غير مدققة',
         };
-
         // إضافة معلومات المستودع إذا كان مطلوباً
         if (settings.includeWarehouseInfo && invoice.warehouse) {
           data['المستودع'] = invoice.warehouse.name;
@@ -97,7 +96,8 @@ export function ExportInvoicesButton() {
         // إضافة معلومات العميل إذا كان مطلوباً
         if (settings.includeClientInfo && invoice.client) {
           data['العميل/المورد'] = invoice.client.name;
-          data['نوع العميل'] = invoice.client.type;
+          const clientType = invoice.client.type === 'customer' ? 'زبون' : invoice.client.type === 'supplier' ? 'مورّد' : invoice.client.type;
+          data['نوع العميل'] = clientType;
         }
 
         // إضافة الملاحظات
@@ -139,7 +139,6 @@ export function ExportInvoicesButton() {
                   'رقم الفاتورة': invoice.invoice_number,
                   'اسم المادة': item.material_name?.material_name || item.medicine?.medicine_name || '-',
                   'الكمية': item.quantity,
-                  'الوزن': item.weight || '-',
                   'الوحدة': item.unit?.unit_name || '-',
                   'فئة البيض': item.egg_weight?.weight_range || '-',
                   'السعر': item.price,

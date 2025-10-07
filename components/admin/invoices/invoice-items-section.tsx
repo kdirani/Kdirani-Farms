@@ -104,7 +104,6 @@ export function InvoiceItemsSection({ invoiceId, items }: InvoiceItemsSectionPro
                   <TableHead>المادة/الدواء/المنتج</TableHead>
                   <TableHead>تفاصيل إضافية</TableHead>
                   <TableHead className="text-right">الكمية</TableHead>
-                  <TableHead className="text-right">الوزن</TableHead>
                   <TableHead>الوحدة</TableHead>
                   <TableHead className="text-right">السعر</TableHead>
                   <TableHead className="text-right">القيمة</TableHead>
@@ -134,7 +133,6 @@ export function InvoiceItemsSection({ invoiceId, items }: InvoiceItemsSectionPro
                       ) : '-'}
                     </TableCell>
                     <TableCell className="text-right">{item.quantity.toLocaleString()}</TableCell>
-                    <TableCell className="text-right">{item.weight ? item.weight.toLocaleString() : '-'}</TableCell>
                     <TableCell>{item.unit_name || '-'}</TableCell>
                     <TableCell className="text-right">
                       {editingItemId === item.id ? (

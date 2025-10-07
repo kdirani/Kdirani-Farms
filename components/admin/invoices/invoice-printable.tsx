@@ -45,19 +45,18 @@ export const InvoicePrintable = forwardRef<HTMLDivElement, InvoicePrintableProps
             </div>
           </div>
         </div>
-        
         <h2 className="text-lg font-bold mb-2 text-center">بنود الفاتورة</h2>
         <div className="overflow-x-auto mb-6">
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-3 text-right font-bold">المادة</th>
+                <th className="border border-gray-300 p-3 text-right font-bold">المادة/الدواء/المنتج</th>
                 <th className="border border-gray-300 p-3 text-right font-bold">وزن البيض</th>
                 <th className="border border-gray-300 p-3 text-right font-bold">الكمية</th>
-                <th className="border border-gray-300 p-3 text-right font-bold">الوزن</th>
                 <th className="border border-gray-300 p-3 text-right font-bold">الوحدة</th>
                 <th className="border border-gray-300 p-3 text-right font-bold">السعر</th>
                 <th className="border border-gray-300 p-3 text-right font-bold">القيمة</th>
+                <th className="border border-gray-300 p-3 text-right font-bold">النسبة</th>
               </tr>
             </thead>
             <tbody>
@@ -67,7 +66,6 @@ export const InvoicePrintable = forwardRef<HTMLDivElement, InvoicePrintableProps
                     <td className="border border-gray-300 p-3">{item.material_name || item.medicine_name || '-'}</td>
                     <td className="border border-gray-300 p-3">{item.egg_weight || '-'}</td>
                     <td className="border border-gray-300 p-3">{item.quantity.toLocaleString()}</td>
-                    <td className="border border-gray-300 p-3">{item.weight ? item.weight.toLocaleString() : '-'}</td>
                     <td className="border border-gray-300 p-3">{item.unit_name || '-'}</td>
                     <td className="border border-gray-300 p-3">{formatCurrency(item.price)}</td>
                     <td className="border border-gray-300 p-3">{formatCurrency(item.value)}</td>

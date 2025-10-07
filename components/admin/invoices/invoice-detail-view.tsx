@@ -70,6 +70,14 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
     );
   };
 
+  const getClientTypeLabel = (type: string) => {
+    const types: Record<string, string> = {
+      'customer': 'زبون',
+      'supplier': 'مورّد',
+    };
+    return types[type] || type;
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -159,7 +167,7 @@ export function InvoiceDetailView({ invoice, items, expenses }: InvoiceDetailVie
                 {invoice.client ? (
                   <div>
                     <p className="text-lg font-semibold">{invoice.client.name}</p>
-                    <p className="text-sm text-muted-foreground capitalize">{invoice.client.type}</p>
+                    <p className="text-sm text-muted-foreground">{getClientTypeLabel(invoice.client.type)}</p>
                   </div>
                 ) : (
                   <p className="text-lg text-muted-foreground">غير محدد</p>

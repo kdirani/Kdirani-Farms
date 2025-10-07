@@ -46,6 +46,14 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
+  const getClientTypeLabel = (type: string) => {
+    const types: Record<string, string> = {
+      'customer': 'زبون',
+      'supplier': 'مورّد',
+    };
+    return types[type] || type;
+  };
+
   const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch = 
       invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -159,7 +167,7 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
                     {invoice.client ? (
                       <div>
                         <div className="font-medium">{invoice.client.name}</div>
-                        <div className="text-xs text-muted-foreground capitalize">{invoice.client.type}</div>
+                        <div className="text-xs text-muted-foreground">{getClientTypeLabel(invoice.client.type)}</div>
                       </div>
                     ) : '-'}
                   </TableCell>
