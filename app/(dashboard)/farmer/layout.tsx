@@ -37,11 +37,8 @@ export default async function FarmerLayout({
             <div className="mx-auto max-w-6xl">
               <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200/50 px-6 py-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <MobileNav />
-                    <HeaderLogo href="/farmer" width={100} height={35} />
-                  </div>
-                  <UserNav user={session.user} />
+                  <HeaderLogo href="/farmer" width={100} height={35} />
+                  <MobileNav />
                 </div>
               </div>
             </div>

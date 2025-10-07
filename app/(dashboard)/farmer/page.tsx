@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Package,
   Calendar,
   AlertCircle
 } from "lucide-react";
@@ -89,7 +88,7 @@ export default async function FarmerDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-1 max-w-2xl">
         <Card className="border-slate-200 hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-800">
@@ -106,25 +105,6 @@ export default async function FarmerDashboardPage() {
             <Link href="/farmer/daily-report">
               <Button className="w-full" variant={todayReport ? "outline" : "default"}>
                 {todayReport ? "عرض التقرير اليومي" : "إضافة تقرير يومي"}
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200 hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-slate-800">
-              <Package className="h-5 w-5 text-primary" />
-              فاتورة تصنيع
-            </CardTitle>
-            <CardDescription className="text-slate-600">
-              إنشاء فاتورة تصنيع علف جديدة
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/farmer/manufacturing">
-              <Button className="w-full" variant="default">
-                إنشاء فاتورة تصنيع
               </Button>
             </Link>
           </CardContent>

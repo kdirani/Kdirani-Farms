@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   ClipboardList,
-  Factory,
   Home,
   LogOut,
 } from "lucide-react";
@@ -22,11 +21,6 @@ const navItems = [
     title: "التقرير اليومي",
     href: "/farmer/daily-report",
     icon: ClipboardList,
-  },
-  {
-    title: "فاتورة تصنيع",
-    href: "/farmer/manufacturing",
-    icon: Factory,
   },
 ];
 
