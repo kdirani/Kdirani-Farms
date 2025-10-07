@@ -355,7 +355,7 @@ export default function IntegratedDailyReportForm({
         }
 
         toast.success(result.data.message || 'تم إنشاء التقرير اليومي بنجاح');
-        router.push('/farmer/reports');
+        router.push('/farmer');
       } else {
         toast.error(result.error || 'فشل في إنشاء التقرير');
       }
