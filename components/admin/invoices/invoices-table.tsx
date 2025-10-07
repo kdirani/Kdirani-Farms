@@ -139,7 +139,14 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
                     </div>
                   </TableCell>
                   <TableCell>{getTypeBadge(invoice.invoice_type)}</TableCell>
-                  <TableCell>{formatDate(new Date(invoice.invoice_date))}</TableCell>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">{formatDate(new Date(invoice.invoice_date))}</div>
+                      {invoice.invoice_time && (
+                        <div className="text-xs text-muted-foreground">{invoice.invoice_time}</div>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     {invoice.warehouse ? (
                       <div>
