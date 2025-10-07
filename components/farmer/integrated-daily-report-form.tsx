@@ -878,12 +878,16 @@ export default function IntegratedDailyReportForm({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {poultryStatus && (
-            <div className="bg-muted p-4 rounded-lg">
-              <Label className="text-sm text-muted-foreground">القطيع</Label>
-              <p className="text-lg font-semibold mt-1">{poultryStatus.batch_name}</p>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="warehouse_name_medicine">المستودع</Label>
+            <Input
+              id="warehouse_name_medicine"
+              type="text"
+              value={warehouseName}
+              readOnly
+              className="bg-muted cursor-not-allowed"
+            />
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="space-y-2">

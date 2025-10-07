@@ -93,11 +93,16 @@ export default async function DailyReportPage() {
     .select("*")
     .order("name");
 
-  // Get clients
-  const { data: clients } = await supabase
+  // Get clients (remove duplicates if any)
+  const { data: clientsData } = await supabase
     .from("clients")
     .select("*")
     .order("name");
+  
+  // Remove duplicate clients by name
+  const clients = clientsData?.filter((client, index, self) => 
+    index === self.findIndex((c) => c.name === client.name && c.type === client.type)
+  ) || [];
 
   // Get medicines
   const { data: medicines } = await supabase
