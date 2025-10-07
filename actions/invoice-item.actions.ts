@@ -221,16 +221,21 @@ export async function updateInvoiceItem(input: UpdateInvoiceItemInput): Promise<
 
     const quantity = input.quantity ?? current.quantity;
     const price = input.price ?? current.price;
+    const weight = input.weight ?? current.weight;
     const value = quantity * price;
+
+    // Build update object with only the fields that are provided
+    const updateData: any = {
+      value: value,
+    };
+    
+    if (input.quantity !== undefined) updateData.quantity = input.quantity;
+    if (input.price !== undefined) updateData.price = input.price;
+    if (input.weight !== undefined) updateData.weight = input.weight;
 
     const { data: updatedItem, error } = await supabase
       .from('invoice_items')
-      .update({
-        quantity: input.quantity,
-        weight: input.weight,
-        price: input.price,
-        value: value,
-      })
+      .update(updateData)
       .eq('id', input.id)
       .select()
       .single();
