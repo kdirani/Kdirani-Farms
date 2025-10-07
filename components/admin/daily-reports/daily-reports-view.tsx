@@ -32,7 +32,9 @@ import {
 import { formatDate } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toggleDailyReportStatus } from '@/actions/daily-report.actions';
+import { getDailyReportAttachments, type DailyReportAttachment } from '@/actions/daily-report-attachment.actions';
 import { toast } from 'sonner';
+import { FileText, Download } from 'lucide-react';
 
 interface DailyReport {
   id: string;
@@ -82,6 +84,7 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
   const router = useRouter();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
+  const [attachments, setAttachments] = useState<Record<string, DailyReportAttachment[]>>({});
 
   const handleWarehouseChange = (warehouseId: string) => {
     router.push(`/admin/daily-reports?warehouse=${warehouseId}`);
@@ -91,8 +94,20 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
     router.push(`/admin/daily-reports?warehouse=${selectedWarehouseId}&page=${page}`);
   };
 
-  const toggleExpand = (reportId: string) => {
-    setExpandedRow(expandedRow === reportId ? null : reportId);
+  const toggleExpand = async (reportId: string) => {
+    const newExpandedRow = expandedRow === reportId ? null : reportId;
+    setExpandedRow(newExpandedRow);
+    
+    // Load attachments if expanding and not already loaded
+    if (newExpandedRow && !attachments[reportId]) {
+      const result = await getDailyReportAttachments(reportId);
+      if (result.success && result.data) {
+        setAttachments(prev => ({
+          ...prev,
+          [reportId]: result.data!
+        }));
+      }
+    }
   };
 
   const handleToggleStatus = async (reportId: string, currentStatus: boolean) => {
@@ -160,13 +175,23 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                   <React.Fragment key={report.id}>
                     <TableRow>
                       <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {formatDate(new Date(report.report_date))}
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <div className="font-medium">
+                              {formatDate(new Date(report.report_date))}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {report.report_time}
+                            </div>
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            {report.report_time}
-                          </div>
+                          {attachments[report.id] && attachments[report.id].length > 0 && (
+                            <div className="relative group">
+                              <FileText className="h-3 w-3 text-primary" />
+                              <span className="absolute hidden group-hover:block bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap -top-8 left-0 z-10">
+                                {attachments[report.id].length} مرفقات
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
@@ -337,6 +362,31 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                               </CardContent>
                             </Card>
                           </div>
+
+                          {/* Attachments Section */}
+                          {attachments[report.id] && attachments[report.id].length > 0 && (
+                            <div className="mt-4 p-4 border-t">
+                              <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                                <FileText className="h-4 w-4" />
+                                المرفقات ({attachments[report.id].length})
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {attachments[report.id].map((attachment) => (
+                                  <a
+                                    key={attachment.id}
+                                    href={attachment.file_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 p-2 border rounded hover:bg-muted/50 transition-colors"
+                                  >
+                                    <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                                    <span className="text-sm truncate flex-1">{attachment.file_name}</span>
+                                    <Download className="h-4 w-4 text-muted-foreground shrink-0" />
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     )}
