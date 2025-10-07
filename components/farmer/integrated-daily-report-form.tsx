@@ -303,17 +303,26 @@ export default function IntegratedDailyReportForm({
   const onSubmit = async (data: DailyReportFormData) => {
     setIsLoading(true);
     try {
-      // Group egg sale items by client
+      // Group egg sale items by client (create separate invoice for each client)
       const eggSaleInvoices = eggSaleItems.length > 0 
-        ? [{
-            client_id: eggSaleItems[0]?.client_id,
-            items: eggSaleItems.map(item => ({
-              egg_weight_id: item.egg_weight_id,
-              unit_id: item.unit_id,
-              quantity: item.quantity,
-              price: item.price,
-            })),
-          }]
+        ? Object.values(
+            eggSaleItems.reduce((acc, item) => {
+              const clientId = item.client_id || 'no_client';
+              if (!acc[clientId]) {
+                acc[clientId] = {
+                  client_id: item.client_id,
+                  items: []
+                };
+              }
+              acc[clientId].items.push({
+                egg_weight_id: item.egg_weight_id,
+                unit_id: item.unit_id,
+                quantity: item.quantity,
+                price: item.price,
+              });
+              return acc;
+            }, {} as Record<string, any>)
+          )
         : undefined;
 
       const result = await createIntegratedDailyReport({
