@@ -1,0 +1,132 @@
+'use client';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { WeeklySummary } from '@/actions/general-report.actions';
+import { formatDate } from '@/lib/utils';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+
+interface WeeklySummaryTableProps {
+  summaries: WeeklySummary[];
+}
+
+export function WeeklySummaryTable({ summaries }: WeeklySummaryTableProps) {
+  if (summaries.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>التقارير الأسبوعية</CardTitle>
+          <CardDescription>لا توجد تقارير أسبوعية في الفترة المحددة</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  // Calculate comparison with previous week
+  const getComparison = (currentValue: number, index: number) => {
+    if (index >= summaries.length - 1) return null;
+    const previousValue = summaries[index + 1].total_eggs_produced;
+    if (previousValue === 0) return null;
+    
+    const change = ((currentValue - previousValue) / previousValue) * 100;
+    return change;
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>التقارير الأسبوعية</CardTitle>
+        <CardDescription>
+          ملخص {summaries.length} أسبوع - مقارنة الإنتاج بين الأسابيع
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>الأسبوع</TableHead>
+                <TableHead>الفترة</TableHead>
+                <TableHead className="text-right">عدد التقارير</TableHead>
+                <TableHead className="text-right">البيض المُنتَج</TableHead>
+                <TableHead className="text-right">البيض المباع</TableHead>
+                <TableHead className="text-right">الأعلاف (كغم)</TableHead>
+                <TableHead className="text-right">السواد (كغم)</TableHead>
+                <TableHead className="text-right">النفوق</TableHead>
+                <TableHead className="text-right">متوسط يومي</TableHead>
+                <TableHead className="text-right">المقارنة</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {summaries.map((summary, index) => {
+                const comparison = getComparison(summary.total_eggs_produced, index);
+                
+                return (
+                  <TableRow key={`${summary.week_start}-${summary.week_number}`}>
+                    <TableCell className="font-medium">
+                      الأسبوع {summary.week_number}
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        <div>{formatDate(new Date(summary.week_start))}</div>
+                        <div className="text-muted-foreground">
+                          إلى {formatDate(new Date(summary.week_end))}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">{summary.reports_count}</TableCell>
+                    <TableCell className="text-right font-semibold">
+                      {summary.total_eggs_produced.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {summary.total_eggs_sold.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {summary.total_feed_consumed.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {summary.total_droppings_sold.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {summary.total_mortality.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {summary.daily_average_production.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {comparison !== null ? (
+                        <Badge
+                          variant={comparison > 0 ? 'success' : comparison < 0 ? 'destructive' : 'secondary'}
+                          className="gap-1"
+                        >
+                          {comparison > 0 ? (
+                            <TrendingUp className="h-3 w-3" />
+                          ) : comparison < 0 ? (
+                            <TrendingDown className="h-3 w-3" />
+                          ) : (
+                            <Minus className="h-3 w-3" />
+                          )}
+                          {Math.abs(comparison).toFixed(1)}%
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

@@ -99,6 +99,11 @@ const navSections = [
     title: 'التقارير',
     items: [
       {
+        title: 'التقرير العام',
+        href: '/admin/reports/general',
+        icon: BarChart3,
+      },
+      {
         title: 'التقارير اليومية',
         href: '/admin/daily-reports',
         icon: FileText,
