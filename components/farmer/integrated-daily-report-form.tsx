@@ -19,13 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
@@ -385,6 +379,27 @@ export default function IntegratedDailyReportForm({
   // Get customer clients
   const customerClients = clients.filter(c => c.type === 'customer');
 
+  // Prepare combobox options
+  const clientOptions: ComboboxOption[] = customerClients.map(client => ({
+    value: client.id,
+    label: client.name
+  }));
+
+  const eggWeightOptions: ComboboxOption[] = eggWeights.map(weight => ({
+    value: weight.id,
+    label: weight.weight_range
+  }));
+
+  const unitOptions: ComboboxOption[] = units.map(unit => ({
+    value: unit.id,
+    label: unit.unit_name
+  }));
+
+  const medicineOptions: ComboboxOption[] = availableMedicines.map(med => ({
+    value: med.medicine_id,
+    label: `${med.medicines.name} (متاح: ${getAvailableQuantity(med.medicine_id)})`
+  }));
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Basic Report Info */}
@@ -671,62 +686,38 @@ export default function IntegratedDailyReportForm({
           <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
             <div className="space-y-2">
               <Label>الزبون</Label>
-              <Select
+              <Combobox
+                options={clientOptions}
                 value={newEggSaleItem.client_id || ''}
                 onValueChange={(value) => setNewEggSaleItem({ ...newEggSaleItem, client_id: value })}
+                placeholder="اختر الزبون"
+                searchPlaceholder="ابحث عن الزبون..."
                 disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الزبون" />
-                </SelectTrigger>
-                <SelectContent>
-                  {customerClients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
               <Label>وزن البيض</Label>
-              <Select
+              <Combobox
+                options={eggWeightOptions}
                 value={newEggSaleItem.egg_weight_id || ''}
                 onValueChange={(value) => setNewEggSaleItem({ ...newEggSaleItem, egg_weight_id: value })}
+                placeholder="اختر الوزن"
+                searchPlaceholder="ابحث عن الوزن..."
                 disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الوزن" />
-                </SelectTrigger>
-                <SelectContent>
-                  {eggWeights.map((weight) => (
-                    <SelectItem key={weight.id} value={weight.id}>
-                      {weight.weight_range}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
               <Label>الوحدة</Label>
-              <Select
+              <Combobox
+                options={unitOptions}
                 value={newEggSaleItem.unit_id || ''}
                 onValueChange={(value) => setNewEggSaleItem({ ...newEggSaleItem, unit_id: value })}
+                placeholder="اختر الوحدة"
+                searchPlaceholder="ابحث عن الوحدة..."
                 disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الوحدة" />
-                </SelectTrigger>
-                <SelectContent>
-                  {units.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
-                      {unit.unit_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
@@ -818,42 +809,26 @@ export default function IntegratedDailyReportForm({
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="space-y-2">
               <Label>الزبون</Label>
-              <Select
+              <Combobox
+                options={clientOptions}
                 value={droppingsSale.client_id || ''}
                 onValueChange={(value) => setDroppingsSale({ ...droppingsSale, client_id: value })}
+                placeholder="اختر الزبون"
+                searchPlaceholder="ابحث عن الزبون..."
                 disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الزبون" />
-                </SelectTrigger>
-                <SelectContent>
-                  {customerClients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
               <Label>الوحدة</Label>
-              <Select
+              <Combobox
+                options={unitOptions}
                 value={droppingsSale.unit_id || ''}
                 onValueChange={(value) => setDroppingsSale({ ...droppingsSale, unit_id: value })}
+                placeholder="اختر الوحدة"
+                searchPlaceholder="ابحث عن الوحدة..."
                 disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الوحدة" />
-                </SelectTrigger>
-                <SelectContent>
-                  {units.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
-                      {unit.unit_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
@@ -914,44 +889,28 @@ export default function IntegratedDailyReportForm({
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="space-y-2">
               <Label>الدواء</Label>
-              <Select
+              <Combobox
+                options={medicineOptions}
                 value={newMedicineItem.medicine_id || ''}
                 onValueChange={(value) => {
                   setNewMedicineItem({ ...newMedicineItem, medicine_id: value });
                 }}
+                placeholder="اختر الدواء"
+                searchPlaceholder="ابحث عن الدواء..."
                 disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الدواء" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableMedicines.map((med) => (
-                    <SelectItem key={med.medicine_id} value={med.medicine_id}>
-                      {med.medicines.name} (متاح: {getAvailableQuantity(med.medicine_id)})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
               <Label>الوحدة</Label>
-              <Select
+              <Combobox
+                options={unitOptions}
                 value={newMedicineItem.unit_id || ''}
                 onValueChange={(value) => setNewMedicineItem({ ...newMedicineItem, unit_id: value })}
+                placeholder="اختر الوحدة"
+                searchPlaceholder="ابحث عن الوحدة..."
                 disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الوحدة" />
-                </SelectTrigger>
-                <SelectContent>
-                  {units.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
-                      {unit.unit_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
