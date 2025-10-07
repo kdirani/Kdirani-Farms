@@ -31,6 +31,8 @@ import {
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toggleDailyReportStatus } from '@/actions/daily-report.actions';
+import { toast } from 'sonner';
 
 interface DailyReport {
   id: string;
@@ -79,6 +81,7 @@ interface DailyReportsViewProps {
 export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pagination }: DailyReportsViewProps) {
   const router = useRouter();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
 
   const handleWarehouseChange = (warehouseId: string) => {
     router.push(`/admin/daily-reports?warehouse=${warehouseId}`);
@@ -90,6 +93,23 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
 
   const toggleExpand = (reportId: string) => {
     setExpandedRow(expandedRow === reportId ? null : reportId);
+  };
+
+  const handleToggleStatus = async (reportId: string, currentStatus: boolean) => {
+    setLoadingStatus(reportId);
+    try {
+      const result = await toggleDailyReportStatus(reportId, currentStatus);
+      if (result.success) {
+        toast.success(currentStatus ? 'تم إلغاء التحقق من التقرير' : 'تم التحقق من التقرير بنجاح');
+        router.refresh();
+      } else {
+        toast.error(result.error || 'فشل في تحديث الحالة');
+      }
+    } catch (error) {
+      toast.error('حدث خطأ غير متوقع');
+    } finally {
+      setLoadingStatus(null);
+    }
   };
 
   return (
@@ -177,17 +197,25 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                         </div>
                       </TableCell>
                       <TableCell>
-                        {report.checked ? (
-                          <Badge variant="success" className="gap-1">
-                            <CheckCircle className="h-3 w-3" />
-                            مُتحقق
-                          </Badge>
-                        ) : (
-                          <Badge variant="warning" className="gap-1">
-                            <XCircle className="h-3 w-3" />
-                            في الانتظار
-                          </Badge>
-                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleStatus(report.id, report.checked)}
+                          disabled={loadingStatus === report.id}
+                          className="h-auto p-0 hover:bg-transparent"
+                        >
+                          {report.checked ? (
+                            <Badge variant="success" className="gap-1 cursor-pointer hover:opacity-80">
+                              <CheckCircle className="h-3 w-3" />
+                              مُتحقق
+                            </Badge>
+                          ) : (
+                            <Badge variant="warning" className="gap-1 cursor-pointer hover:opacity-80">
+                              <XCircle className="h-3 w-3" />
+                              في الانتظار
+                            </Badge>
+                          )}
+                        </Button>
                       </TableCell>
                       <TableCell>
                         <Button

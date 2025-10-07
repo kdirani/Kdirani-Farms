@@ -385,6 +385,38 @@ export async function updateDailyReport(id: string, data: Partial<z.infer<typeof
   }
 }
 
+export async function toggleDailyReportStatus(id: string, currentStatus: boolean) {
+  try {
+    const session = await auth();
+    if (!session?.user || session.user.role === "farmer") {
+      return { success: false, error: "غير مصرح" };
+    }
+
+    const supabase = await createClient();
+
+    const { data: report, error } = await supabase
+      .from("daily_reports")
+      .update({
+        checked: !currentStatus,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: "فشل في تحديث حالة التقرير" };
+    }
+
+    revalidatePath("/admin/daily-reports");
+
+    return { success: true, data: report };
+  } catch (error) {
+    console.error("Error toggling daily report status:", error);
+    return { success: false, error: "حدث خطأ أثناء تحديث الحالة" };
+  }
+}
+
 export async function deleteDailyReport(id: string) {
   try {
     const session = await auth();
