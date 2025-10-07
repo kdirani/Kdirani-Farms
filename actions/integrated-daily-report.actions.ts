@@ -289,17 +289,15 @@ async function getChicksBeforeValue(
     }
     const { data: lastReport } = await supabase
       .from('daily_reports')
-      .select('chicks_before, chicks_after, report_date, report_time')
+      .select('chicks_after')
       .eq('warehouse_id', warehouseId)
       .order('report_date', { ascending: false })
       .order('report_time', { ascending: false })
       .limit(1)
       .maybeSingle();
     
-    console.log('[getChicksBeforeValue] Last report data:', JSON.stringify(lastReport, null, 2));
     const value = lastReport?.chicks_after || 0;
-    console.log('[getChicksBeforeValue] Using chicks_after:', value);
-    console.log('[getChicksBeforeValue] NOT using chicks_before:', lastReport?.chicks_before);
+    console.log('[getChicksBeforeValue] Returning value from last report:', value);
     return value;
   }
 }
@@ -576,7 +574,6 @@ export async function createIntegratedDailyReport(
     // First report: from poultry_status.remaining_chicks
     // Subsequent reports: from last daily_report.chicks_after
     const chicksBeforeValue = await getChicksBeforeValue(supabase, input.warehouse_id);
-    console.log('[createIntegratedDailyReport] chicksBeforeValue:', chicksBeforeValue);
 
     // Calculate monthly feed automatically (sum of all daily feeds in the same month)
     const feedMonthlyKg = await calculateMonthlyFeed(
@@ -597,10 +594,6 @@ export async function createIntegratedDailyReport(
       input.eggs_sold - 
       input.eggs_gift;
     const chicksAfter = chicksBeforeValue - input.chicks_dead;
-    console.log('[createIntegratedDailyReport] Calculating chicks_after:');
-    console.log('  chicks_before:', chicksBeforeValue);
-    console.log('  chicks_dead:', input.chicks_dead);
-    console.log('  chicks_after:', chicksAfter);
     
     // Calculate feed ratio: (feed in grams / chicks after) rounded to 2 decimals
     // Example: (4200 kg × 1000) / 30000 chicks = 140.00 grams/chick
