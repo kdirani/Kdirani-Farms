@@ -149,7 +149,7 @@ async function updateMaterialInventory(
   supabase: any,
   warehouseId: string,
   materialNameId: string,
-  field: 'purchases' | 'sales' | 'consumption',
+  field: 'purchases' | 'sales' | 'consumption' | 'manufacturing',
   quantity: number
 ): Promise<boolean> {
   const { data: material } = await supabase
@@ -176,6 +176,9 @@ async function updateMaterialInventory(
   } else if (field === 'consumption') {
     updates.consumption = material.consumption + quantity;
     newBalance -= quantity;
+  } else if (field === 'manufacturing') {
+    updates.manufacturing = material.manufacturing + quantity;
+    newBalance += quantity;
   }
 
   updates.current_balance = Math.max(0, newBalance);
@@ -623,13 +626,13 @@ export async function createIntegratedDailyReport(
       return { success: false, error: 'فشل في إنشاء مادة البيض' };
     }
 
-    // 2. Update egg inventory (add healthy eggs as purchases)
+    // 2. Update egg inventory (add healthy eggs as manufacturing/production)
     if (input.production_eggs_healthy > 0) {
       await updateMaterialInventory(
         supabase,
         input.warehouse_id,
         eggMaterialId,
-        'purchases',
+        'manufacturing',
         input.production_eggs_healthy
       );
     }
