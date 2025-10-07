@@ -56,7 +56,6 @@ export const InvoicePrintable = forwardRef<HTMLDivElement, InvoicePrintableProps
                 <th className="border border-gray-300 p-3 text-right font-bold">الوحدة</th>
                 <th className="border border-gray-300 p-3 text-right font-bold">السعر</th>
                 <th className="border border-gray-300 p-3 text-right font-bold">القيمة</th>
-                <th className="border border-gray-300 p-3 text-right font-bold">النسبة</th>
               </tr>
             </thead>
             <tbody>
@@ -73,7 +72,7 @@ export const InvoicePrintable = forwardRef<HTMLDivElement, InvoicePrintableProps
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="border border-gray-300 p-3 text-center">لا توجد بيانات</td>
+                  <td colSpan={6} className="border border-gray-300 p-3 text-center">لا توجد بيانات</td>
                 </tr>
               )}
             </tbody>
