@@ -252,6 +252,13 @@ export default function IntegratedDailyReportForm({
     });
   }, [cartonConsumption, setValue]);
 
+  // Auto-update production_droppings when droppings sale quantity changes
+  useEffect(() => {
+    setValue('production_droppings', droppingsSale.quantity || 0, {
+      shouldValidate: true,
+    });
+  }, [droppingsSale.quantity, setValue]);
+
   // Egg Sale Functions
   const addEggSaleItem = () => {
     if (!newEggSaleItem.egg_weight_id || !newEggSaleItem.unit_id || !newEggSaleItem.quantity) {
@@ -631,14 +638,20 @@ export default function IntegratedDailyReportForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="production_droppings">إنتاج السواد (كجم)</Label>
+            <Label htmlFor="production_droppings_display">إنتاج السواد (كجم) - تلقائي</Label>
             <Input
-              id="production_droppings"
+              id="production_droppings_display"
               type="number"
               step="0.01"
-              {...register('production_droppings', { valueAsNumber: true })}
-              disabled={isLoading}
+              value={droppingsSale.quantity || 0}
+              readOnly
+              className="bg-muted cursor-not-allowed"
             />
+            {/* Hidden input to submit the value */}
+            <input type="hidden" {...register('production_droppings', { valueAsNumber: true })} />
+            <p className="text-xs text-muted-foreground">
+              يُحسب تلقائياً من كمية فاتورة مبيع السواد
+            </p>
           </div>
         </CardContent>
       </Card>
