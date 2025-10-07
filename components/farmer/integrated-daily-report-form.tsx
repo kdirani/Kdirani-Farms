@@ -212,7 +212,9 @@ export default function IntegratedDailyReportForm({
 
   // Calculate totals
   const productionEggs = watchHealthy + watchDeformed;
-  const productionEggRate = watchChicksBefore > 0 ? (productionEggs / watchChicksBefore) * 100 : 0;
+  const productionEggRate = watchChicksBefore > 0 
+    ? ((productionEggs * 30) / watchChicksBefore) * 100 
+    : 0;
   const currentEggsBalance = watchPreviousBalance + watchHealthy - watchSold - watchGift;
   const chicksAfter = watchChicksBefore - watchChicksDead;
   
@@ -558,6 +560,9 @@ export default function IntegratedDailyReportForm({
               <div className="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm font-bold">
                 {productionEggRate.toFixed(2)}%
               </div>
+              <p className="text-xs text-muted-foreground">
+                يُحسب تلقائياً: (إجمالي الإنتاج × 30 ÷ عدد الدجاج قبل) × 100
+              </p>
             </div>
           </div>
         </CardContent>

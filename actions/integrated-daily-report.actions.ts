@@ -582,7 +582,7 @@ export async function createIntegratedDailyReport(
     // Calculate computed fields
     const productionEggs = input.production_eggs_healthy + input.production_eggs_deformed;
     const productionEggRate = chicksBeforeValue > 0 
-      ? (productionEggs / chicksBeforeValue) * 100 
+      ? ((productionEggs * 30) / chicksBeforeValue) * 100 
       : 0;
     const currentEggsBalance = 
       input.previous_eggs_balance + 
