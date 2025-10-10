@@ -38,12 +38,12 @@ export function AdminLayoutWrapper({ children, session }: AdminLayoutWrapperProp
         {/* Sidebar Navigation - على اليمين في الشاشات الكبيرة */}
         <aside
           className={`
-            sticky top-0 h-screen bg-white border-l shadow-lg overflow-hidden transition-all duration-300 ease-in-out
+            sticky top-0 h-screen bg-white border-l shadow-lg transition-all duration-300 ease-in-out
             ${sidebarOpen ? 'w-64 opacity-100' : 'w-0 opacity-0'}
             hidden lg:block
           `}
         >
-          <div className={`p-6 w-64 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`p-6 w-64 h-full overflow-y-auto transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
             <AdminNav />
           </div>
         </aside>
