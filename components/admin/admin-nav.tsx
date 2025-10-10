@@ -115,10 +115,15 @@ const navSections = [
     title: 'الأدوية والتنبيهات',
     items: [
       {
+        title: 'الأدوية واللقاحات',
+        href: '/admin/medicines',
+        icon: Pill,
+      },
+      {
         title: 'تنبيهات الأدوية',
         href: '/admin/medication-alerts',
         icon: Bell,
-      },
+      }
     ],
   },
   {
@@ -138,11 +143,6 @@ const navSections = [
         title: 'أوزان البيض',
         href: '/admin/egg-weights',
         icon: Layers,
-      },
-      {
-        title: 'الأدوية واللقاحات',
-        href: '/admin/medicines',
-        icon: Pill,
       },
       {
         title: 'أنواع المصاريف',
