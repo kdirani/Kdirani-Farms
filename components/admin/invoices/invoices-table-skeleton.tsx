@@ -20,14 +20,14 @@ export function InvoicesTableSkeleton() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Invoice #</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Warehouse</TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead className="text-right">Net Value</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>رقم الفاتورة</TableHead>
+              <TableHead>النوع</TableHead>
+              <TableHead>التاريخ</TableHead>
+              <TableHead>المستودع</TableHead>
+              <TableHead>العميل</TableHead>
+              <TableHead className="text-right">القيمة الصافية</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

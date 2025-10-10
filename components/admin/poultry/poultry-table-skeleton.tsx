@@ -20,15 +20,16 @@ export function PoultryTableSkeleton() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Batch Name</TableHead>
-              <TableHead>Farm</TableHead>
-              <TableHead>Farmer</TableHead>
-              <TableHead className="text-right">Opening</TableHead>
-              <TableHead className="text-right">Dead</TableHead>
-              <TableHead className="text-right">Remaining</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>اسم الدفعة</TableHead>
+              <TableHead>المزرعة</TableHead>
+              <TableHead>المزارع</TableHead>
+              <TableHead className="text-right">البداية</TableHead>
+              <TableHead className="text-right">ميتة</TableHead>
+              <TableHead className="text-right">متبقية</TableHead>
+              <TableHead>تاريخ ميلاد الفراخ</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead>تاريخ الإنشاء</TableHead>
+              <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -51,6 +52,9 @@ export function PoultryTableSkeleton() {
                 </TableCell>
                 <TableCell className="text-right">
                   <Skeleton className="h-4 w-16 ml-auto" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-24" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-5 w-16" />
