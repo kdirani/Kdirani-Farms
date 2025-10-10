@@ -259,7 +259,6 @@ CREATE TABLE public.invoice_items (
   unit_id uuid REFERENCES public.measurement_units(id), -- مرجع لوحدة القياس
   egg_weight_id uuid REFERENCES public.egg_weights(id), -- مرجع لوزن البيض
   quantity DECIMAL(10,2) DEFAULT 0, -- الكمية
-  weight DECIMAL(10,2) DEFAULT NULL, -- الوزن
   price DECIMAL(10,2) DEFAULT 0, -- السعر
   value DECIMAL(12,2) DEFAULT 0 -- القيمة
 );

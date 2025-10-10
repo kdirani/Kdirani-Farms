@@ -563,7 +563,6 @@ export type Database = {
           unit_id: string | null
           quantity: number
           blend_count: number
-          weight: number | null
         }
         Insert: {
           id?: string
