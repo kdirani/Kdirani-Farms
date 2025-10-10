@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Package,
 } from "lucide-react";
+import { LowInventoryAlert } from "@/components/admin/low-inventory-alert";
 
 export const metadata: Metadata = {
   title: "لوحة التحكم - الإدارة",
@@ -86,8 +87,12 @@ export default async function AdminDashboardPage() {
     .select("*", { count: "exact", head: true })
     .eq("checked", false);
 
-  // Get low inventory items
-  const { data: lowInventory } = await supabase
+  // Get low inventory items with pagination
+  const lowInventoryPage = 1;
+  const lowInventoryLimit = 5;
+  const lowInventoryOffset = (lowInventoryPage - 1) * lowInventoryLimit;
+
+  const { data: lowInventory, count: lowInventoryTotal } = await supabase
     .from("materials")
     .select(`
       id,
@@ -98,10 +103,10 @@ export default async function AdminDashboardPage() {
       warehouses (
         name
       )
-    `)
+    `, { count: 'exact' })
     .lt("current_balance", 100)
     .order("current_balance", { ascending: true })
-    .limit(10);
+    .range(lowInventoryOffset, lowInventoryOffset + lowInventoryLimit - 1);
 
   // Get medication alerts for admin
   const { data: medicationAlerts } = await supabase
@@ -369,45 +374,15 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Low Inventory Alert */}
-      {lowInventory && lowInventory.length > 0 && (
-        <Card className="border-red-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-700">
-              <AlertCircle className="h-5 w-5" />
-              تنبيه: مواد منخفضة في المخزون
-            </CardTitle>
-            <CardDescription>
-              المواد التالية أقل من الحد الأدنى المطلوب
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {lowInventory.map((item: any) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-red-50 border border-red-200"
-                >
-                  <div className="flex-1">
-                    <p className="font-medium text-red-900">
-                      {item.materials_names?.material_name || "مادة"}
-                    </p>
-                    <p className="text-sm text-red-700">
-                      المستودع: {item.warehouses?.name || "غير محدد"}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-red-600">
-                      {item.current_balance?.toLocaleString("ar-IQ", {
-                        maximumFractionDigits: 2,
-                      })}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <LowInventoryAlert 
+        initialData={lowInventory?.map((item: any) => ({
+          id: item.id,
+          current_balance: item.current_balance,
+          materials_names: Array.isArray(item.materials_names) ? item.materials_names[0] : item.materials_names,
+          warehouses: Array.isArray(item.warehouses) ? item.warehouses[0] : item.warehouses,
+        })) || []} 
+        initialTotal={lowInventoryTotal || 0} 
+      />
     </div>
   );
 }

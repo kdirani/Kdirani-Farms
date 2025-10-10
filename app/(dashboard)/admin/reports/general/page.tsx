@@ -12,7 +12,14 @@ export const metadata: Metadata = {
   description: 'تقرير شامل لجميع التقارير اليومية والأسبوعية والشهرية',
 };
 
-export default async function GeneralReportPage() {
+interface GeneralReportPageProps {
+  searchParams: Promise<{ page?: string }>;
+}
+
+export default async function GeneralReportPage({ searchParams }: GeneralReportPageProps) {
+  const params = await searchParams;
+  const page = parseInt(params.page || '1');
+  
   // Fetch initial data without filters (last 30 days by default)
   const endDate = new Date();
   const startDate = new Date();
@@ -27,7 +34,7 @@ export default async function GeneralReportPage() {
     getDailyReports({
       startDate: startDate.toISOString().split('T')[0],
       endDate: endDate.toISOString().split('T')[0],
-    }),
+    }, page, 10),
     getWeeklySummary({
       startDate: startDate.toISOString().split('T')[0],
       endDate: endDate.toISOString().split('T')[0],
@@ -69,6 +76,8 @@ export default async function GeneralReportPage() {
           average_daily_production: 0,
           total_reports: 0,
         }}
+        initialPagination={dailyReportsResult.pagination}
+        currentPage={page}
       />
     </div>
   );
