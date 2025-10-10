@@ -113,21 +113,21 @@ export function MedicationAlertsTable({ alerts: initialAlerts, farms }: Medicati
     <div className="space-y-4">
       {/* إحصائيات سريعة */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <div className="text-sm text-blue-600 font-medium">إجمالي التنبيهات</div>
-          <div className="text-2xl font-bold text-blue-700">{stats.total}</div>
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div className="text-sm text-gray-600 font-medium">إجمالي التنبيهات</div>
+          <div className="text-2xl font-bold text-gray-700">{stats.total}</div>
         </div>
-        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-          <div className="text-sm text-green-600 font-medium">تم الإعطاء</div>
-          <div className="text-2xl font-bold text-green-700">{stats.administered}</div>
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div className="text-sm text-gray-600 font-medium">تم الإعطاء</div>
+          <div className="text-2xl font-bold text-gray-700">{stats.administered}</div>
         </div>
-        <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-          <div className="text-sm text-yellow-600 font-medium">قيد الانتظار</div>
-          <div className="text-2xl font-bold text-yellow-700">{stats.pending}</div>
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div className="text-sm text-gray-600 font-medium">قيد الانتظار</div>
+          <div className="text-2xl font-bold text-gray-700">{stats.pending}</div>
         </div>
-        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-          <div className="text-sm text-red-600 font-medium">متأخر</div>
-          <div className="text-2xl font-bold text-red-700">{stats.overdue}</div>
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div className="text-sm text-gray-600 font-medium">متأخر</div>
+          <div className="text-2xl font-bold text-gray-700">{stats.overdue}</div>
         </div>
       </div>
 
