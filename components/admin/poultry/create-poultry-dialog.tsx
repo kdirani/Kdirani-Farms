@@ -30,6 +30,7 @@ const poultrySchema = z.object({
   batch_name: z.string().min(2, 'اسم الدفعة يجب أن يكون حرفين على الأقل'),
   farm_id: z.string().min(1, 'المزرعة مطلوبة'),
   opening_chicks: z.number().min(0, 'عدد الكتاكيت الافتتاحي لا يمكن أن يكون سالباً'),
+  chick_birth_date: z.string().optional(),
 });
 
 type PoultryFormData = z.infer<typeof poultrySchema>;
@@ -82,6 +83,7 @@ export function CreatePoultryDialog({ open, onOpenChange }: CreatePoultryDialogP
         batch_name: data.batch_name,
         farm_id: data.farm_id,
         opening_chicks: data.opening_chicks,
+        chick_birth_date: data.chick_birth_date,
       });
       
       if (result.success) {
@@ -173,6 +175,22 @@ export function CreatePoultryDialog({ open, onOpenChange }: CreatePoultryDialogP
             <p className="text-xs text-muted-foreground">
               العدد الأولي للدجاج في هذه الدفعة
             </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="chick_birth_date">تاريخ ميلاد الفراخ</Label>
+            <Input
+              id="chick_birth_date"
+              type="date"
+              {...register('chick_birth_date')}
+              disabled={isLoading}
+            />
+            <p className="text-xs text-muted-foreground">
+              🔔 عند إضافة تاريخ الميلاد، سيتم إنشاء التنبيهات الدوائية تلقائياً
+            </p>
+            {errors.chick_birth_date && (
+              <p className="text-sm text-destructive">{errors.chick_birth_date.message}</p>
+            )}
           </div>
 
           <DialogFooter>

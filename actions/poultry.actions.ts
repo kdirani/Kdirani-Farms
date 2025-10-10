@@ -24,6 +24,7 @@ export type CreatePoultryInput = {
   farm_id: string;
   batch_name: string;
   opening_chicks: number;
+  chick_birth_date?: string;
 };
 
 export type UpdatePoultryInput = {
@@ -259,6 +260,7 @@ export async function createPoultryStatus(input: CreatePoultryInput): Promise<Ac
         opening_chicks: input.opening_chicks,
         dead_chicks: 0,
         remaining_chicks: input.opening_chicks, // Initial remaining = opening
+        chick_birth_date: input.chick_birth_date || null,
       })
       .select()
       .single();

@@ -25,7 +25,7 @@ import { UserCog, MoreHorizontal, Search, Plus } from 'lucide-react';
 import { CreatePoultryDialog } from './create-poultry-dialog';
 import { EditPoultryDialog } from './edit-poultry-dialog';
 import { DeletePoultryDialog } from './delete-poultry-dialog';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatNumber } from '@/lib/utils';
 
 interface PoultryTableProps {
   poultryStatuses: PoultryStatus[];
@@ -88,6 +88,7 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
               <TableHead className="text-right">البداية</TableHead>
               <TableHead className="text-right">الميت</TableHead>
               <TableHead className="text-right">المتبقي</TableHead>
+              <TableHead>تاريخ ميلاد الفراخ</TableHead>
               <TableHead>الحالة</TableHead>
               <TableHead>تاريخ الإنشاء</TableHead>
               <TableHead className="text-right">الإجراءات</TableHead>
@@ -96,7 +97,7 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
           <TableBody>
             {filteredPoultry.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center text-muted-foreground">
+                <TableCell colSpan={10} className="text-center text-muted-foreground">
                   لم يتم العثور على دفعات قطعان
                 </TableCell>
               </TableRow>
@@ -127,13 +128,25 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
                     )}
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    {poultry.opening_chicks.toLocaleString()}
+                    {formatNumber(poultry.opening_chicks)}
                   </TableCell>
                   <TableCell className="text-right text-destructive">
-                    {poultry.dead_chicks.toLocaleString()}
+                    {formatNumber(poultry.dead_chicks)}
                   </TableCell>
                   <TableCell className="text-right font-semibold">
-                    {poultry.remaining_chicks.toLocaleString()}
+                    {formatNumber(poultry.remaining_chicks)}
+                  </TableCell>
+                  <TableCell>
+                    {poultry.chick_birth_date ? (
+                      <div className="text-sm">
+                        <div>{formatDate(new Date(poultry.chick_birth_date))}</div>
+                        <div className="text-xs text-muted-foreground">
+                          عمر: {formatNumber(Math.floor((new Date().getTime() - new Date(poultry.chick_birth_date).getTime()) / (1000 * 60 * 60 * 24)))} يوم
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">غير محدد</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     {getStatusBadge(poultry)}

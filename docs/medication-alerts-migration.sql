@@ -295,7 +295,7 @@ CREATE OR REPLACE FUNCTION public.get_active_alerts_for_farm(
 RETURNS TABLE (
   alert_id uuid,
   medicine_id uuid,
-  medicine_name TEXT,
+  medicine_name VARCHAR(255),
   medicine_description TEXT,
   scheduled_day INTEGER,
   scheduled_date DATE,
@@ -444,7 +444,7 @@ RETURNS TABLE (
   alert_id uuid,
   farm_id uuid,
   farm_name TEXT,
-  medicine_name TEXT,
+  medicine_name VARCHAR(255),
   scheduled_date DATE,
   days_until INTEGER,
   priority TEXT,

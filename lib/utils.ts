@@ -94,3 +94,17 @@ export function formatCurrency(amount: number, currency: string = 'USD'): string
   return currency === 'USD' ? `${symbol}${formattedAmount}` : `${formattedAmount} ${symbol}`;
 }
 
+/**
+ * تنسيق الأرقام بشكل ثابت لتجنب مشاكل Hydration
+ * @param num الرقم المراد تنسيقه
+ * @returns سلسلة نصية منسقة بالأرقام الإنجليزية
+ */
+export function formatNumber(num: number): string {
+  if (typeof num !== 'number' || isNaN(num)) {
+    return '0';
+  }
+  
+  // استخدام تنسيق ثابت بالإنجليزية لتجنب مشاكل Hydration
+  return num.toLocaleString('en-US');
+}
+

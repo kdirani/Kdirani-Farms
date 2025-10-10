@@ -138,17 +138,76 @@ export async function getActiveAlertsForFarm(
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc('get_active_alerts_for_farm', {
-      p_farm_id: farmId,
-      p_days_ahead: daysAhead,
-    });
+    // استخدام استعلام مباشر بدلاً من دالة قاعدة البيانات
+    const { data, error } = await supabase
+      .from('medication_alerts')
+      .select(`
+        id,
+        medicine_id,
+        scheduled_day,
+        scheduled_date,
+        alert_date,
+        is_administered,
+        notes,
+        medicines!inner (
+          id,
+          name,
+          description
+        )
+      `)
+      .eq('farm_id', farmId)
+      .eq('is_administered', false)
+      .lte('alert_date', new Date(Date.now() + daysAhead * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+      .order('scheduled_date', { ascending: true });
 
     if (error) {
       console.error('Error fetching active alerts:', error);
       return { success: false, error: error.message };
     }
 
-    return { success: true, data: data || [] };
+    // تحويل البيانات إلى التنسيق المطلوب
+    const alerts: AlertWithDetails[] = (data || []).map((alert: any) => {
+      const today = new Date();
+      const scheduledDate = new Date(alert.scheduled_date);
+      const daysUntilScheduled = Math.floor((scheduledDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const isOverdue = daysUntilScheduled < 0;
+
+      let priority: 'عاجل - متأخر' | 'عاجل - اليوم' | 'مهم - غداً' | 'عادي' | 'غير عاجل';
+      if (isOverdue) priority = 'عاجل - متأخر';
+      else if (daysUntilScheduled === 0) priority = 'عاجل - اليوم';
+      else if (daysUntilScheduled === 1) priority = 'مهم - غداً';
+      else if (daysUntilScheduled <= daysAhead) priority = 'عادي';
+      else priority = 'غير عاجل';
+
+      return {
+        alert_id: alert.id,
+        medicine_id: alert.medicine_id,
+        medicine_name: alert.medicines.name,
+        medicine_description: alert.medicines.description || '',
+        scheduled_day: alert.scheduled_day,
+        scheduled_date: alert.scheduled_date,
+        alert_date: alert.alert_date,
+        is_administered: alert.is_administered,
+        days_until_scheduled: daysUntilScheduled,
+        is_overdue: isOverdue,
+        priority,
+        notes: alert.notes || '',
+      };
+    });
+
+    // ترتيب حسب الأولوية
+    alerts.sort((a, b) => {
+      const priorityOrder = {
+        'عاجل - متأخر': 1,
+        'عاجل - اليوم': 2,
+        'مهم - غداً': 3,
+        'عادي': 4,
+        'غير عاجل': 5,
+      };
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
+
+    return { success: true, data: alerts };
   } catch (error) {
     console.error('Error:', error);
     return { success: false, error: 'حدث خطأ أثناء جلب التنبيهات' };
@@ -165,17 +224,68 @@ export async function getUpcomingAlertsForUser(
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc('get_upcoming_alerts', {
-      p_user_id: userId,
-      p_limit: limit,
-    });
+    // استخدام استعلام مباشر بدلاً من دالة قاعدة البيانات
+    const { data, error } = await supabase
+      .from('medication_alerts')
+      .select(`
+        id,
+        farm_id,
+        scheduled_date,
+        farms!inner (
+          id,
+          name,
+          user_id
+        ),
+        medicines!inner (
+          id,
+          name
+        )
+      `)
+      .eq('farms.user_id', userId)
+      .eq('is_administered', false)
+      .gte('scheduled_date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+      .order('scheduled_date', { ascending: true })
+      .limit(limit);
 
     if (error) {
       console.error('Error fetching upcoming alerts:', error);
       return { success: false, error: error.message };
     }
 
-    return { success: true, data: data || [] };
+    // تحويل البيانات إلى التنسيق المطلوب
+    const alerts: UpcomingAlert[] = (data || []).map((alert: any) => {
+      const today = new Date();
+      const scheduledDate = new Date(alert.scheduled_date);
+      const daysUntil = Math.floor((scheduledDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      
+      let priority: 'متأخر' | 'اليوم' | 'غداً' | 'قادم';
+      if (daysUntil < 0) priority = 'متأخر';
+      else if (daysUntil === 0) priority = 'اليوم';
+      else if (daysUntil === 1) priority = 'غداً';
+      else priority = 'قادم';
+
+      let urgencyLevel: number;
+      if (daysUntil < 0) urgencyLevel = 1;
+      else if (daysUntil === 0) urgencyLevel = 2;
+      else if (daysUntil === 1) urgencyLevel = 3;
+      else urgencyLevel = 4;
+
+      return {
+        alert_id: alert.id,
+        farm_id: alert.farm_id,
+        farm_name: alert.farms.name,
+        medicine_name: alert.medicines.name,
+        scheduled_date: alert.scheduled_date,
+        days_until: daysUntil,
+        priority,
+        urgency_level: urgencyLevel,
+      };
+    }).filter(alert => alert.priority !== 'قادم'); // إخفاء التنبيهات من نوع "قادم"
+
+    // ترتيب حسب الأولوية
+    alerts.sort((a, b) => a.urgency_level - b.urgency_level);
+
+    return { success: true, data: alerts };
   } catch (error) {
     console.error('Error:', error);
     return { success: false, error: 'حدث خطأ أثناء جلب التنبيهات القادمة' };
