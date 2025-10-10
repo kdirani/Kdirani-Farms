@@ -23,6 +23,7 @@ const poultrySchema = z.object({
   batch_name: z.string().min(2, 'اسم الدفعة يجب أن يكون حرفين على الأقل'),
   opening_chicks: z.number().min(0, 'عدد الكتاكيت الافتتاحي لا يمكن أن يكون سالباً'),
   dead_chicks: z.number().min(0, 'عدد الكتاكيت النافقة لا يمكن أن يكون سالباً'),
+  chick_birth_date: z.string().optional(),
 });
 
 type PoultryFormData = z.infer<typeof poultrySchema>;
@@ -56,6 +57,7 @@ export function EditPoultryDialog({ poultry, open, onOpenChange }: EditPoultryDi
         batch_name: poultry.batch_name || '',
         opening_chicks: poultry.opening_chicks,
         dead_chicks: poultry.dead_chicks,
+        chick_birth_date: poultry.chick_birth_date || '',
       });
     }
   }, [poultry, open, reset]);
@@ -68,6 +70,7 @@ export function EditPoultryDialog({ poultry, open, onOpenChange }: EditPoultryDi
         batch_name: data.batch_name,
         opening_chicks: data.opening_chicks,
         dead_chicks: data.dead_chicks,
+        chick_birth_date: data.chick_birth_date,
       });
       
       if (result.success) {
@@ -148,6 +151,22 @@ export function EditPoultryDialog({ poultry, open, onOpenChange }: EditPoultryDi
             />
             {errors.dead_chicks && (
               <p className="text-sm text-destructive">{errors.dead_chicks.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="chick_birth_date">تاريخ ميلاد الفراخ</Label>
+            <Input
+              id="chick_birth_date"
+              type="date"
+              {...register('chick_birth_date')}
+              disabled={isLoading}
+            />
+            <p className="text-xs text-muted-foreground">
+              🔔 عند إضافة أو تحديث تاريخ الميلاد، سيتم إنشاء التنبيهات الدوائية تلقائياً
+            </p>
+            {errors.chick_birth_date && (
+              <p className="text-sm text-destructive">{errors.chick_birth_date.message}</p>
             )}
           </div>
 

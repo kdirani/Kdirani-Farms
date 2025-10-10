@@ -37,6 +37,7 @@ const farmSetupSchema = z.object({
   poultry: z.object({
     batch_name: z.string().min(2, 'اسم القطيع يجب أن يكون حرفين على الأقل'),
     opening_chicks: z.number().min(0, 'عدد الدجاج الابتدائي لا يمكن أن يكون سالباً'),
+    chick_birth_date: z.string().optional(),
   }),
   materials: z.array(
     z.object({
@@ -98,6 +99,7 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
       poultry: {
         batch_name: '',
         opening_chicks: 0,
+        chick_birth_date: '',
       },
       materials: [],
       medicines: [],
@@ -358,6 +360,22 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
               />
               {errors.poultry?.opening_chicks && (
                 <p className="text-sm text-destructive">{errors.poultry.opening_chicks.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="poultry.chick_birth_date">تاريخ ميلاد الفراخ</Label>
+              <Input
+                id="poultry.chick_birth_date"
+                type="date"
+                {...register('poultry.chick_birth_date')}
+                disabled={isLoading}
+              />
+              <p className="text-xs text-muted-foreground">
+                🔔 عند إضافة تاريخ الميلاد، سيتم إنشاء جميع التنبيهات الدوائية تلقائياً بناءً على عمر الفراخ
+              </p>
+              {errors.poultry?.chick_birth_date && (
+                <p className="text-sm text-destructive">{errors.poultry.chick_birth_date.message}</p>
               )}
             </div>
           </div>

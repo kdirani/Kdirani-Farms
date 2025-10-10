@@ -10,6 +10,7 @@ export type PoultryStatus = {
   opening_chicks: number;
   dead_chicks: number;
   remaining_chicks: number;
+  chick_birth_date: string | null;
   created_at: string;
   updated_at: string;
   farm?: {
@@ -30,6 +31,7 @@ export type UpdatePoultryInput = {
   batch_name?: string;
   opening_chicks?: number;
   dead_chicks?: number;
+  chick_birth_date?: string;
 };
 
 export type ActionResult<T = void> = {
@@ -337,6 +339,7 @@ export async function updatePoultryStatus(input: UpdatePoultryInput): Promise<Ac
     if (input.batch_name !== undefined) updateData.batch_name = input.batch_name.trim();
     if (input.opening_chicks !== undefined) updateData.opening_chicks = input.opening_chicks;
     if (input.dead_chicks !== undefined) updateData.dead_chicks = input.dead_chicks;
+    if (input.chick_birth_date !== undefined) updateData.chick_birth_date = input.chick_birth_date || null;
     updateData.remaining_chicks = newRemainingChicks;
 
     const { data: updatedPoultry, error } = await supabase
