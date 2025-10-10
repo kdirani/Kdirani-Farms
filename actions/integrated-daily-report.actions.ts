@@ -241,7 +241,7 @@ async function getChicksFromPoultryStatus(
   // Get the single poultry status for this farm
   const { data: poultryStatus, error: poultryError } = await supabase
     .from('poultry_status')
-    .select('remaining_chicks')
+    .select('opening_chicks')
     .eq('farm_id', warehouse.farm_id)
     .maybeSingle();
 
@@ -255,13 +255,13 @@ async function getChicksFromPoultryStatus(
     return 0;
   }
 
-  console.log('[getChicksFromPoultryStatus] Found remaining_chicks:', poultryStatus.remaining_chicks);
-  return poultryStatus?.remaining_chicks || 0;
+  console.log('[getChicksFromPoultryStatus] Found opening_chicks:', poultryStatus.opening_chicks);
+  return poultryStatus?.opening_chicks || 0;
 }
 
 /**
  * Get chicks_before value automatically:
- * - First report: from poultry_status.remaining_chicks
+ * - First report: from poultry_status.opening_chicks
  * - Subsequent reports: from last daily_report.chicks_after
  */
 async function getChicksBeforeValue(
@@ -571,7 +571,7 @@ export async function createIntegratedDailyReport(
     const supabase = await createClient();
 
     // Get chicks_before value automatically
-    // First report: from poultry_status.remaining_chicks
+    // First report: from poultry_status.opening_chicks
     // Subsequent reports: from last daily_report.chicks_after
     const chicksBeforeValue = await getChicksBeforeValue(supabase, input.warehouse_id);
 

@@ -131,8 +131,6 @@ export type PoultryStatus = {
   farm_id: string | null;
   batch_name: string | null;
   opening_chicks: number;
-  dead_chicks: number;
-  remaining_chicks: number;
   chick_birth_date: string | null; // ✅ جديد
   created_at: string;
   updated_at: string;

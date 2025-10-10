@@ -163,9 +163,7 @@ CREATE TABLE public.poultry_status (
   farm_id uuid UNIQUE REFERENCES public.farms(id) ON DELETE CASCADE, -- معرف المزرعة (UNIQUE لضمان قطيع واحد لكل مزرعة)
   batch_name VARCHAR(255), -- اسم قطيع الدجاج
   opening_chicks INTEGER DEFAULT 0, -- عدد الدجاج الابتدائي
-  dead_chicks INTEGER DEFAULT 0, -- النفوق
-  remaining_chicks INTEGER DEFAULT 0, -- الدجاج المتبقي
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(), 
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 

@@ -10,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -45,19 +44,6 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
       poultry.farm?.user_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusBadge = (poultry: PoultryStatus) => {
-    const mortalityRate = (poultry.dead_chicks / poultry.opening_chicks) * 100;
-    
-    if (mortalityRate === 0) {
-      return <Badge variant="success">ممتاز</Badge>;
-    } else if (mortalityRate < 5) {
-      return <Badge variant="success">جيد</Badge>;
-    } else if (mortalityRate < 10) {
-      return <Badge variant="warning">مقبول</Badge>;
-    } else {
-      return <Badge variant="destructive">ضعيف</Badge>;
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -86,10 +72,7 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
               <TableHead>المزرعة</TableHead>
               <TableHead>المزارع</TableHead>
               <TableHead className="text-right">البداية</TableHead>
-              <TableHead className="text-right">الميت</TableHead>
-              <TableHead className="text-right">المتبقي</TableHead>
               <TableHead>تاريخ ميلاد الفراخ</TableHead>
-              <TableHead>الحالة</TableHead>
               <TableHead>تاريخ الإنشاء</TableHead>
               <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
@@ -97,7 +80,7 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
           <TableBody>
             {filteredPoultry.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center text-muted-foreground">
+                <TableCell colSpan={7} className="text-center text-muted-foreground">
                   لم يتم العثور على دفعات قطعان
                 </TableCell>
               </TableRow>
@@ -130,12 +113,6 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
                   <TableCell className="text-right font-medium">
                     {formatNumber(poultry.opening_chicks)}
                   </TableCell>
-                  <TableCell className="text-right text-destructive">
-                    {formatNumber(poultry.dead_chicks)}
-                  </TableCell>
-                  <TableCell className="text-right font-semibold">
-                    {formatNumber(poultry.remaining_chicks)}
-                  </TableCell>
                   <TableCell>
                     {poultry.chick_birth_date ? (
                       <div className="text-sm">
@@ -147,9 +124,6 @@ export function PoultryTable({ poultryStatuses }: PoultryTableProps) {
                     ) : (
                       <span className="text-muted-foreground text-sm">غير محدد</span>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    {getStatusBadge(poultry)}
                   </TableCell>
                   <TableCell>
                     {formatDate(new Date(poultry.created_at))}

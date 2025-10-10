@@ -24,10 +24,7 @@ export function PoultryTableSkeleton() {
               <TableHead>المزرعة</TableHead>
               <TableHead>المزارع</TableHead>
               <TableHead className="text-right">البداية</TableHead>
-              <TableHead className="text-right">ميتة</TableHead>
-              <TableHead className="text-right">متبقية</TableHead>
               <TableHead>تاريخ ميلاد الفراخ</TableHead>
-              <TableHead>الحالة</TableHead>
               <TableHead>تاريخ الإنشاء</TableHead>
               <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
@@ -47,17 +44,8 @@ export function PoultryTableSkeleton() {
                 <TableCell className="text-right">
                   <Skeleton className="h-4 w-16 ml-auto" />
                 </TableCell>
-                <TableCell className="text-right">
-                  <Skeleton className="h-4 w-12 ml-auto" />
-                </TableCell>
-                <TableCell className="text-right">
-                  <Skeleton className="h-4 w-16 ml-auto" />
-                </TableCell>
                 <TableCell>
                   <Skeleton className="h-4 w-24" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-5 w-16" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-4 w-24" />

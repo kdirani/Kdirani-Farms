@@ -344,9 +344,9 @@ VALUES ('existing-farm-id', 'قطيع جديد', 1000);
 {
   "farm_id": "farm-1",
   "poultry_status": [
-    { "id": "ps-1", "batch_name": "قطيع 2024-A", "remaining_chicks": 5000 },
-    { "id": "ps-2", "batch_name": "قطيع 2024-B", "remaining_chicks": 3000 },
-    { "id": "ps-3", "batch_name": "قطيع 2025-A", "remaining_chicks": 8000 }
+    { "id": "ps-1", "batch_name": "قطيع 2024-A", },
+    { "id": "ps-2", "batch_name": "قطيع 2024-B",  },
+    { "id": "ps-3", "batch_name": "قطيع 2025-A",  }
   ]
 }
 ```
@@ -359,7 +359,6 @@ VALUES ('existing-farm-id', 'قطيع جديد', 1000);
   "poultry_status": {
     "id": "ps-1",
     "batch_name": "قطيع 2025",
-    "remaining_chicks": 10000
   }
 }
 ```

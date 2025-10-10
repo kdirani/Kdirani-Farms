@@ -22,7 +22,6 @@ import { Loader2 } from 'lucide-react';
 const poultrySchema = z.object({
   batch_name: z.string().min(2, 'اسم الدفعة يجب أن يكون حرفين على الأقل'),
   opening_chicks: z.number().min(0, 'عدد الكتاكيت الافتتاحي لا يمكن أن يكون سالباً'),
-  dead_chicks: z.number().min(0, 'عدد الكتاكيت النافقة لا يمكن أن يكون سالباً'),
   chick_birth_date: z.string().optional(),
 });
 
@@ -41,22 +40,17 @@ export function EditPoultryDialog({ poultry, open, onOpenChange }: EditPoultryDi
     register,
     handleSubmit,
     formState: { errors },
-    watch,
     reset,
   } = useForm<PoultryFormData>({
     resolver: zodResolver(poultrySchema),
   });
 
-  const openingChicks = watch('opening_chicks');
-  const deadChicks = watch('dead_chicks');
-  const remainingChicks = openingChicks - deadChicks;
 
   useEffect(() => {
     if (poultry && open) {
       reset({
         batch_name: poultry.batch_name || '',
         opening_chicks: poultry.opening_chicks,
-        dead_chicks: poultry.dead_chicks,
         chick_birth_date: poultry.chick_birth_date || '',
       });
     }
@@ -69,7 +63,6 @@ export function EditPoultryDialog({ poultry, open, onOpenChange }: EditPoultryDi
         id: poultry.id,
         batch_name: data.batch_name,
         opening_chicks: data.opening_chicks,
-        dead_chicks: data.dead_chicks,
         chick_birth_date: data.chick_birth_date,
       });
       
@@ -137,24 +130,6 @@ export function EditPoultryDialog({ poultry, open, onOpenChange }: EditPoultryDi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="dead_chicks">عدد الكتاكيت النافقة *</Label>
-            <Input
-              id="dead_chicks"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              placeholder="مثال: 0"
-              {...register('dead_chicks', { 
-                setValueAs: (value) => value === '' ? 0 : parseInt(value, 10) 
-              })}
-              disabled={isLoading}
-            />
-            {errors.dead_chicks && (
-              <p className="text-sm text-destructive">{errors.dead_chicks.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="chick_birth_date">تاريخ ميلاد الفراخ</Label>
             <Input
               id="chick_birth_date"
@@ -170,24 +145,6 @@ export function EditPoultryDialog({ poultry, open, onOpenChange }: EditPoultryDi
             )}
           </div>
 
-          {!isNaN(remainingChicks) && (
-            <div className="bg-muted p-3 rounded-lg">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">الكتاكيت المتبقية:</span>
-                <span className="text-lg font-bold">
-                  {remainingChicks >= 0 ? remainingChicks.toLocaleString('en-US') : (
-                    <span className="text-destructive">غير صالح (سالب)</span>
-                  )}
-                </span>
-              </div>
-              {remainingChicks >= 0 && openingChicks > 0 && (
-                <div className="text-xs text-muted-foreground mt-1">
-                  نسبة النفوق: {((deadChicks / openingChicks) * 100).toFixed(2)}%
-                </div>
-              )}
-            </div>
-          )}
-
           <DialogFooter>
             <Button
               type="button"
@@ -197,7 +154,7 @@ export function EditPoultryDialog({ poultry, open, onOpenChange }: EditPoultryDi
             >
               إلغاء
             </Button>
-            <Button type="submit" disabled={isLoading || remainingChicks < 0}>
+            <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
               حفظ التغييرات
             </Button>

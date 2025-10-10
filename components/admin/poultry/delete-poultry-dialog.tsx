@@ -78,14 +78,6 @@ export function DeletePoultryDialog({ poultry, open, onOpenChange }: DeletePoult
               <span className="text-sm font-medium">عدد الكتاكيت الافتتاحي:</span>
               <span className="text-sm">{poultry.opening_chicks.toLocaleString('en-US')}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-sm font-medium">الكتاكيت النافقة:</span>
-              <span className="text-sm text-destructive">{poultry.dead_chicks.toLocaleString('en-US')}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm font-medium">المتبقي:</span>
-              <span className="text-sm font-semibold">{poultry.remaining_chicks.toLocaleString('en-US')}</span>
-            </div>
           </div>
         </div>
 

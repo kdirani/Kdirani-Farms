@@ -243,8 +243,7 @@ export type Database = {
           farm_id: string | null
           batch_name: string | null
           opening_chicks: number
-          dead_chicks: number
-          remaining_chicks: number
+          chick_birth_date: string | null
           created_at: string
           updated_at: string
         }
@@ -253,8 +252,7 @@ export type Database = {
           farm_id?: string | null
           batch_name?: string | null
           opening_chicks?: number
-          dead_chicks?: number
-          remaining_chicks?: number
+          chick_birth_date?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -263,8 +261,7 @@ export type Database = {
           farm_id?: string | null
           batch_name?: string | null
           opening_chicks?: number
-          dead_chicks?: number
-          remaining_chicks?: number
+          chick_birth_date?: string | null
           created_at?: string
           updated_at?: string
         }

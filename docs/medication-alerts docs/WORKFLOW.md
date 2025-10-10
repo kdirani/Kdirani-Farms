@@ -67,7 +67,6 @@ INSERT INTO public.poultry_status (
   farm_id,
   batch_name,
   opening_chicks,
-  remaining_chicks
 )
 VALUES (
   'farm-uuid',
