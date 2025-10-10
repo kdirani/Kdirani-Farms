@@ -71,6 +71,39 @@ COMMENT ON COLUMN public.medication_alerts.alert_date IS 'تاريخ ظهور ا
 COMMENT ON COLUMN public.medication_alerts.is_administered IS 'حالة إعطاء الدواء: true = تم الإعطاء، false = لم يتم بعد';
 
 -- ==================================================================================
+-- 2.1. Trigger لضمان تطابق farm_id مع القطيع (علاقة 1:1)
+-- ==================================================================================
+
+-- دالة لملء farm_id تلقائياً من poultry_status
+CREATE OR REPLACE FUNCTION public.auto_set_farm_id_from_poultry()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- ملء farm_id تلقائياً من القطيع
+  SELECT farm_id INTO NEW.farm_id
+  FROM public.poultry_status
+  WHERE id = NEW.poultry_status_id;
+  
+  -- التحقق من وجود القطيع
+  IF NEW.farm_id IS NULL THEN
+    RAISE EXCEPTION 'لم يتم العثور على المزرعة للقطيع المحدد';
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION public.auto_set_farm_id_from_poultry IS 
+  'دالة Trigger لملء farm_id تلقائياً من poultry_status لضمان التطابق والحفاظ على علاقة 1:1';
+
+-- إنشاء Trigger
+DROP TRIGGER IF EXISTS trg_auto_set_farm_id ON public.medication_alerts;
+
+CREATE TRIGGER trg_auto_set_farm_id
+BEFORE INSERT OR UPDATE ON public.medication_alerts
+FOR EACH ROW
+EXECUTE FUNCTION public.auto_set_farm_id_from_poultry();
+
+-- ==================================================================================
 -- 3. دالة لحساب عمر الفراخ باليوم
 -- ==================================================================================
 
@@ -153,7 +186,9 @@ BEGIN
     RAISE EXCEPTION 'يجب تحديد تاريخ ميلاد الفراخ';
   END IF;
   
-  -- جلب farm_id من القطيع
+  -- جلب farm_id من القطيع (للاستخدام في الإدراج)
+  -- ملاحظة: farm_id سيتم ملؤه تلقائياً بواسطة Trigger
+  -- لكن نحتاجه هنا للتأكد من وجود المزرعة
   SELECT farm_id INTO v_farm_id 
   FROM public.poultry_status 
   WHERE id = p_poultry_status_id;
@@ -189,8 +224,8 @@ BEGIN
       END IF;
       
       -- إدراج التنبيه
+      -- ملاحظة: farm_id سيتم ملؤه تلقائياً بواسطة trg_auto_set_farm_id
       INSERT INTO public.medication_alerts (
-        farm_id,
         poultry_status_id,
         medicine_id,
         scheduled_day,
@@ -200,7 +235,6 @@ BEGIN
         created_at
       )
       VALUES (
-        v_farm_id,
         p_poultry_status_id,
         medicine_record.id,
         medicine_day,
