@@ -11,11 +11,11 @@
 5. انتظر حتى تنتهي جميع الاستعلامات (قد تستغرق 10-30 ثانية)
 ```
 
-### الخطوة 2: تطبيق سياسات الأمان
+### الخطوة 2: نسخ ملف Actions
 ```bash
-1. في نفس SQL Editor
-2. انسخ والصق محتوى: medication-alerts-rls.sql
-3. اضغط RUN
+1. انسخ ملف actions/medication-alerts.actions.ts
+2. ضعه في مجلد actions في مشروعك
+3. تأكد من المسارات (@/lib/supabase/server)
 ```
 
 ### الخطوة 3: التحقق من النجاح
@@ -32,17 +32,17 @@ AND table_name = 'medication_alerts';
 
 ### الخطوة 4: اختبار النظام
 ```sql
--- ابحث عن مزرعة موجودة
-SELECT id, name FROM farms LIMIT 1;
+-- ابحث عن قطيع موجود
+SELECT id, batch_name FROM poultry_status LIMIT 1;
 
--- حدّث تاريخ ميلاد الفراخ (استبدل farm-id-here)
-UPDATE farms 
+-- حدّث تاريخ ميلاد الفراخ (استبدل poultry-id-here)
+UPDATE poultry_status 
 SET chick_birth_date = CURRENT_DATE 
-WHERE id = 'farm-id-here';
+WHERE id = 'poultry-id-here';
 
 -- تحقق من إنشاء التنبيهات
 SELECT COUNT(*) FROM medication_alerts 
-WHERE farm_id = 'farm-id-here';
+WHERE poultry_status_id = 'poultry-id-here';
 
 -- يجب أن يعيد عدد > 0
 ```
@@ -52,94 +52,80 @@ WHERE farm_id = 'farm-id-here';
 ### 1. تحديث Types
 ```typescript
 // في ملف types أو في بداية ملفات الإجراءات
-export type Farm = {
+export type PoultryStatus = {
   // ... الحقول الموجودة
   chick_birth_date?: string; // 👈 أضف هذا
 };
 ```
 
-### 2. تحديث نموذج تعديل المزرعة
+### 2. تحديث نموذج إعداد المزرعة
+
+في ملف `components/admin/setup/complete-farm-setup-form.tsx`:
+
 ```typescript
-// في edit-farm-dialog.tsx
-// أضف هذا الحقل في النموذج
-
-<div className="space-y-2">
-  <Label htmlFor="chick_birth_date">تاريخ ميلاد الفراخ</Label>
-  <Input
-    id="chick_birth_date"
-    type="date"
-    {...register('chick_birth_date')}
-    disabled={isLoading}
-  />
-</div>
-```
-
-### 3. تحديث Schema Validation
-```typescript
-// في edit-farm-dialog.tsx و create-farm-dialog.tsx
-const farmSchema = z.object({
-  name: z.string().min(2),
-  location: z.string().optional(),
-  user_id: z.string().optional(),
-  is_active: z.boolean(),
-  chick_birth_date: z.string().optional(), // 👈 أضف هذا
-});
-```
-
-### 4. تحديث نموذج Setup
-```typescript
-// في complete-farm-setup-form.tsx
-
-// في schema
-farm: z.object({
-  name: z.string().min(2),
-  location: z.string().optional(),
-  is_active: z.boolean().default(true),
+// في Schema
+poultry: z.object({
+  batch_name: z.string().min(2),
+  opening_chicks: z.number().min(0),
   chick_birth_date: z.string().optional(), // 👈 أضف هذا
 }),
 
 // في النموذج
 <div className="space-y-2">
-  <Label htmlFor="farm.chick_birth_date">تاريخ ميلاد الفراخ</Label>
+  <Label htmlFor="poultry.chick_birth_date">تاريخ ميلاد الفراخ</Label>
   <Input
-    id="farm.chick_birth_date"
+    id="poultry.chick_birth_date"
     type="date"
-    {...register('farm.chick_birth_date')}
+    {...register('poultry.chick_birth_date')}
     disabled={isLoading}
   />
 </div>
 ```
 
-### 5. إضافة التنبيهات في صفحة المزارع
-```typescript
-// في app/(dashboard)/farmer/page.tsx
+### 3. إضافة التنبيهات في صفحة المزارع
 
+في ملف `app/(dashboard)/farmer/page.tsx`:
+
+```typescript
 // استيراد
 import { getUpcomingAlertsForUser } from '@/actions/medication-alerts.actions';
+import { Bell } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 // في الدالة الرئيسية
-const { data: alerts } = await supabase.rpc('get_upcoming_alerts', {
-  p_user_id: session.user.id,
-  p_limit: 5
-});
+const alertsResult = await getUpcomingAlertsForUser(session.user.id, 5);
+const alerts = alertsResult.success ? alertsResult.data : [];
 
 // في JSX
 {alerts && alerts.length > 0 && (
   <Card className="border-orange-200 bg-orange-50">
     <CardHeader>
       <CardTitle className="flex items-center gap-2">
-        <Bell className="h-5 w-5" />
+        <Bell className="h-5 w-5 text-orange-600" />
         تنبيهات الأدوية ({alerts.length})
       </CardTitle>
+      <CardDescription>
+        التنبيهات القادمة لأدوية القطيع
+      </CardDescription>
     </CardHeader>
     <CardContent>
       <div className="space-y-2">
         {alerts.map((alert) => (
-          <div key={alert.alert_id} className="p-3 bg-white rounded-lg">
-            <p className="font-semibold">{alert.medicine_name}</p>
-            <p className="text-sm text-muted-foreground">
-              {alert.scheduled_date} - {alert.priority}
-            </p>
+          <div key={alert.alert_id} className="p-3 bg-white rounded-lg border">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="font-semibold">💊 {alert.medicine_name}</p>
+                <p className="text-sm text-muted-foreground">
+                  📅 {new Date(alert.scheduled_date).toLocaleDateString('ar-EG')}
+                </p>
+              </div>
+              <Badge variant={
+                alert.priority === 'متأخر' ? 'destructive' :
+                alert.priority === 'اليوم' ? 'warning' : 'default'
+              }>
+                {alert.priority}
+              </Badge>
+            </div>
           </div>
         ))}
       </div>
@@ -151,50 +137,43 @@ const { data: alerts } = await supabase.rpc('get_upcoming_alerts', {
 ## 📋 قائمة المهام
 
 ### في قاعدة البيانات
-- [x] إضافة حقل `chick_birth_date` إلى جدول farms
-- [x] إنشاء جدول `medication_alerts`
-- [x] إنشاء الدوال والـ Triggers
-- [x] تطبيق سياسات RLS
+- [ ] تنفيذ `medication-alerts-migration.sql`
+- [ ] اختبار إنشاء التنبيهات
 
 ### في الكود
+- [ ] نسخ `actions/medication-alerts.actions.ts`
 - [ ] تحديث Types
-- [ ] تحديث نموذج تعديل المزرعة (edit-farm-dialog.tsx)
-- [ ] تحديث نموذج إنشاء المزرعة (create-farm-dialog.tsx) إذا كان موجوداً
 - [ ] تحديث نموذج Setup (complete-farm-setup-form.tsx)
-- [ ] إنشاء actions/medication-alerts.actions.ts
-- [ ] إضافة قسم التنبيهات في صفحة المزارع
-- [ ] إنشاء مكونات عرض التنبيهات (اختياري)
-- [ ] اختبار النظام بالكامل
+- [ ] إضافة التنبيهات في `farmer/page.tsx`
+
+### الاختبار
+- [ ] إنشاء قطيع تجريبي
+- [ ] إضافة تاريخ ميلاد
+- [ ] التحقق من التنبيهات
+- [ ] اختبار تحديد التنبيه
 
 ## 🧪 اختبار سريع
 
-### اختبار 1: إنشاء مزرعة بتاريخ ميلاد
+### اختبار 1: إنشاء قطيع بتاريخ ميلاد
 ```typescript
-// يجب أن يعمل هذا تلقائياً بعد التحديثات
-// عند إنشاء مزرعة جديدة وإضافة chick_birth_date
+// عند إنشاء قطيع جديد وإضافة chick_birth_date
 // سيتم إنشاء التنبيهات تلقائياً
 ```
 
 ### اختبار 2: جلب التنبيهات
 ```typescript
-// في أي مكان
-const { data } = await supabase
-  .rpc('get_upcoming_alerts', {
-    p_user_id: 'user-id',
-    p_limit: 5
-  });
-console.log(data); // يجب أن يعرض التنبيهات
+import { getUpcomingAlertsForUser } from '@/actions/medication-alerts.actions';
+
+const result = await getUpcomingAlertsForUser('user-id', 5);
+console.log(result.data); // يجب أن يعرض التنبيهات
 ```
 
 ### اختبار 3: تحديد تنبيه كمكتمل
 ```typescript
-const { data } = await supabase
-  .rpc('mark_alert_as_administered', {
-    p_alert_id: 'alert-id',
-    p_user_id: 'user-id',
-    p_notes: 'تم الإعطاء بنجاح'
-  });
-console.log(data); // يجب أن يكون true
+import { markAlertAsAdministered } from '@/actions/medication-alerts.actions';
+
+const result = await markAlertAsAdministered('alert-id', 'تم الإعطاء بنجاح');
+console.log(result.success); // يجب أن يكون true
 ```
 
 ## 📁 الملفات المرفقة
@@ -202,11 +181,8 @@ console.log(data); // يجب أن يكون true
 | الملف | الغرض | متى تستخدمه |
 |------|------|------------|
 | `medication-alerts-migration.sql` | إنشاء الجداول والدوال | **مرة واحدة** في البداية |
-| `medication-alerts-rls.sql` | سياسات الأمان | **مرة واحدة** بعد Migration |
+| `medication-alerts.actions.ts` | Server Actions جاهزة | **انسخه** إلى مشروعك |
 | `medication-alerts-queries.sql` | استعلامات مفيدة | **مرجع** عند الحاجة |
-| `medication-alerts-examples.tsx` | أمثلة الكود | **مرجع** للنسخ واللصق |
-| `medication-alerts-usage.md` | دليل الاستخدام | **مرجع** للمطورين |
-| `MEDICATION_ALERTS_README.md` | دليل شامل | **مرجع** عام |
 
 ## ⚠️ ملاحظات مهمة
 
@@ -218,43 +194,38 @@ console.log(data); // يجب أن يكون true
    - عند إضافة/تحديث `chick_birth_date`
    - لا حاجة لإجراء يدوي
 
-3. **RLS نشطة**
-   - المزارعون يرون تنبيهاتهم فقط
-   - المدراء يرون جميع التنبيهات
-
-4. **التنبيهات تُحسب تلقائياً**
+3. **التنبيهات تُحسب تلقائياً**
    - بناءً على جدول الأدوية الموجود
    - يمكنك إضافة أدوية جديدة في أي وقت
+
+4. **تم إضافة chick_birth_date إلى poultry_status**
+   - وليس إلى جدول farms
+   - كل قطيع له تاريخ ميلاد مستقل
 
 ## 🆘 حل المشاكل السريع
 
 ### المشكلة: لا تظهر التنبيهات
 ```sql
 -- تحقق من تاريخ الميلاد
-SELECT id, name, chick_birth_date FROM farms WHERE id = 'farm-id';
+SELECT id, batch_name, chick_birth_date 
+FROM poultry_status 
+WHERE id = 'poultry-id';
 
 -- إذا كان null، أضف تاريخ
-UPDATE farms SET chick_birth_date = '2025-10-01' WHERE id = 'farm-id';
+UPDATE poultry_status 
+SET chick_birth_date = '2025-10-01' 
+WHERE id = 'poultry-id';
 
 -- تحقق من التنبيهات
-SELECT COUNT(*) FROM medication_alerts WHERE farm_id = 'farm-id';
-```
-
-### المشكلة: خطأ في الصلاحيات
-```sql
--- تحقق من RLS
-SELECT tablename, policyname 
-FROM pg_policies 
-WHERE tablename = 'medication_alerts';
-
--- إذا لم توجد، نفذ medication-alerts-rls.sql
+SELECT COUNT(*) FROM medication_alerts 
+WHERE poultry_status_id = 'poultry-id';
 ```
 
 ### المشكلة: التواريخ خاطئة
 ```sql
 -- أعد إنشاء التنبيهات
-SELECT public.create_medication_alerts_for_farm(
-  'farm-id',
+SELECT public.create_medication_alerts_for_poultry(
+  'poultry-id',
   '2025-10-01'  -- تاريخ الميلاد الصحيح
 );
 ```
@@ -268,4 +239,4 @@ SELECT public.create_medication_alerts_for_farm(
 
 ---
 
-**نصيحة**: ابدأ بمزرعة تجريبية واحدة للاختبار قبل تطبيق التغييرات على جميع المزارع.
+**نصيحة**: ابدأ بقطيع تجريبي واحد للاختبار قبل تطبيق التغييرات على جميع القطعان.

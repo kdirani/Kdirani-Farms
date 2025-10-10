@@ -1,100 +1,80 @@
 # 🎯 ابدأ من هنا - نظام التنبيهات الدوائية
 
-## ✅ تم إنشاء 10 ملفات جاهزة للاستخدام!
+## ✅ تم إنشاء النظام بنجاح!
 
 ---
 
 ## 📌 الخطوة الأولى: اقرأ هذا الملف
 
-**→ [README.md](./README.md)** - نظرة عامة وسريعة
+**→ [SUMMARY_AR.md](./SUMMARY_AR.md)** - ملخص شامل بالعربية
 
 ---
 
-## 🚀 البدء السريع (اختر مسارك)
+## 🚀 البدء السريع (3 خطوات)
 
-### للمبتدئين (أريد البدء فوراً)
-**الوقت المقدر: 10 دقائق**
+### 1️⃣ قاعدة البيانات (5 دقائق)
+```
+1. افتح Supabase → SQL Editor
+2. نفذ: docs/medication-alerts-migration.sql
+3. تم! ✅
+```
 
-1. افتح [`QUICK_START.md`](./QUICK_START.md)
-2. اتبع الخطوات 1-2-3
-3. اختبر النظام
-4. تم! ✅
+### 2️⃣ الكود (5 دقائق)
+```
+1. انسخ: actions/medication-alerts.actions.ts
+2. ضعه في مجلد actions في مشروعك
+3. تحديث النماذج (راجع QUICK_START.md)
+```
 
----
+### 3️⃣ الاختبار (2 دقيقة)
+```sql
+UPDATE poultry_status 
+SET chick_birth_date = CURRENT_DATE 
+WHERE id = 'poultry-id';
 
-### للمطورين (أريد الفهم الكامل)
-**الوقت المقدر: 30 دقيقة**
-
-1. اقرأ [`MEDICATION_ALERTS_README.md`](./MEDICATION_ALERTS_README.md)
-2. راجع [`medication-alerts-examples.tsx`](./medication-alerts-examples.tsx)
-3. نفذ الخطوات من [`QUICK_START.md`](./QUICK_START.md)
-4. جرّب الاستعلامات من [`medication-alerts-queries.sql`](./medication-alerts-queries.sql)
-
----
-
-### للمدراء (أريد ملخص سريع)
-**الوقت المقدر: 5 دقائق**
-
-1. اقرأ [`SUMMARY_AR.md`](./SUMMARY_AR.md)
-2. راجع قسم "الميزات" في [`README.md`](./README.md)
-3. راجع [`INDEX.md`](./INDEX.md) للفهرسة
+SELECT * FROM medication_alerts 
+WHERE poultry_status_id = 'poultry-id';
+```
 
 ---
 
-## 📂 الملفات حسب الأهمية
+## 📂 الملفات الرئيسية
 
 ### ⭐⭐⭐⭐⭐ (إلزامي)
 - `medication-alerts-migration.sql` - **نفذ في Supabase**
-- `medication-alerts-rls.sql` - **نفذ في Supabase**
+- `medication-alerts.actions.ts` - **انسخ إلى مشروعك**
 - `QUICK_START.md` - **اقرأ للتنفيذ**
-
-### ⭐⭐⭐⭐ (مهم جداً)
-- `medication-alerts-examples.tsx` - **للنسخ واللصق**
-- `MEDICATION_ALERTS_README.md` - **للفهم**
-- `README.md` - **للنظرة العامة**
 
 ### ⭐⭐⭐ (مفيد)
 - `medication-alerts-queries.sql` - **للمرجع**
-- `medication-alerts-usage.md` - **للسيناريوهات**
 - `SUMMARY_AR.md` - **للملخص**
-- `INDEX.md` - **للفهرسة**
 
 ---
 
-## ⚡ أسرع طريقة للبدء (3 خطوات)
+## 🔄 تغييرات مهمة
 
-### 1️⃣ قاعدة البيانات
-```
-افتح Supabase → SQL Editor
-نفذ: medication-alerts-migration.sql
-نفذ: medication-alerts-rls.sql
-```
+### ✅ تم إضافة `chick_birth_date` إلى:
+- جدول `poultry_status` (وليس farms)
+- كل قطيع له تاريخ ميلاد مستقل
 
-### 2️⃣ الكود
-```
-انسخ دوال من: medication-alerts-examples.tsx
-حدّث النماذج (راجع QUICK_START.md)
-```
+### ✅ تم حذف:
+- حقل `administered_by` (لا نتتبع من أعطى الدواء)
+- ملف RLS (لا يتم تفعيل Row Level Security)
 
-### 3️⃣ الاختبار
-```sql
-UPDATE farms SET chick_birth_date = CURRENT_DATE WHERE id = 'farm-id';
-SELECT * FROM medication_alerts WHERE farm_id = 'farm-id';
-```
-
-✅ **تم!**
+### ✅ تم إنشاء:
+- 11 دالة SQL جاهزة
+- 10 Server Actions جاهزة
+- 1 Trigger تلقائي
+- 1 View للملخصات
 
 ---
 
 ## 📋 قائمة مرجعية سريعة
 
 ```
-□ قرأت README.md
-□ قرأت QUICK_START.md
+□ قرأت SUMMARY_AR.md
 □ نفذت medication-alerts-migration.sql
-□ نفذت medication-alerts-rls.sql
-□ نسخت الدوال من medication-alerts-examples.tsx
-□ حدّثت edit-farm-dialog.tsx
+□ نسخت medication-alerts.actions.ts
 □ حدّثت complete-farm-setup-form.tsx
 □ أضفت التنبيهات في farmer/page.tsx
 □ اختبرت النظام
@@ -107,13 +87,26 @@ SELECT * FROM medication_alerts WHERE farm_id = 'farm-id';
 | المشكلة | الحل |
 |---------|------|
 | خطأ في SQL | راجع QUICK_START.md → حل المشاكل |
-| لا تظهر التنبيهات | راجع MEDICATION_ALERTS_README.md → استكشاف الأخطاء |
+| لا تظهر التنبيهات | تحقق من chick_birth_date في poultry_status |
 | لا أعرف من أين أبدأ | اقرأ SUMMARY_AR.md |
-| أريد أمثلة | افتح medication-alerts-examples.tsx |
 | أريد استعلامات | افتح medication-alerts-queries.sql |
 
 ---
 
-**🚀 ابدأ الآن!** → [`README.md`](./README.md)
+## 🎯 الفرق عن الإصدارات السابقة
+
+### قبل التعديل
+- ❌ chick_birth_date في جدول farms
+- ❌ RLS نشط
+- ❌ حقل administered_by موجود
+
+### بعد التعديل ✅
+- ✅ chick_birth_date في جدول poultry_status
+- ✅ بدون RLS
+- ✅ بدون administered_by
+
+---
+
+**🚀 ابدأ الآن!** → [`SUMMARY_AR.md`](./SUMMARY_AR.md)
 
 *آخر تحديث: 2025-10-10*
