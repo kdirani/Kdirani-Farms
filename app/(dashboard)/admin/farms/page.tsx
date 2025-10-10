@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { getFarms } from '@/actions/farm.actions';
 import { FarmsTable } from '@/components/admin/farms/farms-table';
 import { FarmsTableSkeleton } from '@/components/admin/farms/farms-table-skeleton';
+import { TableSkeleton } from '@/components/admin/table-skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';

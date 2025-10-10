@@ -65,7 +65,7 @@ export function AdminLayoutWrapper({ children, session }: AdminLayoutWrapperProp
 
           {/* Main Content */}
           <main className="p-6">
-            <div className="mx-auto max-w-6xl">
+            <div className="mx-auto max-w-6xl animate-in fade-in duration-300">
               {children}
             </div>
           </main>
