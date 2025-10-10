@@ -584,9 +584,9 @@ export async function createIntegratedDailyReport(
     );
 
     // Calculate computed fields
-    const productionEggs = input.production_eggs_healthy + input.production_eggs_deformed;
+    const totalEggTrays = input.production_eggs_healthy + input.production_eggs_deformed; // أطباق البيض (كل طبق = 30 بيضة)
     const productionEggRate = chicksBeforeValue > 0 
-      ? ((productionEggs * 30) / chicksBeforeValue) * 100 
+      ? ((totalEggTrays * 30) / chicksBeforeValue) * 100 
       : 0;
     const currentEggsBalance = 
       input.previous_eggs_balance + 
@@ -658,7 +658,7 @@ export async function createIntegratedDailyReport(
         report_time: input.report_time,
         production_eggs_healthy: input.production_eggs_healthy,
         production_eggs_deformed: input.production_eggs_deformed,
-        production_eggs: productionEggs,
+        production_eggs: totalEggTrays,
         production_egg_rate: parseFloat(productionEggRate.toFixed(2)),
         eggs_sold: input.eggs_sold,
         eggs_gift: input.eggs_gift,

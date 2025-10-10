@@ -109,9 +109,9 @@ export default function DailyReportForm({
   const watchChicksDead = watch('chicks_dead');
 
   // Calculate totals
-  const productionEggs = watchHealthy + watchDeformed;
-  const productionEggRate = watchChicksBefore > 0 ? (productionEggs / watchChicksBefore) * 100 : 0;
-  const currentEggsBalance = watchPreviousBalance + productionEggs - watchSold - watchGift;
+  const totalEggTrays = watchHealthy + watchDeformed; // أطباق البيض (كل طبق = 30 بيضة)
+  const productionEggRate = watchChicksBefore > 0 ? ((totalEggTrays * 30) / watchChicksBefore) * 100 : 0;
+  const currentEggsBalance = watchPreviousBalance + totalEggTrays - watchSold - watchGift;
   const chicksAfter = watchChicksBefore - watchChicksDead;
 
   const onSubmit = async (data: DailyReportFormData) => {
@@ -123,7 +123,7 @@ export default function DailyReportForm({
         report_time: data.report_time,
         production_eggs_healthy: data.production_eggs_healthy,
         production_eggs_deformed: data.production_eggs_deformed,
-        production_eggs: productionEggs,
+        production_eggs: totalEggTrays,
         production_egg_rate: parseFloat(productionEggRate.toFixed(2)),
         eggs_sold: data.eggs_sold,
         eggs_gift: data.eggs_gift,
@@ -234,9 +234,9 @@ export default function DailyReportForm({
             </div>
 
             <div className="space-y-2">
-              <Label>إجمالي الإنتاج</Label>
+              <Label>إجمالي الإنتاج (أطباق)</Label>
               <div className="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm font-bold">
-                {productionEggs.toLocaleString('en-US')}
+                {totalEggTrays.toLocaleString('en-US')}
               </div>
             </div>
           </div>

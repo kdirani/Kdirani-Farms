@@ -205,9 +205,9 @@ export default function IntegratedDailyReportForm({
   const watchFeedMonthly = watch('feed_monthly_kg');
 
   // Calculate totals
-  const productionEggs = watchHealthy + watchDeformed;
+  const totalEggTrays = watchHealthy + watchDeformed; // أطباق البيض (كل طبق = 30 بيضة)
   const productionEggRate = watchChicksBefore > 0 
-    ? ((productionEggs * 30) / watchChicksBefore) * 100 
+    ? ((totalEggTrays * 30) / watchChicksBefore) * 100 
     : 0;
   const currentEggsBalance = watchPreviousBalance + watchHealthy - watchSold - watchGift;
   const chicksAfter = watchChicksBefore - watchChicksDead;
@@ -469,9 +469,9 @@ export default function IntegratedDailyReportForm({
             </div>
 
             <div className="space-y-2">
-              <Label>إجمالي الإنتاج</Label>
+              <Label>إجمالي الإنتاج (أطباق)</Label>
               <div className="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm font-bold">
-                {productionEggs.toLocaleString('en-US')}
+                {totalEggTrays.toLocaleString('en-US')}
               </div>
             </div>
           </div>
