@@ -74,22 +74,22 @@ export function MonthlySummaryTable({ summaries }: MonthlySummaryTableProps) {
                     <TableCell>{summary.year}</TableCell>
                     <TableCell className="text-right">{summary.reports_count}</TableCell>
                     <TableCell className="text-right font-semibold">
-                      {summary.total_eggs_produced.toLocaleString()}
+                      {summary.total_eggs_produced.toLocaleString('en-US')}
                     </TableCell>
                     <TableCell className="text-right">
-                      {summary.total_eggs_sold.toLocaleString()}
+                      {summary.total_eggs_sold.toLocaleString('en-US')}
                     </TableCell>
                     <TableCell className="text-right">
-                      {summary.total_feed_consumed.toLocaleString()}
+                      {summary.total_feed_consumed.toLocaleString('en-US')}
                     </TableCell>
                     <TableCell className="text-right">
-                      {summary.total_droppings_sold.toLocaleString()}
+                      {summary.total_droppings_sold.toLocaleString('en-US')}
                     </TableCell>
                     <TableCell className="text-right">
-                      {summary.total_mortality.toLocaleString()}
+                      {summary.total_mortality.toLocaleString('en-US')}
                     </TableCell>
                     <TableCell className="text-right">
-                      {summary.daily_average_production.toLocaleString()}
+                      {summary.daily_average_production.toLocaleString('en-US')}
                     </TableCell>
                     <TableCell className="text-right">
                       {comparison !== null ? (

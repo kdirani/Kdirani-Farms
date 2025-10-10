@@ -236,7 +236,7 @@ export default function DailyReportForm({
             <div className="space-y-2">
               <Label>إجمالي الإنتاج</Label>
               <div className="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm font-bold">
-                {productionEggs.toLocaleString()}
+                {productionEggs.toLocaleString('en-US')}
               </div>
             </div>
           </div>
@@ -275,7 +275,7 @@ export default function DailyReportForm({
             <div className="space-y-2">
               <Label>الرصيد الحالي</Label>
               <div className="flex h-10 items-center rounded-md border border-input bg-primary/10 px-3 text-sm font-bold text-primary">
-                {currentEggsBalance.toLocaleString()}
+                {currentEggsBalance.toLocaleString('en-US')}
               </div>
             </div>
           </div>
@@ -320,7 +320,7 @@ export default function DailyReportForm({
             <div className="space-y-2">
               <Label>العدد بعد</Label>
               <div className="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm font-bold">
-                {chicksAfter.toLocaleString()}
+                {chicksAfter.toLocaleString('en-US')}
               </div>
             </div>
 

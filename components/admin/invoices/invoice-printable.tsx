@@ -64,7 +64,7 @@ export const InvoicePrintable = forwardRef<HTMLDivElement, InvoicePrintableProps
                   <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                     <td className="border border-gray-300 p-3">{item.material_name || item.medicine_name || '-'}</td>
                     <td className="border border-gray-300 p-3">{item.egg_weight || '-'}</td>
-                    <td className="border border-gray-300 p-3">{item.quantity.toLocaleString()}</td>
+                    <td className="border border-gray-300 p-3">{item.quantity.toLocaleString('en-US')}</td>
                     <td className="border border-gray-300 p-3">{item.unit_name || '-'}</td>
                     <td className="border border-gray-300 p-3">{formatCurrency(item.price)}</td>
                     <td className="border border-gray-300 p-3">{formatCurrency(item.value)}</td>

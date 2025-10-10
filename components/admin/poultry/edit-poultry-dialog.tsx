@@ -175,7 +175,7 @@ export function EditPoultryDialog({ poultry, open, onOpenChange }: EditPoultryDi
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium">الكتاكيت المتبقية:</span>
                 <span className="text-lg font-bold">
-                  {remainingChicks >= 0 ? remainingChicks.toLocaleString() : (
+                  {remainingChicks >= 0 ? remainingChicks.toLocaleString('en-US') : (
                     <span className="text-destructive">غير صالح (سالب)</span>
                   )}
                 </span>

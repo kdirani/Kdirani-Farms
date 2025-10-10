@@ -60,19 +60,19 @@ export function DailyReportsTable({ reports }: DailyReportsTableProps) {
                   <TableCell>{report.farm_name}</TableCell>
                   <TableCell>{report.house_name}</TableCell>
                   <TableCell className="text-right">
-                    {report.total_eggs_produced.toLocaleString()}
+                    {report.total_eggs_produced.toLocaleString('en-US')}
                   </TableCell>
                   <TableCell className="text-right">
-                    {report.total_eggs_sold.toLocaleString()}
+                    {report.total_eggs_sold.toLocaleString('en-US')}
                   </TableCell>
                   <TableCell className="text-right">
-                    {report.total_feed_consumed.toLocaleString()}
+                    {report.total_feed_consumed.toLocaleString('en-US')}
                   </TableCell>
                   <TableCell className="text-right">
-                    {report.total_droppings_sold.toLocaleString()}
+                    {report.total_droppings_sold.toLocaleString('en-US')}
                   </TableCell>
                   <TableCell className="text-right">
-                    {report.total_mortality.toLocaleString()}
+                    {report.total_mortality.toLocaleString('en-US')}
                   </TableCell>
                 </TableRow>
               ))}

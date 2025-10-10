@@ -132,7 +132,7 @@ export function InvoiceItemsSection({ invoiceId, items }: InvoiceItemsSectionPro
                         <span>{item.egg_weight}</span>
                       ) : '-'}
                     </TableCell>
-                    <TableCell className="text-right">{item.quantity.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">{item.quantity.toLocaleString('en-US')}</TableCell>
                     <TableCell>{item.unit_name || '-'}</TableCell>
                     <TableCell className="text-right">
                       {editingItemId === item.id ? (
