@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { AdminNav } from '@/components/admin/admin-nav';
 import { MobileNav } from '@/components/admin/mobile-nav';
-import { UserNav } from '@/components/layout/user-nav';
 import { HeaderLogo } from '@/components/layout/header-logo';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
@@ -56,6 +55,10 @@ export function AdminLayoutWrapper({ children, session }: AdminLayoutWrapperProp
               <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200/50 px-6 py-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
+                    <MobileNav />
+                    <HeaderLogo href="/admin" width={100} height={35} />
+                  </div>
+                  <div className="flex items-center gap-4">
                     {/* زر فتح/إغلاق القائمة الجانبية - فقط للشاشات الكبيرة */}
                     <Button
                       variant="ghost"
@@ -70,10 +73,7 @@ export function AdminLayoutWrapper({ children, session }: AdminLayoutWrapperProp
                         <Menu className="h-5 w-5" />
                       )}
                     </Button>
-                    <MobileNav />
-                    <HeaderLogo href="/admin" width={100} height={35} />
                   </div>
-                  <UserNav user={session.user} />
                 </div>
               </div>
             </div>
