@@ -11,10 +11,10 @@ interface LowInventoryItem {
   current_balance: number;
   materials_names: {
     material_name: string;
-  } | null;
+  };
   warehouses: {
     name: string;
-  } | null;
+  };
 }
 
 interface LowInventoryAlertProps {
@@ -58,7 +58,19 @@ export function LowInventoryAlert({ initialData = [], initialTotal = 0 }: LowInv
         return;
       }
 
-      setItems(data || []);
+      // Transform the data to match the interface
+      const transformedData = (data || []).map((item: any) => ({
+        id: item.id,
+        current_balance: item.current_balance,
+        materials_names: Array.isArray(item.materials_names) 
+          ? item.materials_names[0] 
+          : item.materials_names,
+        warehouses: Array.isArray(item.warehouses) 
+          ? item.warehouses[0] 
+          : item.warehouses,
+      }));
+
+      setItems(transformedData);
       setTotalItems(count || 0);
       setCurrentPage(page);
     } catch (error) {
