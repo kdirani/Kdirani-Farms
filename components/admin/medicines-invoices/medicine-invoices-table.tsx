@@ -37,8 +37,7 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
   const filteredInvoices = invoices.filter((invoice) => {
     return (
       invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.warehouse?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.poultry_status?.status_name.toLowerCase().includes(searchTerm.toLowerCase())
+      invoice.warehouse?.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
@@ -80,7 +79,6 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
               <TableHead>رقم الفاتورة</TableHead>
               <TableHead>التاريخ</TableHead>
               <TableHead>المستودع</TableHead>
-              <TableHead>حالة القطيع</TableHead>
               <TableHead className="text-right">القيمة الإجمالية</TableHead>
               <TableHead className="text-right">الإجراءات</TableHead>
             </TableRow>
@@ -88,7 +86,7 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
           <TableBody>
             {filteredInvoices.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
+                <TableCell colSpan={5} className="text-center text-muted-foreground">
                   لم يتم العثور على فواتير أدوية
                 </TableCell>
               </TableRow>
@@ -103,11 +101,6 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
                         <div className="font-medium">{invoice.warehouse.name}</div>
                         <div className="text-xs text-muted-foreground">{invoice.warehouse.farm_name}</div>
                       </div>
-                    ) : '-'}
-                  </TableCell>
-                  <TableCell>
-                    {invoice.poultry_status ? (
-                      <div className="font-medium">{invoice.poultry_status.status_name}</div>
                     ) : '-'}
                   </TableCell>
                   <TableCell className="text-right font-semibold">
