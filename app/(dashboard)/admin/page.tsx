@@ -270,7 +270,7 @@ export default async function AdminDashboardPage() {
                 {recentReports.map((report: any) => (
                   <div
                     key={report.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                    className="flex gap-2 items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                   >
                     <div className="flex-1">
                       <p className="font-medium">
@@ -281,6 +281,13 @@ export default async function AdminDashboardPage() {
                         {report.report_time}
                       </p>
                     </div>
+                    {!report.checked && (
+                      <div className="mr-3">
+                        <span className="inline-flex items-center rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-700">
+                          غير مدقق
+                        </span>
+                      </div>
+                    )}
                     <div className="text-right">
                       <p className="text-sm font-medium">
                         {report.production_eggs?.toLocaleString("ar-IQ")} بيضة
@@ -289,13 +296,7 @@ export default async function AdminDashboardPage() {
                         {report.production_egg_rate?.toFixed(1)}% إنتاج
                       </p>
                     </div>
-                    {!report.checked && (
-                      <div className="mr-3">
-                        <span className="inline-flex items-center rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-700">
-                          غير مدقق
-                        </span>
-                      </div>
-                    )}
+
                   </div>
                 ))}
               </div>
