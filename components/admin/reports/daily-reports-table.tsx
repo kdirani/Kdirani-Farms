@@ -41,9 +41,9 @@ export function DailyReportsTable({ reports }: DailyReportsTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>التاريخ</TableHead>
-                <TableHead>المزرعة</TableHead>
-                <TableHead>المستودع</TableHead>
+                <TableHead className="text-right">التاريخ</TableHead>
+                <TableHead className="text-right">المزرعة</TableHead>
+                <TableHead className="text-right">المستودع</TableHead>
                 <TableHead className="text-right">البيض المُنتَج</TableHead>
                 <TableHead className="text-right">البيض المباع</TableHead>
                 <TableHead className="text-right">الأعلاف (كغم)</TableHead>
@@ -54,11 +54,11 @@ export function DailyReportsTable({ reports }: DailyReportsTableProps) {
             <TableBody>
               {reports.map((report) => (
                 <TableRow key={report.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium text-right">
                     {formatDate(new Date(report.report_date))}
                   </TableCell>
-                  <TableCell>{report.farm_name}</TableCell>
-                  <TableCell>{report.house_name}</TableCell>
+                  <TableCell className="text-right">{report.farm_name}</TableCell>
+                  <TableCell className="text-right">{report.house_name}</TableCell>
                   <TableCell className="text-right">
                     {report.total_eggs_produced.toLocaleString('en-US')}
                   </TableCell>

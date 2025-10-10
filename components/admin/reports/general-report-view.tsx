@@ -117,9 +117,9 @@ export function GeneralReportView({
           {/* Reports Tabs */}
           <Tabs defaultValue="daily" className="space-y-4">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="daily">التقارير اليومية</TabsTrigger>
-              <TabsTrigger value="weekly">التقارير الأسبوعية</TabsTrigger>
               <TabsTrigger value="monthly">التقارير الشهرية</TabsTrigger>
+              <TabsTrigger value="weekly">التقارير الأسبوعية</TabsTrigger>
+              <TabsTrigger value="daily">التقارير اليومية</TabsTrigger>
             </TabsList>
 
             <TabsContent value="daily" className="space-y-4">

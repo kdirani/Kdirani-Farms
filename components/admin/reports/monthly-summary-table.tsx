@@ -52,8 +52,8 @@ export function MonthlySummaryTable({ summaries }: MonthlySummaryTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الشهر</TableHead>
-                <TableHead>السنة</TableHead>
+                <TableHead className="text-right">الشهر</TableHead>
+                <TableHead className="text-right">السنة</TableHead>
                 <TableHead className="text-right">عدد التقارير</TableHead>
                 <TableHead className="text-right">البيض المُنتَج</TableHead>
                 <TableHead className="text-right">البيض المباع</TableHead>
@@ -70,8 +70,8 @@ export function MonthlySummaryTable({ summaries }: MonthlySummaryTableProps) {
                 
                 return (
                   <TableRow key={`${summary.year}-${summary.month}`}>
-                    <TableCell className="font-medium">{summary.month}</TableCell>
-                    <TableCell>{summary.year}</TableCell>
+                    <TableCell className="font-medium text-right">{summary.month}</TableCell>
+                    <TableCell className="text-right">{summary.year}</TableCell>
                     <TableCell className="text-right">{summary.reports_count}</TableCell>
                     <TableCell className="text-right font-semibold">
                       {summary.total_eggs_produced.toLocaleString('en-US')}
