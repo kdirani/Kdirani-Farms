@@ -73,26 +73,16 @@ export default async function AdminDashboardPage() {
     .order("report_time", { ascending: false })
     .limit(5);
 
-  // Get farms with their status
-  const { data: farms } = await supabase
-    .from("farms")
-    .select(`
-      id,
-      name,
-      is_active,
-      profiles (
-        fname
-      ),
-      poultry_status (
-        remaining_chicks
-      )
-    `)
-    .order("created_at", { ascending: false })
-    .limit(5);
 
   // Get unchecked reports count
   const { count: uncheckedReportsCount } = await supabase
     .from("daily_reports")
+    .select("*", { count: "exact", head: true })
+    .eq("checked", false);
+
+  // Get unchecked invoices count
+  const { count: uncheckedInvoicesCount } = await supabase
+    .from("invoices")
     .select("*", { count: "exact", head: true })
     .eq("checked", false);
 
@@ -112,6 +102,26 @@ export default async function AdminDashboardPage() {
     .lt("current_balance", 100)
     .order("current_balance", { ascending: true })
     .limit(10);
+
+  // Get medication alerts for admin
+  const { data: medicationAlerts } = await supabase
+    .from("medication_alerts")
+    .select(`
+      id,
+      scheduled_date,
+      is_administered,
+      farms (
+        name
+      ),
+      medicines (
+        name
+      )
+    `)
+    .eq("is_administered", false)
+    .gte("scheduled_date", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+    .lte("scheduled_date", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+    .order("scheduled_date", { ascending: true })
+    .limit(5);
 
   return (
     <div className="space-y-6">
@@ -230,15 +240,17 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-blue-200 bg-blue-50">
+        <Card className="border-purple-200 bg-purple-50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">الأداء العام</CardTitle>
-            <TrendingUp className="h-4 w-4 text-blue-600" />
+            <CardTitle className="text-sm font-medium">الفواتير غير المدققة</CardTitle>
+            <Receipt className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">ممتاز</div>
-            <p className="text-xs text-blue-700 mt-1">
-              جميع الأنظمة تعمل بشكل جيد
+            <div className="text-2xl font-bold text-purple-600">
+              {uncheckedInvoicesCount?.toLocaleString("ar-IQ") || 0}
+            </div>
+            <p className="text-xs text-purple-700 mt-1">
+              بحاجة إلى المراجعة والتدقيق
             </p>
           </CardContent>
         </Card>
@@ -295,49 +307,60 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Farms Overview */}
+        {/* Medication Alerts */}
         <Card>
           <CardHeader>
-            <CardTitle>نظرة على المزارع</CardTitle>
-            <CardDescription>أحدث المزارع المسجلة</CardDescription>
+            <CardTitle>تنبيهات الأدوية</CardTitle>
+            <CardDescription>التنبيهات القادمة للأدوية واللقاحات</CardDescription>
           </CardHeader>
           <CardContent>
-            {farms && farms.length > 0 ? (
+            {medicationAlerts && medicationAlerts.length > 0 ? (
               <div className="space-y-3">
-                {farms.map((farm: any) => (
-                  <div
-                    key={farm.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium">{farm.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        المزارع: {farm.profiles?.fname || "غير محدد"}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">
-                        {farm.poultry_status?.[0]?.remaining_chicks?.toLocaleString(
-                          "ar-IQ"
-                        ) || 0}{" "}
-                        دجاجة
-                      </p>
-                      {farm.is_active ? (
-                        <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
-                          نشطة
+                {medicationAlerts.map((alert: any) => {
+                  const today = new Date();
+                  const scheduledDate = new Date(alert.scheduled_date);
+                  const daysUntil = Math.floor((scheduledDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  
+                  let priorityColor = "bg-blue-100 text-blue-700";
+                  let priorityText = "قادم";
+                  
+                  if (daysUntil < 0) {
+                    priorityColor = "bg-red-100 text-red-700";
+                    priorityText = "متأخر";
+                  } else if (daysUntil === 0) {
+                    priorityColor = "bg-orange-100 text-orange-700";
+                    priorityText = "اليوم";
+                  } else if (daysUntil === 1) {
+                    priorityColor = "bg-yellow-100 text-yellow-700";
+                    priorityText = "غداً";
+                  }
+
+                  return (
+                    <div
+                      key={alert.id}
+                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium">{alert.medicines?.name || "دواء"}</p>
+                        <p className="text-sm text-muted-foreground">
+                          المزرعة: {alert.farms?.name || "غير محدد"}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium">
+                          {new Date(alert.scheduled_date).toLocaleDateString("ar-IQ")}
+                        </p>
+                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${priorityColor}`}>
+                          {priorityText}
                         </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
-                          غير نشطة
-                        </span>
-                      )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-center text-muted-foreground py-8">
-                لا توجد مزارع مسجلة
+                لا توجد تنبيهات أدوية حالياً
               </p>
             )}
           </CardContent>

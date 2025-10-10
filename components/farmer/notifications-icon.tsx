@@ -191,3 +191,4 @@ export function NotificationsIcon({ userId }: NotificationsIconProps) {
     </DropdownMenu>
   );
 }
+
