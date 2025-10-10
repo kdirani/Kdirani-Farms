@@ -55,13 +55,11 @@ export interface ActionResult<T> {
 }
 
 /**
- * Get daily reports with filters and pagination
+ * Get daily reports with filters
  */
 export async function getDailyReports(
-  filters: GeneralReportFilters = {},
-  page: number = 1,
-  limit: number = 10
-): Promise<ActionResult<DailyReportSummary[]> & { pagination?: { page: number; limit: number; total: number; totalPages: number } }> {
+  filters: GeneralReportFilters = {}
+): Promise<ActionResult<DailyReportSummary[]>> {
   try {
     const supabase = await createClient();
 
@@ -80,7 +78,7 @@ export async function getDailyReports(
         production_droppings,
         chicks_dead,
         notes
-      `, { count: 'exact' })
+      `)
       .order('report_date', { ascending: false });
 
     // Apply filters - we need to filter by warehouse since that's what we have
@@ -108,12 +106,7 @@ export async function getDailyReports(
       query = query.lte('report_date', filters.endDate);
     }
 
-    // Apply pagination
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    query = query.range(from, to);
-
-    const { data: dailyReports, error, count } = await query;
+    const { data: dailyReports, error } = await query;
 
     if (error) {
       console.error('Error fetching daily reports:', error);
@@ -139,16 +132,7 @@ export async function getDailyReports(
       };
     });
 
-    return { 
-      success: true, 
-      data: reportsWithSales,
-      pagination: {
-        page,
-        limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
-      }
-    };
+    return { success: true, data: reportsWithSales };
   } catch (error) {
     console.error('Error fetching daily reports:', error);
     return { success: false, error: 'Failed to fetch daily reports' };

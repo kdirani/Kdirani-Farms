@@ -30,7 +30,7 @@ export function PrintInvoiceButton({ invoice, items = [], expenses = [] }: Print
     contentRef: printRef,
     documentTitle: `فاتورة-${invoice.invoice_number}`,
     onAfterPrint: () => {
-      console.log('تمت الطباعة بنجاح');
+      // console.log('تمت الطباعة بنجاح');
       setIsOpen(false); // إغلاق النافذة المنبثقة بعد الطباعة
     },
     // removeAfterPrint: true, // إزالة iframe بعد الطباعة - خاصية غير مدعومة

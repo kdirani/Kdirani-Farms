@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 import { ReportFilters } from './report-filters';
 import { SummaryCards } from './summary-cards';
 import { DailyReportsTable } from './daily-reports-table';
@@ -20,8 +19,7 @@ import {
   getMonthlySummary,
   getOverallStatistics,
 } from '@/actions/general-report.actions';
-import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 interface GeneralReportViewProps {
   initialDailyReports: DailyReportSummary[];
@@ -36,13 +34,6 @@ interface GeneralReportViewProps {
     average_daily_production: number;
     total_reports: number;
   };
-  initialPagination?: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-  currentPage: number;
 }
 
 export function GeneralReportView({
@@ -50,22 +41,13 @@ export function GeneralReportView({
   initialWeeklySummary,
   initialMonthlySummary,
   initialStats,
-  initialPagination,
-  currentPage,
 }: GeneralReportViewProps) {
-  const router = useRouter();
   const [dailyReports, setDailyReports] = useState(initialDailyReports);
   const [weeklySummary, setWeeklySummary] = useState(initialWeeklySummary);
   const [monthlySummary, setMonthlySummary] = useState(initialMonthlySummary);
   const [stats, setStats] = useState(initialStats);
   const [isLoading, setIsLoading] = useState(false);
   const [currentFilters, setCurrentFilters] = useState<GeneralReportFilters>({});
-  const [pagination, setPagination] = useState(initialPagination || {
-    page: currentPage,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-  });
 
   const handleFilterChange = async (filters: GeneralReportFilters) => {
     setIsLoading(true);
@@ -73,7 +55,7 @@ export function GeneralReportView({
 
     try {
       const [dailyResult, weeklyResult, monthlyResult, statsResult] = await Promise.all([
-        getDailyReports(filters, 1, 10), // Reset to page 1 when filters change
+        getDailyReports(filters),
         getWeeklySummary(filters),
         getMonthlySummary(filters),
         getOverallStatistics(filters),
@@ -81,9 +63,6 @@ export function GeneralReportView({
 
       if (dailyResult.success && dailyResult.data) {
         setDailyReports(dailyResult.data);
-        if (dailyResult.pagination) {
-          setPagination(dailyResult.pagination);
-        }
       }
 
       if (weeklyResult.success && weeklyResult.data) {
@@ -102,10 +81,6 @@ export function GeneralReportView({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handlePageChange = (newPage: number) => {
-    router.push(`/admin/reports/general?page=${newPage}`);
   };
 
   return (
@@ -149,35 +124,6 @@ export function GeneralReportView({
 
             <TabsContent value="daily" className="space-y-4">
               <DailyReportsTable reports={dailyReports} />
-              
-              {/* Pagination Controls */}
-              {pagination.totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                  <div className="text-sm text-muted-foreground">
-                    صفحة {pagination.page} من {pagination.totalPages} ({pagination.total} تقرير)
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(pagination.page - 1)}
-                      disabled={pagination.page === 1 || isLoading}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                      السابق
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(pagination.page + 1)}
-                      disabled={pagination.page === pagination.totalPages || isLoading}
-                    >
-                      التالي
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
             </TabsContent>
 
             <TabsContent value="weekly" className="space-y-4">
