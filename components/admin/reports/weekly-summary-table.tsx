@@ -53,8 +53,8 @@ export function WeeklySummaryTable({ summaries }: WeeklySummaryTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الأسبوع</TableHead>
-                <TableHead>الفترة</TableHead>
+                <TableHead className="text-right">الأسبوع</TableHead>
+                <TableHead className="text-right">الفترة</TableHead>
                 <TableHead className="text-right">عدد التقارير</TableHead>
                 <TableHead className="text-right">البيض المُنتَج</TableHead>
                 <TableHead className="text-right">البيض المباع</TableHead>
@@ -71,10 +71,10 @@ export function WeeklySummaryTable({ summaries }: WeeklySummaryTableProps) {
                 
                 return (
                   <TableRow key={`${summary.week_start}-${summary.week_number}`}>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium text-right">
                       الأسبوع {summary.week_number}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-right">
                       <div className="text-sm">
                         <div>{formatDate(new Date(summary.week_start))}</div>
                         <div className="text-muted-foreground">
