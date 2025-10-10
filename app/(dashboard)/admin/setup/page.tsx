@@ -64,29 +64,6 @@ export default function CompleteFarmSetupPage() {
           إنشاء تكوين مزرعة كامل في مكان واحد: المزارع، المزرعة، المستودع، القطيع، المواد الغذائية والأدوية
         </p>
       </div>
-
-      <Card className="border-blue-200 bg-blue-50">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-4">
-            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <h3 className="font-semibold text-blue-900">سير العمل السريع</h3>
-              <p className="text-sm text-blue-800 mt-1">
-                تسهل هذه الصفحة عملية إنشاء مزرعة جديدة. سيتم إنشاء جميع الكيانات بالتسلسل:
-              </p>
-              <ol className="text-sm text-blue-800 mt-2 mr-4 space-y-1 list-decimal">
-                <li>حساب مستخدم مزارع جديد مع بيانات الدخول</li>
-                <li>مزرعة مخصصة للمزارع</li>
-                <li>مستودع للمزرعة</li>
-                <li>القطيع (كل مزرعة لها قطيع واحد فقط)</li>
-                <li>الأرصدة الافتتاحية للمواد الغذائية في المستودع (اختياري)</li>
-                <li>الأرصدة الافتتاحية للأدوية في المستودع (اختياري)</li>
-              </ol>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       <Suspense fallback={<LoadingSkeleton />}>
         <SetupFormContent />
       </Suspense>
