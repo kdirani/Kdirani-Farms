@@ -319,6 +319,7 @@ export async function markAlertAsAdministered(
 
     revalidatePath('/farmer');
     revalidatePath('/admin/farms');
+    revalidatePath('/admin/medication-alerts');
 
     return { success: true };
   } catch (error) {
@@ -351,6 +352,7 @@ export async function unmarkAlertAsAdministered(
 
     revalidatePath('/farmer');
     revalidatePath('/admin/farms');
+    revalidatePath('/admin/medication-alerts');
 
     return { success: true };
   } catch (error) {
@@ -518,10 +520,123 @@ export async function updateAlertNotes(
 
     revalidatePath('/farmer');
     revalidatePath('/admin/farms');
+    revalidatePath('/admin/medication-alerts');
 
     return { success: true };
   } catch (error) {
     console.error('Error:', error);
     return { success: false, error: 'حدث خطأ أثناء تحديث الملاحظات' };
+  }
+}
+
+/**
+ * جلب جميع التنبيهات للمدير مع تفاصيل المزرعة والدواء
+ */
+export type AdminMedicationAlert = {
+  id: string;
+  farm_id: string;
+  farm_name: string;
+  medicine_id: string;
+  medicine_name: string;
+  scheduled_day: number;
+  scheduled_date: string;
+  is_administered: boolean;
+  administered_at?: string;
+  notes?: string;
+  days_until_scheduled: number;
+  priority: 'متأخر' | 'اليوم' | 'غداً' | 'قادم';
+};
+
+export async function getAllAlertsForAdmin(
+  farmId?: string
+): Promise<ActionResult<AdminMedicationAlert[]>> {
+  try {
+    const supabase = await createClient();
+
+    // التحقق من أن المستخدم مدير
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'غير مصرح' };
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_role')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile || (profile.user_role !== 'admin' && profile.user_role !== 'sub_admin')) {
+      return { success: false, error: 'غير مصرح - يتطلب صلاحيات المدير' };
+    }
+
+    // بناء الاستعلام
+    let query = supabase
+      .from('medication_alerts')
+      .select(`
+        id,
+        farm_id,
+        medicine_id,
+        scheduled_day,
+        scheduled_date,
+        is_administered,
+        administered_at,
+        notes,
+        farms!inner (
+          id,
+          name
+        ),
+        medicines!inner (
+          id,
+          name
+        )
+      `)
+      .order('scheduled_date', { ascending: false });
+
+    // التصفية حسب المزرعة إذا تم تحديدها
+    if (farmId) {
+      query = query.eq('farm_id', farmId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching alerts for admin:', error);
+      return { success: false, error: error.message };
+    }
+
+    // تحويل البيانات إلى التنسيق المطلوب
+    const alerts: AdminMedicationAlert[] = (data || []).map((alert: any) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const scheduledDate = new Date(alert.scheduled_date);
+      scheduledDate.setHours(0, 0, 0, 0);
+      const daysUntilScheduled = Math.floor((scheduledDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+      let priority: 'متأخر' | 'اليوم' | 'غداً' | 'قادم';
+      if (daysUntilScheduled < 0) priority = 'متأخر';
+      else if (daysUntilScheduled === 0) priority = 'اليوم';
+      else if (daysUntilScheduled === 1) priority = 'غداً';
+      else priority = 'قادم';
+
+      return {
+        id: alert.id,
+        farm_id: alert.farm_id,
+        farm_name: alert.farms.name,
+        medicine_id: alert.medicine_id,
+        medicine_name: alert.medicines.name,
+        scheduled_day: alert.scheduled_day,
+        scheduled_date: alert.scheduled_date,
+        is_administered: alert.is_administered,
+        administered_at: alert.administered_at,
+        notes: alert.notes,
+        days_until_scheduled: daysUntilScheduled,
+        priority,
+      };
+    });
+
+    return { success: true, data: alerts };
+  } catch (error) {
+    console.error('Error:', error);
+    return { success: false, error: 'حدث خطأ أثناء جلب التنبيهات' };
   }
 }

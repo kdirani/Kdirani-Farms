@@ -20,6 +20,7 @@ import {
   UserCog,
   LogOut,
   Zap,
+  Bell,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'next-auth/react';
@@ -107,6 +108,16 @@ const navSections = [
         title: 'التقارير اليومية',
         href: '/admin/daily-reports',
         icon: FileText,
+      },
+    ],
+  },
+  {
+    title: 'الأدوية والتنبيهات',
+    items: [
+      {
+        title: 'تنبيهات الأدوية',
+        href: '/admin/medication-alerts',
+        icon: Bell,
       },
     ],
   },
