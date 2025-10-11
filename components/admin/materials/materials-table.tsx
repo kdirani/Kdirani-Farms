@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Package, MoreHorizontal, Search, Plus, Filter } from 'lucide-react';
-import { formatDate, formatTime } from '@/lib/utils';
+import { formatDate, formatTime, formatNumber } from '@/lib/utils';
 import { CreateMaterialDialog } from './create-material-dialog';
 import { EditMaterialDialog } from './edit-material-dialog';
 import { DeleteMaterialDialog } from './delete-material-dialog';
@@ -224,12 +224,12 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
                   <TableCell>{material.warehouse?.name || '-'}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">{material.warehouse?.farm_name || '-'}</TableCell>
                   <TableCell>{material.unit_name || '-'}</TableCell>
-                  <TableCell className="text-right">{material.opening_balance.toLocaleString('en-US')}</TableCell>
-                  <TableCell className="text-right text-green-600">+{material.purchases.toLocaleString('en-US')}</TableCell>
-                  <TableCell className="text-right text-red-600">-{material.sales.toLocaleString('en-US')}</TableCell>
-                  <TableCell className="text-right text-orange-600">-{material.consumption.toLocaleString('en-US')}</TableCell>
-                  <TableCell className="text-right text-blue-600">+{material.manufacturing.toLocaleString('en-US')}</TableCell>
-                  <TableCell className="text-right font-bold text-lg">{material.current_balance.toLocaleString('en-US')}</TableCell>
+                  <TableCell className="text-right">{formatNumber(material.opening_balance)}</TableCell>
+                  <TableCell className="text-right text-green-600">+{formatNumber(material.purchases)}</TableCell>
+                  <TableCell className="text-right text-red-600">-{formatNumber(material.sales)}</TableCell>
+                  <TableCell className="text-right text-orange-600">-{formatNumber(material.consumption)}</TableCell>
+                  <TableCell className="text-right text-blue-600">+{formatNumber(material.manufacturing)}</TableCell>
+                  <TableCell className="text-right font-bold text-lg">{formatNumber(material.current_balance)}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     <div className="flex flex-col">
                       <span>{formatDate(new Date(material.updated_at))}</span>
@@ -280,7 +280,7 @@ export function MaterialsTable({ materials, isAggregated = false, availableWareh
       </div>
 
       <div className="flex justify-between items-center text-sm text-muted-foreground">
-        <span>عرض {filteredMaterials.length} من {materials.length} مادة</span>
+        <span>عرض {formatNumber(filteredMaterials.length)} من {formatNumber(materials.length)} مادة</span>
         <div className="flex gap-4">
           <span className="flex items-center gap-2">
             <span className="text-green-600">●</span> المشتريات تضيف للمخزون

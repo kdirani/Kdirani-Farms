@@ -29,7 +29,7 @@ import {
   TrendingUp,
   Package
 } from 'lucide-react';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatNumber } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toggleDailyReportStatus } from '@/actions/daily-report.actions';
 import { getDailyReportAttachments, type DailyReportAttachment } from '@/actions/daily-report-attachment.actions';
@@ -196,28 +196,28 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                       </TableCell>
                       <TableCell className="text-right">
                         <div>
-                          <div className="font-semibold">{report.production_eggs.toLocaleString('en-US')}</div>
+                          <div className="font-semibold">{formatNumber(report.production_eggs)}</div>
                           <div className="text-xs text-muted-foreground">
-                            {report.production_egg_rate}% rate
+                            {formatNumber(report.production_egg_rate)}% rate
                           </div>
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {report.eggs_sold.toLocaleString('en-US')}
+                        {formatNumber(report.eggs_sold)}
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {report.current_eggs_balance.toLocaleString('en-US')}
+                        {formatNumber(report.current_eggs_balance)}
                       </TableCell>
                       <TableCell className="text-right">
                         <span className="text-xs">
-                          {report.chicks_before} / {report.chicks_dead} / {report.chicks_after}
+                          {formatNumber(report.chicks_before)} / {formatNumber(report.chicks_dead)} / {formatNumber(report.chicks_after)}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex flex-col items-end">
-                          <div>{report.feed_daily_kg.toLocaleString('en-US')}</div>
+                          <div>{formatNumber(report.feed_daily_kg)}</div>
                           <div className="text-xs text-muted-foreground">
-                            {report.feed_ratio}
+                            {formatNumber(report.feed_ratio)}
                           </div>
                         </div>
                       </TableCell>
@@ -266,19 +266,19 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                               <CardContent className="text-sm space-y-1">
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">صحيح:</span>
-                                  <span className="font-medium">{report.production_eggs_healthy}</span>
+                                  <span className="font-medium">{formatNumber(report.production_eggs_healthy)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">مشوه:</span>
-                                  <span className="font-medium">{report.production_eggs_deformed}</span>
+                                  <span className="font-medium">{formatNumber(report.production_eggs_deformed)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">هدية:</span>
-                                  <span className="font-medium">{report.eggs_gift}</span>
+                                  <span className="font-medium">{formatNumber(report.eggs_gift)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">الرصيد السابق:</span>
-                                  <span className="font-medium">{report.previous_eggs_balance}</span>
+                                  <span className="font-medium">{formatNumber(report.previous_eggs_balance)}</span>
                                 </div>
                               </CardContent>
                             </Card>
@@ -293,22 +293,22 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                               <CardContent className="text-sm space-y-1">
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">قبل:</span>
-                                  <span className="font-medium">{report.chicks_before}</span>
+                                  <span className="font-medium">{formatNumber(report.chicks_before)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">مات:</span>
-                                  <span className="font-medium text-destructive">{report.chicks_dead}</span>
+                                  <span className="font-medium text-destructive">{formatNumber(report.chicks_dead)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">بعد:</span>
-                                  <span className="font-medium">{report.chicks_after}</span>
+                                  <span className="font-medium">{formatNumber(report.chicks_after)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">معدل الوفيات:</span>
                                   <span className="font-medium">
-                                    {report.chicks_before > 0 
-                                      ? ((report.chicks_dead / report.chicks_before) * 100).toFixed(2) 
-                                      : 0}%
+                                    {formatNumber(report.chicks_before > 0 
+                                      ? ((report.chicks_dead / report.chicks_before) * 100) 
+                                      : 0)}%
                                   </span>
                                 </div>
                               </CardContent>
@@ -324,15 +324,15 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                               <CardContent className="text-sm space-y-1">
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">يومي (كيلو):</span>
-                                  <span className="font-medium">{report.feed_daily_kg}</span>
+                                  <span className="font-medium">{formatNumber(report.feed_daily_kg)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">شهري (كيلو):</span>
-                                  <span className="font-medium">{report.feed_monthly_kg}</span>
+                                  <span className="font-medium">{formatNumber(report.feed_monthly_kg)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">نسبة العلف:</span>
-                                  <span className="font-medium">{report.feed_ratio}</span>
+                                  <span className="font-medium">{formatNumber(report.feed_ratio)}</span>
                                 </div>
                               </CardContent>
                             </Card>
@@ -347,11 +347,11 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
                               <CardContent className="text-sm space-y-1">
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">الكرتون المستخدم:</span>
-                                  <span className="font-medium">{report.carton_consumption}</span>
+                                  <span className="font-medium">{formatNumber(report.carton_consumption)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">السماد (كيلو):</span>
-                                  <span className="font-medium">{report.production_droppings}</span>
+                                  <span className="font-medium">{formatNumber(report.production_droppings)}</span>
                                 </div>
                                 {report.notes && (
                                   <div className="pt-2">

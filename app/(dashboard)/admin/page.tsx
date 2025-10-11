@@ -14,7 +14,7 @@ import {
   Package,
 } from "lucide-react";
 import { LowInventoryAlert } from "@/components/admin/low-inventory-alert";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatNumber, formatTime } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "لوحة التحكم - الإدارة",
@@ -148,7 +148,7 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {usersCount?.toLocaleString("ar-IQ") || 0}
+              {formatNumber(usersCount || 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               إجمالي المستخدمين في النظام
@@ -163,7 +163,7 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {farmsCount?.toLocaleString("ar-IQ") || 0}
+              {formatNumber(farmsCount || 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               عدد المزارع النشطة
@@ -178,7 +178,7 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {warehousesCount?.toLocaleString("ar-IQ") || 0}
+              {formatNumber(warehousesCount || 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               المستودعات المسجلة
@@ -193,7 +193,7 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {dailyReportsCount?.toLocaleString("ar-IQ") || 0}
+              {formatNumber(dailyReportsCount || 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               إجمالي التقارير المسجلة
@@ -208,7 +208,7 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {invoicesCount?.toLocaleString("ar-IQ") || 0}
+              {formatNumber(invoicesCount || 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               فواتير البيع والشراء
@@ -223,7 +223,7 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {materialsCount?.toLocaleString("ar-IQ") || 0}
+              {formatNumber(materialsCount || 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               المواد في المخزون
@@ -238,7 +238,7 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">
-              {uncheckedReportsCount?.toLocaleString("ar-IQ") || 0}
+              {formatNumber(uncheckedReportsCount || 0)}
             </div>
             <p className="text-xs text-orange-700 mt-1">
               بحاجة إلى المراجعة
@@ -253,7 +253,7 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">
-              {uncheckedInvoicesCount?.toLocaleString("ar-IQ") || 0}
+              {formatNumber(uncheckedInvoicesCount || 0)}
             </div>
             <p className="text-xs text-purple-700 mt-1">
               بحاجة إلى المراجعة والتدقيق
@@ -284,7 +284,7 @@ export default async function AdminDashboardPage() {
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {formatDate(new Date(report.report_date))} -{" "}
-                        {report.report_time}
+                        {formatTime(new Date(`${report.report_date}T${report.report_time}`))}
                       </p>
                     </div>
                     {!report.checked && (
@@ -296,10 +296,10 @@ export default async function AdminDashboardPage() {
                     )}
                     <div className="text-right">
                       <p className="text-sm font-medium">
-                        {report.production_eggs?.toLocaleString("ar-IQ")} بيضة
+                        {formatNumber(report.production_eggs || 0)} بيضة
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {report.production_egg_rate?.toFixed(1)}% إنتاج
+                        {formatNumber(report.production_egg_rate || 0)}% إنتاج
                       </p>
                     </div>
 

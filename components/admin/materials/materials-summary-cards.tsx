@@ -1,8 +1,7 @@
-'use client';
-
 import { MaterialsSummary } from '@/actions/material.actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, AlertTriangle, XCircle, Warehouse } from 'lucide-react';
+import { formatNumber } from '@/lib/utils';
 
 interface MaterialsSummaryCardsProps {
   summary: MaterialsSummary;
@@ -17,9 +16,9 @@ export function MaterialsSummaryCards({ summary }: MaterialsSummaryCardsProps) {
           <Package className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{summary.total_materials}</div>
+          <div className="text-2xl font-bold">{formatNumber(summary.total_materials)}</div>
           <p className="text-xs text-muted-foreground">
-            عبر {summary.total_warehouses} مستودع
+            عبر {formatNumber(summary.total_warehouses)} مستودع
           </p>
         </CardContent>
       </Card>
@@ -30,7 +29,7 @@ export function MaterialsSummaryCards({ summary }: MaterialsSummaryCardsProps) {
           <AlertTriangle className="h-4 w-4 text-yellow-600" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-yellow-600">{summary.low_stock_count}</div>
+          <div className="text-2xl font-bold text-yellow-600">{formatNumber(summary.low_stock_count)}</div>
           <p className="text-xs text-muted-foreground">
             المواد أقل من 100 وحدة
           </p>
@@ -43,7 +42,7 @@ export function MaterialsSummaryCards({ summary }: MaterialsSummaryCardsProps) {
           <XCircle className="h-4 w-4 text-destructive" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-destructive">{summary.out_of_stock_count}</div>
+          <div className="text-2xl font-bold text-destructive">{formatNumber(summary.out_of_stock_count)}</div>
           <p className="text-xs text-muted-foreground">
             المواد تحتاج إعادة تخزين
           </p>
@@ -56,7 +55,7 @@ export function MaterialsSummaryCards({ summary }: MaterialsSummaryCardsProps) {
           <Warehouse className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{summary.total_warehouses}</div>
+          <div className="text-2xl font-bold">{formatNumber(summary.total_warehouses)}</div>
           <p className="text-xs text-muted-foreground">
             المواقع النشطة
           </p>
