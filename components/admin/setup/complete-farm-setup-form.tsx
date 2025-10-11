@@ -263,7 +263,7 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
               <Label htmlFor="farm.name">اسم المزرعة *</Label>
               <Input
                 id="farm.name"
-                placeholder="مثال: مزرعة الوادي الأخضر"
+                placeholder="مثال: مزرعة ابو عبدو"
                 {...register('farm.name')}
                 disabled={isLoading}
               />
@@ -276,7 +276,7 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
               <Label htmlFor="farm.location">الموقع</Label>
               <Input
                 id="farm.location"
-                placeholder="مثال: حي القديراني"
+                placeholder="مثال: الباب طريق الازرق"
                 {...register('farm.location')}
                 disabled={isLoading}
               />
@@ -313,7 +313,7 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
             <Label htmlFor="warehouse.name">اسم المستودع *</Label>
             <Input
               id="warehouse.name"
-              placeholder="مثال: المستودع الرئيسي"
+              placeholder="مثال: مستودع ابو عبدو"
               {...register('warehouse.name')}
               disabled={isLoading}
             />
@@ -336,7 +336,7 @@ export function CompleteFarmSetupForm({ materialNames, units }: CompleteFarmSetu
               <Label htmlFor="poultry.batch_name">اسم القطيع *</Label>
               <Input
                 id="poultry.batch_name"
-                placeholder="مثال: قطيع 2024-01"
+                placeholder="مثال: قطيع ابو عبدو"
                 {...register('poultry.batch_name')}
                 disabled={isLoading}
               />

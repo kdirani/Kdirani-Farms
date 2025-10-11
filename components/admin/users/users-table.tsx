@@ -26,7 +26,7 @@ import { CreateUserDialog } from './create-user-dialog';
 import { EditUserDialog } from './edit-user-dialog';
 import { DeleteUserDialog } from './delete-user-dialog';
 import { ResetPasswordDialog } from './reset-password-dialog';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatDateTimeWithPeriod } from '@/lib/utils';
 
 interface UsersTableProps {
   users: User[];
@@ -123,15 +123,7 @@ export function UsersTable({ users }: UsersTableProps) {
                   </TableCell>
                   <TableCell>
                     {user.last_sign_in_at
-                      ? (() => {
-                          const date = new Date(user.last_sign_in_at);
-                          const hours = date.getHours();
-                          const minutes = String(date.getMinutes()).padStart(2, "0");
-                          const period = hours >= 12 ? 'م' : 'ص';
-                          const hours12 = hours % 12 || 12;
-                          const formattedHours = String(hours12).padStart(2, "0");
-                          return `${formatDate(date)} | ${formattedHours}:${minutes} ${period}`;
-                        })()
+                      ? formatDateTimeWithPeriod(new Date(user.last_sign_in_at))
                       : 'لم يسجل دخول بعد'}
                   </TableCell>
                   <TableCell className="text-right">

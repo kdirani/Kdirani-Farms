@@ -14,7 +14,7 @@ import {
   Package,
 } from "lucide-react";
 import { LowInventoryAlert } from "@/components/admin/low-inventory-alert";
-import { formatDate, formatNumber, formatTime } from "@/lib/utils";
+import { formatDate, formatNumber, formatTime, formatDateTimeWithPeriod } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "لوحة التحكم - الإدارة",
@@ -283,8 +283,7 @@ export default async function AdminDashboardPage() {
                         {report.warehouses?.farms?.name || "مزرعة"}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {formatDate(new Date(report.report_date))} -{" "}
-                        {formatTime(new Date(`${report.report_date}T${report.report_time}`))}
+                        {formatDateTimeWithPeriod(new Date(`${report.report_date}T${report.report_time}`))}
                       </p>
                     </div>
                     {!report.checked && (

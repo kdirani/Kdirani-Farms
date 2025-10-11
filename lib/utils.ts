@@ -95,6 +95,33 @@ export function formatCurrency(amount: number, currency: string = 'USD'): string
 }
 
 /**
+ * تحويل كائن التاريخ إلى سلسلة نصية بتنسيق التاريخ والوقت مع نظام 12 ساعة (AM/PM)
+ * @param date كائن التاريخ المراد تنسيقه
+ * @returns سلسلة نصية بتنسيق "DD/MM/YYYY | HH:MM AM/PM"
+ */
+export function formatDateTimeWithPeriod(date: Date): string {
+  // التأكد من أن المعامل هو كائن تاريخ صالح
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    return "";
+  }
+
+  // استخراج مكونات التاريخ والوقت
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  // تحويل إلى نظام 12 ساعة
+  const period = hours >= 12 ? 'م' : 'ص';
+  const hours12 = hours % 12 || 12;
+  const formattedHours = String(hours12).padStart(2, "0");
+
+  // إنشاء السلسلة النصية بالتنسيق المطلوب
+  return `${day}/${month}/${year} | ${formattedHours}:${minutes} ${period}`;
+}
+
+/**
  * تنسيق الأرقام بشكل ثابت لتجنب مشاكل Hydration
  * @param num الرقم المراد تنسيقه
  * @returns سلسلة نصية منسقة بالأرقام الإنجليزية
@@ -103,8 +130,7 @@ export function formatNumber(num: number): string {
   if (typeof num !== 'number' || isNaN(num)) {
     return '0';
   }
-  
+
   // استخدام تنسيق ثابت بالإنجليزية لتجنب مشاكل Hydration
   return num.toLocaleString('en-US');
 }
-
