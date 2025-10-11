@@ -1,4 +1,6 @@
 import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
 import { getFarms } from '@/actions/farm.actions';
 import { FarmsTable } from '@/components/admin/farms/farms-table';
 import { FarmsTableSkeleton } from '@/components/admin/farms/farms-table-skeleton';

@@ -16,6 +16,8 @@ import {
 import { LowInventoryAlert } from "@/components/admin/low-inventory-alert";
 import { formatDate, formatNumber, formatTime, formatDateTimeWithPeriod } from "@/lib/utils";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "لوحة التحكم - الإدارة",
   description: "لوحة تحكم المدير",

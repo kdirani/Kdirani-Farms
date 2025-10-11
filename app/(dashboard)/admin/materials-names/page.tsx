@@ -1,4 +1,6 @@
 import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
 import { getMaterialNames } from '@/actions/material-name.actions';
 import { MaterialNamesTable } from '@/components/admin/materials-names/materials-names-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

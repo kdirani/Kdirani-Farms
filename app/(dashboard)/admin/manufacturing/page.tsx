@@ -1,4 +1,6 @@
 import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
 import { getManufacturingInvoices } from '@/actions/manufacturing.actions';
 import { ManufacturingTable } from '@/components/admin/manufacturing/manufacturing-table';
 import { ExportManufacturingButton } from '@/components/admin/manufacturing/export-manufacturing-button';

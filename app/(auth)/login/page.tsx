@@ -5,6 +5,8 @@ import LoginForm from "@/components/auth/login-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { HeaderLogo } from "@/components/layout/header-logo";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "تسجيل الدخول - نظام إدارة المزارع",
   description: "تسجيل الدخول إلى نظام إدارة مزارع الدواجن",

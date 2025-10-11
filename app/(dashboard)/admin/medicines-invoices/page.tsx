@@ -1,4 +1,6 @@
 import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
 import { getMedicineInvoices } from '@/actions/medicine-invoice.actions';
 import { MedicineInvoicesTable } from '@/components/admin/medicines-invoices/medicine-invoices-table';
 import { ExportMedicinesInvoicesButton } from '@/components/admin/medicines-invoices/export-medicines-invoices-button';

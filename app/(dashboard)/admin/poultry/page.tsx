@@ -1,4 +1,6 @@
 import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
 import { getPoultryStatuses } from '@/actions/poultry.actions';
 import { PoultryTable } from '@/components/admin/poultry/poultry-table';
 import { PoultryTableSkeleton } from '@/components/admin/poultry/poultry-table-skeleton';

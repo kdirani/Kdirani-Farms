@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import { GeneralReportView } from '@/components/admin/reports/general-report-view';
 import {
   getDailyReports,
@@ -6,6 +7,8 @@ import {
   getMonthlySummary,
   getOverallStatistics,
 } from '@/actions/general-report.actions';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'التقرير العام - مزارع القديراني',

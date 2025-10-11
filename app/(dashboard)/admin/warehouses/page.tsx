@@ -1,4 +1,6 @@
 import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
 import { getWarehouses } from '@/actions/warehouse.actions';
 import { WarehousesTable } from '@/components/admin/warehouses/warehouses-table';
 import { WarehousesTableSkeleton } from '@/components/admin/warehouses/warehouses-table-skeleton';

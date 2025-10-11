@@ -1,4 +1,6 @@
 import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
 import { getExpenseTypes } from '@/actions/expense-type.actions';
 import { ExpenseTypesTable } from '@/components/admin/expense-types/expense-types-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

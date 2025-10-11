@@ -1,4 +1,6 @@
 import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
 import { getMaterials, getMaterialsAggregated, getMaterialsSummary } from '@/actions/material.actions';
 import { MaterialsTable } from '@/components/admin/materials/materials-table';
 import { MaterialsTableSkeleton } from '@/components/admin/materials/materials-table-skeleton';

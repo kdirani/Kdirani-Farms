@@ -1,4 +1,6 @@
 import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
 import { getUsers } from '@/actions/user.actions';
 import { UsersTable } from '@/components/admin/users/users-table';
 import { UsersTableSkeleton } from '@/components/admin/users/users-table-skeleton';

@@ -1,4 +1,6 @@
 import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
 import { getAllAlertsForAdmin } from '@/actions/medication-alerts.actions';
 import { getFarms } from '@/actions/farm.actions';
 import { MedicationAlertsTable } from '@/components/admin/medication-alerts/medication-alerts-table';

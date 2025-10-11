@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import IntegratedDailyReportForm from "@/components/farmer/integrated-daily-report-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "التقرير اليومي - نظام إدارة المزارع",
   description: "إضافة تقرير يومي جديد للإنتاج",

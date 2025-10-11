@@ -1,4 +1,6 @@
 import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
 import { getMedicines } from '@/actions/medicine.actions';
 import { MedicinesTable } from '@/components/admin/medicines/medicines-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
