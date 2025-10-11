@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Invoice, deleteInvoice } from '@/actions/invoice.actions';
 import {
   Table,
@@ -35,16 +36,28 @@ import { DeleteInvoiceDialog } from './delete-invoice-dialog';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 
-interface InvoicesTableProps {
-  invoices: Invoice[];
+interface Farm {
+  id: string;
+  name: string;
 }
 
-export function InvoicesTable({ invoices }: InvoicesTableProps) {
+interface InvoicesTableProps {
+  invoices: Invoice[];
+  farms: Farm[];
+  selectedFarmId: string;
+}
+
+export function InvoicesTable({ invoices, farms, selectedFarmId }: InvoicesTableProps) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'buy' | 'sell'>('all');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+
+  const handleFarmChange = (farmId: string) => {
+    router.push(`/admin/invoices?farm=${farmId}`);
+  };
 
   const getClientTypeLabel = (type: string) => {
     const types: Record<string, string> = {
@@ -89,6 +102,18 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4 flex-1">
+          <Select value={selectedFarmId} onValueChange={handleFarmChange}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="اختر المزرعة" />
+            </SelectTrigger>
+            <SelectContent>
+              {farms.map((farm) => (
+                <SelectItem key={farm.id} value={farm.id}>
+                  {farm.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input

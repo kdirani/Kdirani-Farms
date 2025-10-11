@@ -141,6 +141,107 @@ export async function getInvoices(): Promise<ActionResult<Invoice[]>> {
 }
 
 /**
+ * Get invoices by farm
+ */
+export async function getInvoicesByFarm(farmId: string): Promise<ActionResult<Invoice[]>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_role')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile || (profile.user_role !== 'admin' && profile.user_role !== 'sub_admin')) {
+      return { success: false, error: 'Unauthorized - Admin access required' };
+    }
+
+    // Get warehouses for this farm
+    const { data: warehouses } = await supabase
+      .from('warehouses')
+      .select('id')
+      .eq('farm_id', farmId);
+
+    if (!warehouses || warehouses.length === 0) {
+      return { success: true, data: [] };
+    }
+
+    const warehouseIds = warehouses.map(w => w.id);
+
+    const { data: invoices, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .in('warehouse_id', warehouseIds)
+      .order('invoice_date', { ascending: false });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Enrich invoices with warehouse and client info
+    const enrichedInvoices: Invoice[] = [];
+    
+    for (const invoice of invoices || []) {
+      let warehouseInfo = undefined;
+      let clientInfo = undefined;
+
+      if (invoice.warehouse_id) {
+        const { data: warehouse } = await supabase
+          .from('warehouses')
+          .select('name, farm_id')
+          .eq('id', invoice.warehouse_id)
+          .single();
+
+        if (warehouse) {
+          const { data: farm } = await supabase
+            .from('farms')
+            .select('name')
+            .eq('id', warehouse.farm_id)
+            .single();
+
+          warehouseInfo = {
+            name: warehouse.name,
+            farm_name: farm?.name || 'Unknown',
+          };
+        }
+      }
+
+      if (invoice.client_id) {
+        const { data: client } = await supabase
+          .from('clients')
+          .select('name, type')
+          .eq('id', invoice.client_id)
+          .single();
+
+        if (client) {
+          clientInfo = {
+            name: client.name,
+            type: client.type,
+          };
+        }
+      }
+
+      enrichedInvoices.push({
+        ...invoice,
+        warehouse: warehouseInfo,
+        client: clientInfo,
+      });
+    }
+
+    return { success: true, data: enrichedInvoices };
+  } catch (error) {
+    console.error('Error getting invoices by farm:', error);
+    return { success: false, error: 'Failed to get invoices' };
+  }
+}
+
+/**
  * Create a new invoice
  */
 export async function createInvoice(input: CreateInvoiceInput): Promise<ActionResult<Invoice>> {

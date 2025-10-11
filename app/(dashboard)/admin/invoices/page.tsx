@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
-import { getInvoices } from '@/actions/invoice.actions';
+import { getInvoicesByFarm } from '@/actions/invoice.actions';
+import { getFarms } from '@/actions/farm.actions';
 import { InvoicesTable } from '@/components/admin/invoices/invoices-table';
 import { InvoicesTableSkeleton } from '@/components/admin/invoices/invoices-table-skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,13 +8,33 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { ExportInvoicesButton } from '@/components/admin/invoices/export-invoices-button';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata = {
   title: 'إدارة الفواتير - لوحة التحكم الإدارية',
   description: 'إدارة فواتير البيع والشراء',
 };
 
-async function InvoicesContent() {
-  const result = await getInvoices();
+async function InvoicesContent({ farmId }: { farmId?: string }) {
+  // Get farms first
+  const farmsResult = await getFarms();
+  
+  if (!farmsResult.success || !farmsResult.data || farmsResult.data.length === 0) {
+    return (
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          لم يتم العثور على مزارع. يرجى إنشاء مزرعة أولاً.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Use first farm if no farm selected
+  const selectedFarmId = farmId || farmsResult.data[0].id;
+
+  const result = await getInvoicesByFarm(selectedFarmId);
 
   if (!result.success || !result.data) {
     return (
@@ -26,10 +47,21 @@ async function InvoicesContent() {
     );
   }
 
-  return <InvoicesTable invoices={result.data} />;
+  return (
+    <InvoicesTable 
+      invoices={result.data} 
+      farms={farmsResult.data}
+      selectedFarmId={selectedFarmId}
+    />
+  );
 }
 
-export default function InvoicesPage() {
+interface InvoicesPageProps {
+  searchParams: Promise<{ farm?: string }>;
+}
+
+export default async function InvoicesPage({ searchParams }: InvoicesPageProps) {
+  const params = await searchParams;
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -51,7 +83,7 @@ export default function InvoicesPage() {
         </CardHeader>
         <CardContent>
           <Suspense fallback={<InvoicesTableSkeleton />}>
-            <InvoicesContent />
+            <InvoicesContent farmId={params.farm} />
           </Suspense>
         </CardContent>
       </Card>
