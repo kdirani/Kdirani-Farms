@@ -298,7 +298,7 @@ export default function IntegratedDailyReportForm({
       .reduce((sum, item) => sum + item.quantity, 0);
     const pendingInNewItem = newMedicineItem.medicine_id === medicineId ? (newMedicineItem.quantity || 0) : 0;
     
-    return Math.max(0, (medicine?.current_balance || 0) - usedInForm - pendingInNewItem + watchHealthy);
+    return Math.max(0, (medicine?.current_balance || 0) - usedInForm - pendingInNewItem);
   };
 
   const onSubmit = async (data: DailyReportFormData) => {
@@ -899,6 +899,11 @@ export default function IntegratedDailyReportForm({
                 searchPlaceholder="ابحث عن الدواء..."
                 disabled={isLoading}
               />
+              {newMedicineItem.medicine_id && (
+                <p className="text-xs text-muted-foreground">
+                  الكمية المتوفرة: {getAvailableQuantity(newMedicineItem.medicine_id)}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
