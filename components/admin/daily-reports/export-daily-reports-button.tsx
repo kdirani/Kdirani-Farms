@@ -27,11 +27,11 @@ interface ExportSettings {
 }
 
 interface ExportDailyReportsButtonProps {
-  warehouseId: string;
-  warehouseName?: string;
+  farmId: string;
+  farmName?: string;
 }
 
-export function ExportDailyReportsButton({ warehouseId, warehouseName }: ExportDailyReportsButtonProps) {
+export function ExportDailyReportsButton({ farmId, farmName }: ExportDailyReportsButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [settings, setSettings] = useState<ExportSettings>({
@@ -42,8 +42,8 @@ export function ExportDailyReportsButton({ warehouseId, warehouseName }: ExportD
   });
 
   const handleExport = async () => {
-    if (!warehouseId) {
-      alert('يرجى تحديد المستودع أولاً');
+    if (!farmId) {
+      alert('يرجى تحديد المزرعة أولاً');
       return;
     }
 
@@ -51,14 +51,28 @@ export function ExportDailyReportsButton({ warehouseId, warehouseName }: ExportD
       setIsExporting(true);
       const supabase = createClient();
 
-      // جلب بيانات التقارير اليومية للمستودع المحدد
+      // جلب المستودعات التابعة للمزرعة
+      const { data: warehouses } = await supabase
+        .from('warehouses')
+        .select('id')
+        .eq('farm_id', farmId);
+
+      if (!warehouses || warehouses.length === 0) {
+        alert('لا توجد مستودعات لهذه المزرعة');
+        setIsExporting(false);
+        return;
+      }
+
+      const warehouseIds = warehouses.map(w => w.id);
+
+      // جلب بيانات التقارير اليومية للمزرعة المحددة
       const { data: reports, error } = await supabase
         .from('daily_reports')
         .select(`
           *,
           warehouse:warehouses(id, name)
         `)
-        .eq('warehouse_id', warehouseId)
+        .in('warehouse_id', warehouseIds)
         .order('report_date', { ascending: false });
 
       if (error) {
@@ -66,7 +80,7 @@ export function ExportDailyReportsButton({ warehouseId, warehouseName }: ExportD
       }
 
       if (!reports || reports.length === 0) {
-        alert('لا توجد تقارير يومية لهذا المستودع');
+        alert('لا توجد تقارير يومية لهذه المزرعة');
         setIsExporting(false);
         return;
       }
@@ -124,13 +138,13 @@ export function ExportDailyReportsButton({ warehouseId, warehouseName }: ExportD
       const reportsWorksheet = XLSX.utils.json_to_sheet(reportsData);
       
       // إضافة ورقة العمل إلى الكتاب
-      const warehouseTitle = warehouseName || `مستودع ${warehouseId}`;
-      XLSX.utils.book_append_sheet(workbook, reportsWorksheet, `تقارير ${warehouseTitle}`);
+      const farmTitle = farmName || `مزرعة ${farmId}`;
+      XLSX.utils.book_append_sheet(workbook, reportsWorksheet, `تقارير ${farmTitle}`);
 
       // تصدير الملف
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const fileData = new Blob([excelBuffer], { type: 'application/octet-stream' });
-      const fileName = `تقارير_يومية_${warehouseTitle}_${new Date().toLocaleDateString('ar-SA').replace(/\//g, '-')}.xlsx`;
+      const fileName = `تقارير_يومية_${farmTitle}_${new Date().toLocaleDateString('ar-SA').replace(/\//g, '-')}.xlsx`;
       saveAs(fileData, fileName);
       
       setIsDialogOpen(false);

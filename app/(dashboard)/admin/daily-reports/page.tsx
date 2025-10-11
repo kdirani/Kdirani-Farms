@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
-import { getDailyReports } from '@/actions/daily-report.actions';
-import { getWarehousesForMaterials } from '@/actions/material.actions';
+import { getDailyReportsByFarm } from '@/actions/daily-report.actions';
+import { getFarms } from '@/actions/farm.actions';
 import { DailyReportsView } from '@/components/admin/daily-reports/daily-reports-view';
 import { ExportDailyReportsButton } from '@/components/admin/daily-reports/export-daily-reports-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,28 +13,28 @@ export const revalidate = 0;
 
 export const metadata = {
   title: 'التقارير اليومية - لوحة الإدارة',
-  description: 'عرض التقارير التشغيلية اليومية من جميع المستودعات',
+  description: 'عرض التقارير التشغيلية اليومية من جميع المزارع',
 };
 
-async function DailyReportsContent({ warehouseId, page }: { warehouseId?: string; page: number }) {
-  // Get warehouses first
-  const warehousesResult = await getWarehousesForMaterials();
+async function DailyReportsContent({ farmId, page }: { farmId?: string; page: number }) {
+  // Get farms first
+  const farmsResult = await getFarms();
   
-  if (!warehousesResult.success || !warehousesResult.data || warehousesResult.data.length === 0) {
+  if (!farmsResult.success || !farmsResult.data || farmsResult.data.length === 0) {
     return (
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          لم يتم العثور على مستودعات. يرجى إنشاء مستودع أولاً.
+          لم يتم العثور على مزارع. يرجى إنشاء مزرعة أولاً.
         </AlertDescription>
       </Alert>
     );
   }
 
-  // Use first warehouse if no warehouse selected
-  const selectedWarehouseId = warehouseId || warehousesResult.data[0].id;
+  // Use first farm if no farm selected
+  const selectedFarmId = farmId || farmsResult.data[0].id;
 
-  const result = await getDailyReports(selectedWarehouseId, page);
+  const result = await getDailyReportsByFarm(selectedFarmId, page);
 
   if (!result.success) {
     return (
@@ -50,23 +50,23 @@ async function DailyReportsContent({ warehouseId, page }: { warehouseId?: string
   return (
     <DailyReportsView 
       reports={result.data || []} 
-      warehouses={warehousesResult.data}
-      selectedWarehouseId={selectedWarehouseId}
+      farms={farmsResult.data}
+      selectedFarmId={selectedFarmId}
       pagination={result.pagination}
     />
   );
 }
 
 interface DailyReportsPageProps {
-  searchParams: Promise<{ warehouse?: string; page?: string }>;
+  searchParams: Promise<{ farm?: string; page?: string }>;
 }
 
 export default async function DailyReportsPage({ searchParams }: DailyReportsPageProps) {
   const params = await searchParams;
   const page = parseInt(params.page || '1');
   
-  // Fetch warehouses data for the export button
-  const warehousesResult = await getWarehousesForMaterials();
+  // Fetch farms data for the export button
+  const farmsResult = await getFarms();
   
   return (
     <div className="space-y-6">
@@ -85,16 +85,16 @@ export default async function DailyReportsPage({ searchParams }: DailyReportsPag
               تتبع إنتاج البيض واستهلاك العلف واستخدام الأدوية ونشاط المبيعات
             </CardDescription>
           </div>
-          {params.warehouse && warehousesResult.success && (
+          {params.farm && farmsResult.success && (
             <ExportDailyReportsButton 
-              warehouseId={params.warehouse}
-              warehouseName={warehousesResult.data?.find(w => w.id === params.warehouse)?.name}
+              farmId={params.farm}
+              farmName={farmsResult.data?.find(f => f.id === params.farm)?.name}
             />
           )}
         </CardHeader>
         <CardContent>
           <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-            <DailyReportsContent warehouseId={params.warehouse} page={page} />
+            <DailyReportsContent farmId={params.farm} page={page} />
           </Suspense>
         </CardContent>
       </Card>

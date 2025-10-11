@@ -61,7 +61,7 @@ interface DailyReport {
   checked: boolean;
 }
 
-interface Warehouse {
+interface Farm {
   id: string;
   name: string;
 }
@@ -75,23 +75,23 @@ interface Pagination {
 
 interface DailyReportsViewProps {
   reports: DailyReport[];
-  warehouses: Warehouse[];
-  selectedWarehouseId: string;
+  farms: Farm[];
+  selectedFarmId: string;
   pagination?: Pagination;
 }
 
-export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pagination }: DailyReportsViewProps) {
+export function DailyReportsView({ reports, farms, selectedFarmId, pagination }: DailyReportsViewProps) {
   const router = useRouter();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<Record<string, DailyReportAttachment[]>>({});
 
-  const handleWarehouseChange = (warehouseId: string) => {
-    router.push(`/admin/daily-reports?warehouse=${warehouseId}`);
+  const handleFarmChange = (farmId: string) => {
+    router.push(`/admin/daily-reports?farm=${farmId}`);
   };
 
   const handlePageChange = (page: number) => {
-    router.push(`/admin/daily-reports?warehouse=${selectedWarehouseId}&page=${page}`);
+    router.push(`/admin/daily-reports?farm=${selectedFarmId}&page=${page}`);
   };
 
   const toggleExpand = async (reportId: string) => {
@@ -130,14 +130,14 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Select value={selectedWarehouseId} onValueChange={handleWarehouseChange}>
+        <Select value={selectedFarmId} onValueChange={handleFarmChange}>
           <SelectTrigger className="w-64">
-            <SelectValue placeholder="اختر المستودع" />
+            <SelectValue placeholder="اختر المزرعة" />
           </SelectTrigger>
           <SelectContent>
-            {warehouses.map((warehouse) => (
-              <SelectItem key={warehouse.id} value={warehouse.id}>
-                {warehouse.name}
+            {farms.map((farm) => (
+              <SelectItem key={farm.id} value={farm.id}>
+                {farm.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -152,7 +152,7 @@ export function DailyReportsView({ reports, warehouses, selectedWarehouseId, pag
 
       {reports.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          لم يتم العثور على تقارير يومية لهذا المستودع
+          لم يتم العثور على تقارير يومية لهذه المزرعة
         </div>
       ) : (
         <>

@@ -352,6 +352,66 @@ export async function getDailyReports(warehouseId: string, page: number = 1, lim
   }
 }
 
+export async function getDailyReportsByFarm(farmId: string, page: number = 1, limit: number = 10) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return { success: false, error: "غير مصرح" };
+    }
+
+    const supabase = await createClient();
+
+    // Get warehouses for this farm
+    const { data: warehouses } = await supabase
+      .from('warehouses')
+      .select('id')
+      .eq('farm_id', farmId);
+
+    if (!warehouses || warehouses.length === 0) {
+      return {
+        success: true,
+        data: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+        },
+      };
+    }
+
+    const warehouseIds = warehouses.map(w => w.id);
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    const { data, error, count } = await supabase
+      .from("daily_reports")
+      .select("*", { count: "exact" })
+      .in("warehouse_id", warehouseIds)
+      .order("report_date", { ascending: false })
+      .order("report_time", { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      return { success: false, error: "فشل في جلب التقارير" };
+    }
+
+    return {
+      success: true,
+      data,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        totalPages: Math.ceil((count || 0) / limit),
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching daily reports by farm:", error);
+    return { success: false, error: "حدث خطأ أثناء جلب التقارير" };
+  }
+}
+
 export async function updateDailyReport(id: string, data: Partial<z.infer<typeof dailyReportSchema>>) {
   try {
     const session = await auth();
