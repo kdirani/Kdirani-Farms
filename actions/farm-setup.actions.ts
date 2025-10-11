@@ -32,6 +32,7 @@ export type FarmSetupInput = {
   poultry: {
     batch_name: string;
     opening_chicks: number;
+    chick_birth_date?: string;
   };
   
   // Materials (array of materials to create)
@@ -147,6 +148,7 @@ export async function createCompleteFarmSetup(
       farm_id: result.farmId,
       batch_name: input.poultry.batch_name,
       opening_chicks: input.poultry.opening_chicks,
+      chick_birth_date: input.poultry.chick_birth_date,
     };
 
     const poultryResult = await createPoultryStatus(poultryInput);
