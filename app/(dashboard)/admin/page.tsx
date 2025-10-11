@@ -353,7 +353,7 @@ export default async function AdminDashboardPage() {
                           المزرعة: {alert.farms?.name || "غير محدد"}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-left">
                         <p className="text-sm font-medium">
                           {formatDate(new Date(alert.scheduled_date))}
                         </p>
