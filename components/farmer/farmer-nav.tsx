@@ -28,7 +28,7 @@ export function FarmerNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="space-y-2 flex flex-col h-full">
+    <nav className="space-y-2 flex flex-col h-full ">
       <div className="flex-1 space-y-2">
         {navItems.map((item) => {
           const Icon = item.icon;

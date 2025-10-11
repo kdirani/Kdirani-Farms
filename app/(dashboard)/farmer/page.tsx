@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { MedicationAlertsCard } from "@/components/farmer/medication-alerts-card";
 
 export const metadata: Metadata = {
   title: "لوحة التحكم - نظام إدارة المزارع",
@@ -90,9 +89,6 @@ export default async function FarmerDashboardPage() {
           لوحة التحكم الخاصة بك
         </p>
       </div>
-
-      {/* Medication Alerts */}
-      <MedicationAlertsCard userId={session.user.id} />
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-1 max-w-2xl">

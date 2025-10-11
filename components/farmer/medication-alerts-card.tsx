@@ -149,7 +149,7 @@ export function MedicationAlertsCard({ userId }: MedicationAlertsCardProps) {
             }
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-3 max-h-[600px] overflow-y-auto">
           {alerts.map((alert) => (
             <div
               key={alert.alert_id}
