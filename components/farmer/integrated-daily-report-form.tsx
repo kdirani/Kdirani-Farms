@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -21,7 +21,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { FileUpload, UploadedFile } from '@/components/ui/file-upload';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2, Package, Pill, Egg } from 'lucide-react';
@@ -46,6 +45,15 @@ const dailyReportSchema = z.object({
 });
 
 type DailyReportFormData = z.infer<typeof dailyReportSchema>;
+
+// Type definitions for warehouse medicines
+interface WarehouseMedicine {
+  medicine_id: string;
+  current_balance: number;
+  medicines: {
+    name: string;
+  };
+}
 
 interface IntegratedDailyReportFormProps {
   warehouseId: string;
@@ -97,7 +105,7 @@ export default function IntegratedDailyReportForm({
     quantity: 0,
     price: 0,
   });
-  const [availableMedicines, setAvailableMedicines] = useState<any[]>([]);
+  const [availableMedicines, setAvailableMedicines] = useState<WarehouseMedicine[]>([]);
 
   const {
     register,
@@ -125,52 +133,52 @@ export default function IntegratedDailyReportForm({
     },
   });
 
-  // Load available medicines
+  // Load initial data (medicines, chicks, eggs balance) in parallel
   useEffect(() => {
-    const loadMedicines = async () => {
-      const result = await getWarehouseMedicines(warehouseId);
-      if (result.success && result.data) {
-        setAvailableMedicines(result.data);
-      }
-    };
-    loadMedicines();
-  }, [warehouseId]);
+    const loadInitialData = async () => {
+      try {
+        const [medicinesResult, chicksResult, balanceResult] = await Promise.all([
+          getWarehouseMedicines(warehouseId),
+          getChicksBeforeForNewReport(warehouseId),
+          getPreviousEggsBalanceForNewReport(warehouseId)
+        ]);
 
-  // Load chicks_before value automatically
-  useEffect(() => {
-    const loadChicksBefore = async () => {
-      const result = await getChicksBeforeForNewReport(warehouseId);
-      if (result.success && result.data !== undefined) {
-        setValue('chicks_before', result.data, { 
-          shouldValidate: true, 
-          shouldDirty: true,
-          shouldTouch: true 
-        });
-      } else if (result.error) {
-        console.error('Error loading chicks before:', result.error);
-        toast.error('فشل في جلب عدد الدجاج');
-      }
-    };
-    loadChicksBefore();
-  }, [warehouseId, setValue]);
+        // Set medicines
+        if (medicinesResult.success && medicinesResult.data) {
+          setAvailableMedicines(medicinesResult.data);
+        }
 
-  // Load previous_eggs_balance value automatically
-  useEffect(() => {
-    const loadPreviousBalance = async () => {
-      const result = await getPreviousEggsBalanceForNewReport(warehouseId);
-      if (result.success && result.data !== undefined) {
-        setValue('previous_eggs_balance', result.data, { 
-          shouldValidate: true, 
-          shouldDirty: true,
-          shouldTouch: true 
-        });
-      } else if (result.error) {
-        console.error('Error loading previous eggs balance:', result.error);
-        toast.error('فشل في جلب الرصيد السابق');
+        // Set chicks_before
+        if (chicksResult.success && chicksResult.data !== undefined) {
+          setValue('chicks_before', chicksResult.data, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        } else if (chicksResult.error) {
+          console.error('Error loading chicks before:', chicksResult.error);
+          toast.error('فشل في جلب عدد الدجاج');
+        }
+
+        // Set previous_eggs_balance
+        if (balanceResult.success && balanceResult.data !== undefined) {
+          setValue('previous_eggs_balance', balanceResult.data, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        } else if (balanceResult.error) {
+          console.error('Error loading previous eggs balance:', balanceResult.error);
+          toast.error('فشل في جلب الرصيد السابق');
+        }
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+        toast.error('فشل في جلب البيانات الأولية');
       }
     };
-    loadPreviousBalance();
-  }, [warehouseId, setValue]);
+
+    loadInitialData();
+  }, [warehouseId]); // Removed setValue from dependencies
 
   // Watch for changes in feed_daily_kg and report_date
   const watchFeedDaily = watch('feed_daily_kg');
@@ -193,7 +201,7 @@ export default function IntegratedDailyReportForm({
       }
     };
     calculateMonthlyFeed();
-  }, [warehouseId, watchReportDate, watchFeedDaily, setValue]);
+  }, [warehouseId, watchReportDate, watchFeedDaily]); // Removed setValue
 
   const watchHealthy = watch('production_eggs_healthy');
   const watchDeformed = watch('production_eggs_deformed');
@@ -204,72 +212,93 @@ export default function IntegratedDailyReportForm({
   const watchChicksDead = watch('chicks_dead');
   const watchFeedMonthly = watch('feed_monthly_kg');
 
-  // Calculate totals
-  const totalEggTrays = watchHealthy + watchDeformed; // أطباق البيض (كل طبق = 30 بيضة)
-  const productionEggRate = watchChicksBefore > 0 
-    ? ((totalEggTrays * 30) / watchChicksBefore) * 100 
-    : 0;
-  const currentEggsBalance = watchPreviousBalance + watchHealthy - watchSold - watchGift;
-  const chicksAfter = watchChicksBefore - watchChicksDead;
-  
-  // Calculate feed ratio: (feed in grams / chicks after) rounded to 2 decimals
-  const feedRatio = chicksAfter > 0 
-    ? parseFloat(((watchFeedDaily * 1000) / chicksAfter).toFixed(2))
-    : 0;
+  // Memoized calculations - only recalculate when dependencies change
+  const totalEggTrays = useMemo(() => 
+    watchHealthy + watchDeformed, 
+    [watchHealthy, watchDeformed]
+  );
 
-  // Calculate total eggs sold from egg sale items
-  const totalEggsSold = eggSaleItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  const productionEggRate = useMemo(() => 
+    watchChicksBefore > 0 
+      ? ((totalEggTrays * 30) / watchChicksBefore) * 100 
+      : 0,
+    [totalEggTrays, watchChicksBefore]
+  );
 
-  // Calculate carton consumption: (healthy_eggs / 100) + (healthy_eggs / 1000)
-  const cartonConsumption = watchHealthy > 0
-    ? parseFloat(((watchHealthy / 100) + (watchHealthy / 1000)).toFixed(2))
-    : 0;
+  const currentEggsBalance = useMemo(() => 
+    watchPreviousBalance + watchHealthy - watchSold - watchGift,
+    [watchPreviousBalance, watchHealthy, watchSold, watchGift]
+  );
+
+  const chicksAfter = useMemo(() => 
+    watchChicksBefore - watchChicksDead,
+    [watchChicksBefore, watchChicksDead]
+  );
+
+  const feedRatio = useMemo(() => 
+    chicksAfter > 0 
+      ? parseFloat(((watchFeedDaily * 1000) / chicksAfter).toFixed(2))
+      : 0,
+    [chicksAfter, watchFeedDaily]
+  );
+
+  const totalEggsSold = useMemo(() => 
+    eggSaleItems.reduce((sum, item) => sum + (item.quantity || 0), 0),
+    [eggSaleItems]
+  );
+
+  const cartonConsumption = useMemo(() => 
+    watchHealthy > 0
+      ? parseFloat(((watchHealthy / 100) + (watchHealthy / 1000)).toFixed(2))
+      : 0,
+    [watchHealthy]
+  );
 
   // Auto-update feed_ratio when values change
   useEffect(() => {
     setValue('feed_ratio', feedRatio, {
       shouldValidate: true,
     });
-  }, [feedRatio, setValue]);
+  }, [feedRatio]); // Removed setValue
 
   // Auto-update eggs_sold when egg sale items change
   useEffect(() => {
     setValue('eggs_sold', totalEggsSold, {
       shouldValidate: true,
     });
-  }, [totalEggsSold, setValue]);
+  }, [totalEggsSold]); // Removed setValue
 
   // Auto-update carton_consumption when healthy eggs change
   useEffect(() => {
     setValue('carton_consumption', cartonConsumption, {
       shouldValidate: true,
     });
-  }, [cartonConsumption, setValue]);
+  }, [cartonConsumption]); // Removed setValue
 
   // Auto-update production_droppings when droppings sale quantity changes
   useEffect(() => {
     setValue('production_droppings', droppingsSale.quantity || 0, {
       shouldValidate: true,
     });
-  }, [droppingsSale.quantity, setValue]);
+  }, [droppingsSale.quantity]); // Removed setValue
 
-  // Egg Sale Functions
-  const addEggSaleItem = () => {
+  // Egg Sale Functions - Memoized to prevent unnecessary re-renders
+  const addEggSaleItem = useCallback(() => {
     if (!newEggSaleItem.egg_weight_id || !newEggSaleItem.unit_id || !newEggSaleItem.quantity) {
       toast.error('يرجى ملء الحقول المطلوبة (وزن البيض، الوحدة، الكمية)');
       return;
     }
 
-    setEggSaleItems([...eggSaleItems, newEggSaleItem as EggSaleInvoiceItem & { client_id?: string }]);
+    setEggSaleItems(prev => [...prev, newEggSaleItem as EggSaleInvoiceItem & { client_id?: string }]);
     setNewEggSaleItem({ quantity: 0, price: 0, unit_id: '' });
-  };
+  }, [newEggSaleItem]);
 
-  const removeEggSaleItem = (index: number) => {
-    setEggSaleItems(eggSaleItems.filter((_, i) => i !== index));
-  };
+  const removeEggSaleItem = useCallback((index: number) => {
+    setEggSaleItems(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
-  // Medicine Consumption Functions
-  const addMedicineItem = () => {
+  // Medicine Consumption Functions - Memoized
+  const addMedicineItem = useCallback(() => {
     if (!newMedicineItem.medicine_id || !newMedicineItem.unit_id || !newMedicineItem.quantity) {
       toast.error('يرجى ملء الحقول المطلوبة (الدواء، الوحدة، الكمية)');
       return;
@@ -282,15 +311,15 @@ export default function IntegratedDailyReportForm({
       return;
     }
 
-    setMedicineItems([...medicineItems, newMedicineItem as MedicineConsumptionItem]);
+    setMedicineItems(prev => [...prev, newMedicineItem as MedicineConsumptionItem]);
     setNewMedicineItem({ quantity: 0, price: 0 });
-  };
+  }, [newMedicineItem, availableMedicines]);
 
-  const removeMedicineItem = (index: number) => {
-    setMedicineItems(medicineItems.filter((_, i) => i !== index));
-  };
+  const removeMedicineItem = useCallback((index: number) => {
+    setMedicineItems(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const getAvailableQuantity = (medicineId: string): number => {
+  const getAvailableQuantity = useCallback((medicineId: string): number => {
     const medicine = availableMedicines.find(m => m.medicine_id === medicineId);
     // Calculate remaining after considering items not yet saved
     const usedInForm = medicineItems
@@ -299,7 +328,7 @@ export default function IntegratedDailyReportForm({
     const pendingInNewItem = newMedicineItem.medicine_id === medicineId ? (newMedicineItem.quantity || 0) : 0;
     
     return Math.max(0, (medicine?.current_balance || 0) - usedInForm - pendingInNewItem);
-  };
+  }, [availableMedicines, medicineItems, newMedicineItem]);
 
   const onSubmit = async (data: DailyReportFormData) => {
     setIsLoading(true);
