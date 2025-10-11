@@ -14,6 +14,7 @@ import {
   Package,
 } from "lucide-react";
 import { LowInventoryAlert } from "@/components/admin/low-inventory-alert";
+import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "لوحة التحكم - الإدارة",
@@ -282,7 +283,7 @@ export default async function AdminDashboardPage() {
                         {report.warehouses?.farms?.name || "مزرعة"}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(report.report_date).toLocaleDateString("ar-IQ")} -{" "}
+                        {formatDate(new Date(report.report_date))} -{" "}
                         {report.report_time}
                       </p>
                     </div>
@@ -354,7 +355,7 @@ export default async function AdminDashboardPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium">
-                          {new Date(alert.scheduled_date).toLocaleDateString("ar-IQ")}
+                          {formatDate(new Date(alert.scheduled_date))}
                         </p>
                         <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${priorityColor}`}>
                           {priorityText}
