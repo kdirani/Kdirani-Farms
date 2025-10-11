@@ -124,6 +124,9 @@ export function MedicationAlertsCard({ userId }: MedicationAlertsCardProps) {
     );
   }
 
+  const overdueCount = alerts.filter(a => a.priority === 'متأخر').length;
+  const todayCount = alerts.filter(a => a.priority === 'اليوم').length;
+
   return (
     <>
       <Card className="border-orange-200 bg-orange-50">
@@ -131,9 +134,19 @@ export function MedicationAlertsCard({ userId }: MedicationAlertsCardProps) {
           <CardTitle className="flex items-center gap-2 text-orange-800">
             <Bell className="h-5 w-5" />
             تنبيهات الأدوية ({alerts.length})
+            {overdueCount > 0 && (
+              <Badge variant="destructive" className="mr-2">
+                🚨 {overdueCount} متأخر
+              </Badge>
+            )}
           </CardTitle>
           <CardDescription className="text-orange-700">
-            التنبيهات القادمة لأدوية القطيع
+            {overdueCount > 0 
+              ? `لديك ${overdueCount} تنبيه${overdueCount > 1 ? 'ات' : ''} متأخر${overdueCount > 1 ? 'ة' : ''}`
+              : todayCount > 0 
+                ? `لديك ${todayCount} تنبيه${todayCount > 1 ? 'ات' : ''} لليوم`
+                : 'التنبيهات القادمة لأدوية القطيع'
+            }
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">

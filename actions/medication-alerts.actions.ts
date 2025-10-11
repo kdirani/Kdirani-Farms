@@ -225,6 +225,7 @@ export async function getUpcomingAlertsForUser(
     const supabase = await createClient();
 
     // استخدام استعلام مباشر بدلاً من دالة قاعدة البيانات
+    // جلب جميع التنبيهات غير المنفذة بدون قيد لعرض كل التنبيهات المتأخرة
     const { data, error } = await supabase
       .from('medication_alerts')
       .select(`
@@ -243,9 +244,7 @@ export async function getUpcomingAlertsForUser(
       `)
       .eq('farms.user_id', userId)
       .eq('is_administered', false)
-      .gte('scheduled_date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
-      .order('scheduled_date', { ascending: true })
-      .limit(limit);
+      .order('scheduled_date', { ascending: true });
 
     if (error) {
       console.error('Error fetching upcoming alerts:', error);
@@ -253,9 +252,11 @@ export async function getUpcomingAlertsForUser(
     }
 
     // تحويل البيانات إلى التنسيق المطلوب
-    const alerts: UpcomingAlert[] = (data || []).map((alert: any) => {
+    const allAlerts: UpcomingAlert[] = (data || []).map((alert: any) => {
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
       const scheduledDate = new Date(alert.scheduled_date);
+      scheduledDate.setHours(0, 0, 0, 0);
       const daysUntil = Math.floor((scheduledDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
       
       let priority: 'متأخر' | 'اليوم' | 'غداً' | 'قادم';
@@ -280,10 +281,24 @@ export async function getUpcomingAlertsForUser(
         priority,
         urgency_level: urgencyLevel,
       };
-    }).filter(alert => alert.priority !== 'قادم'); // إخفاء التنبيهات من نوع "قادم"
+    });
 
+    // فصل التنبيهات حسب الأولوية
+    const overdueAlerts = allAlerts.filter(alert => alert.priority === 'متأخر');
+    const todayAlerts = allAlerts.filter(alert => alert.priority === 'اليوم');
+    const tomorrowAlerts = allAlerts.filter(alert => alert.priority === 'غداً');
+    const upcomingAlerts = allAlerts.filter(alert => alert.priority === 'قادم');
+    
     // ترتيب حسب الأولوية
-    alerts.sort((a, b) => a.urgency_level - b.urgency_level);
+    overdueAlerts.sort((a, b) => a.days_until - b.days_until); // الأقدم أولاً
+    
+    // عرض كل التنبيهات المتأخرة واليوم وغداً بدون حد + تنبيه قادم واحد فقط
+    const alerts = [
+      ...overdueAlerts, // كل التنبيهات المتأخرة
+      ...todayAlerts, // كل تنبيهات اليوم
+      ...tomorrowAlerts, // كل تنبيهات الغد
+      ...upcomingAlerts.slice(0, 1) // تنبيه قادم واحد فقط
+    ];
 
     return { success: true, data: alerts };
   } catch (error) {
