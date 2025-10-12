@@ -24,13 +24,11 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8 flex flex-col items-center">
           <HeaderLogo href={null} width={200} height={200} className="mb-4" />
-          <p className="text-lg text-blue-700">
-            نظام إدارة مزارع الدواجن
-          </p>
+         
         </div>
 
         <Card className="shadow-2xl">
@@ -48,7 +46,7 @@ export default async function LoginPage() {
         </Card>
 
         <p className="text-center mt-6 text-sm text-gray-600">
-          © 2024 شركة القديراني - جميع الحقوق محفوظة
+          © 2025 شركة القديراني - جميع الحقوق محفوظة
         </p>
       </div>
     </div>
