@@ -307,3 +307,310 @@ export async function deleteMedicineInvoice(id: string): Promise<ActionResult> {
     return { success: false, error: 'Failed to delete medicine invoice' };
   }
 }
+
+/**
+ * Get medicine consumption invoices for farmers (filtered by their farm's warehouses)
+ */
+export async function getFarmerMedicineInvoices(): Promise<ActionResult<MedicineInvoice[]>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Get user's profile and farm
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select(`
+        user_role,
+        farms!inner (
+          id,
+          name,
+          warehouses (
+            id,
+            name
+          )
+        )
+      `)
+      .eq('id', user.id)
+      .single();
+
+    if (!profile || profile.user_role !== 'farmer') {
+      return { success: false, error: 'Unauthorized - Farmer access required' };
+    }
+
+    if (!profile.farms || !Array.isArray(profile.farms) || profile.farms.length === 0) {
+      return { success: true, data: [] };
+    }
+
+    // Get all warehouses from all farms
+    const warehouseIds: any[] = [];
+    if (Array.isArray(profile.farms)) {
+      profile.farms.forEach((farm: any) => {
+        if (farm.warehouses && Array.isArray(farm.warehouses)) {
+          farm.warehouses.forEach((w: any) => warehouseIds.push(w.id));
+        }
+      });
+    }
+
+    // Get medicine invoices for farmer's warehouses
+    const { data: invoices, error } = await supabase
+      .from('medicine_consumption_invoices')
+      .select('*')
+      .in('warehouse_id', warehouseIds)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Enrich invoices with warehouse and poultry status info
+    const enrichedInvoices: MedicineInvoice[] = [];
+    
+    for (const invoice of invoices || []) {
+      let warehouseInfo = undefined;
+      let poultryStatusInfo = undefined;
+
+      // Get warehouse info
+      if (invoice.warehouse_id) {
+        const { data: warehouse } = await supabase
+          .from('warehouses')
+          .select(`
+            name,
+            farms (name)
+          `)
+          .eq('id', invoice.warehouse_id)
+          .single();
+
+        if (warehouse) {
+          warehouseInfo = {
+            name: warehouse.name || 'Unknown',
+            farm_name: warehouse.farms && warehouse.farms.name ? warehouse.farms.name : 'Unknown Farm',
+          };
+        }
+      }
+
+      // Get poultry status info
+      if (invoice.poultry_status_id) {
+        const { data: poultryStatus } = await supabase
+          .from('poultry_statuses')
+          .select('status_name')
+          .eq('id', invoice.poultry_status_id)
+          .single();
+
+        if (poultryStatus) {
+          poultryStatusInfo = {
+            status_name: poultryStatus.status_name,
+          };
+        }
+      }
+
+      enrichedInvoices.push({
+        ...invoice,
+        warehouse: warehouseInfo,
+        poultry_status: poultryStatusInfo,
+      });
+    }
+
+    return { success: true, data: enrichedInvoices };
+  } catch (error) {
+    console.error('Error getting farmer medicine invoices:', error);
+    return { success: false, error: 'Failed to get medicine invoices' };
+  }
+}
+
+/**
+ * Create a new medicine consumption invoice for farmers (with warehouse ownership validation)
+ */
+export async function createFarmerMedicineInvoice(input: CreateMedicineInvoiceInput): Promise<ActionResult<MedicineInvoice>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Get user's profile and farm
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select(`
+        user_role,
+        farms!inner (
+          id,
+          name,
+          warehouses (
+            id,
+            name
+          )
+        )
+      `)
+      .eq('id', user.id)
+      .single();
+
+    if (!profile || profile.user_role !== 'farmer') {
+      return { success: false, error: 'Unauthorized - Farmer access required' };
+    }
+
+    if (!profile.farms || !profile.farms.warehouses) {
+      return { success: false, error: 'No warehouses found for your farm' };
+    }
+
+    // Verify that the warehouse belongs to the farmer's farm
+    const warehouseIds = profile.farms.warehouses.map((w: any) => w.id);
+    if (!warehouseIds.includes(input.warehouse_id)) {
+      return { success: false, error: 'Unauthorized - Warehouse does not belong to your farm' };
+    }
+
+    // Validate input
+    if (!input.invoice_number || !input.invoice_date || !input.warehouse_id) {
+      return { success: false, error: 'Missing required fields' };
+    }
+
+    // Check if invoice number already exists
+    const { data: existingInvoice } = await supabase
+      .from('medicine_consumption_invoices')
+      .select('id')
+      .eq('invoice_number', input.invoice_number.trim())
+      .single();
+
+    if (existingInvoice) {
+      return { success: false, error: 'Invoice number already exists' };
+    }
+
+    // Create the medicine invoice
+    const { data: invoice, error } = await supabase
+      .from('medicine_consumption_invoices')
+      .insert({
+        invoice_number: input.invoice_number.trim(),
+        invoice_date: input.invoice_date,
+        invoice_time: input.invoice_time || null,
+        warehouse_id: input.warehouse_id,
+        poultry_status_id: input.poultry_status_id || null,
+        total_value: 0,
+        notes: input.notes?.trim() || null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/farmer/medicine-invoices');
+    return { success: true, data: invoice };
+  } catch (error) {
+    console.error('Error creating farmer medicine invoice:', error);
+    return { success: false, error: 'Failed to create medicine invoice' };
+  }
+}
+
+/**
+ * Get medicine consumption invoice by ID for farmers (with ownership validation)
+ */
+export async function getFarmerMedicineInvoiceById(invoiceId: string): Promise<ActionResult<MedicineInvoice>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Get user's profile and farm
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select(`
+        user_role,
+        farms!inner (
+          id,
+          name,
+          warehouses (
+            id,
+            name
+          )
+        )
+      `)
+      .eq('id', user.id)
+      .single();
+
+    if (!profile || profile.user_role !== 'farmer') {
+      return { success: false, error: 'Unauthorized - Farmer access required' };
+    }
+
+    if (!profile.farms || !profile.farms.warehouses) {
+      return { success: false, error: 'No warehouses found for your farm' };
+    }
+
+    const warehouseIds = profile.farms.warehouses.map((w: any) => w.id);
+
+    // Get the medicine invoice
+    const { data: invoice, error } = await supabase
+      .from('medicine_consumption_invoices')
+      .select('*')
+      .eq('id', invoiceId)
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    if (!invoice) {
+      return { success: false, error: 'Medicine invoice not found' };
+    }
+
+    // Verify that the invoice's warehouse belongs to the farmer's farm
+    if (!warehouseIds.includes(invoice.warehouse_id)) {
+      return { success: false, error: 'Unauthorized - Invoice does not belong to your farm' };
+    }
+
+    // Enrich with warehouse and poultry status info
+    let warehouseInfo = undefined;
+    let poultryStatusInfo = undefined;
+
+    if (invoice.warehouse_id) {
+      const { data: warehouse } = await supabase
+        .from('warehouses')
+        .select(`
+          name,
+          farms (name)
+        `)
+        .eq('id', invoice.warehouse_id)
+        .single();
+
+      if (warehouse) {
+        warehouseInfo = {
+          name: warehouse.name || 'Unknown',
+          farm_name: warehouse.farms && warehouse.farms.name ? warehouse.farms.name : 'Unknown Farm',
+        };
+      }
+    }
+
+    if (invoice.poultry_status_id) {
+      const { data: poultryStatus } = await supabase
+        .from('poultry_statuses')
+        .select('status_name')
+        .eq('id', invoice.poultry_status_id)
+        .single();
+
+      if (poultryStatus) {
+        poultryStatusInfo = {
+          status_name: poultryStatus.status_name,
+        };
+      }
+    }
+
+    const enrichedInvoice: MedicineInvoice = {
+      ...invoice,
+      warehouse: warehouseInfo,
+      poultry_status: poultryStatusInfo,
+    };
+
+    return { success: true, data: enrichedInvoice };
+  } catch (error) {
+    console.error('Error getting farmer medicine invoice by id:', error);
+    return { success: false, error: 'Failed to get medicine invoice' };
+  }
+}

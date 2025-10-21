@@ -219,3 +219,33 @@ export async function deleteMeasurementUnit(id: string): Promise<ActionResult> {
     return { success: false, error: 'Failed to delete measurement unit' };
   }
 }
+
+/**
+ * Get all measurement units for farmers (read-only access)
+ */
+export async function getFarmerMeasurementUnits(): Promise<ActionResult<MeasurementUnit[]>> {
+  try {
+    const supabase = await createClient();
+
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Farmers can read measurement units
+    const { data: units, error } = await supabase
+      .from('measurement_units')
+      .select('*')
+      .order('unit_name');
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: units || [] };
+  } catch (error) {
+    console.error('Error getting farmer measurement units:', error);
+    return { success: false, error: 'Failed to get measurement units' };
+  }
+}

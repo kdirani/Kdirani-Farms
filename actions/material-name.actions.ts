@@ -219,3 +219,33 @@ export async function deleteMaterialName(id: string): Promise<ActionResult> {
     return { success: false, error: 'Failed to delete material name' };
   }
 }
+
+/**
+ * Get all material names for farmers (read-only access)
+ */
+export async function getFarmerMaterialNames(): Promise<ActionResult<MaterialName[]>> {
+  try {
+    const supabase = await createClient();
+
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Farmers can read material names
+    const { data: materialNames, error } = await supabase
+      .from('materials_names')
+      .select('*')
+      .order('material_name');
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: materialNames || [] };
+  } catch (error) {
+    console.error('Error getting farmer material names:', error);
+    return { success: false, error: 'Failed to get material names' };
+  }
+}

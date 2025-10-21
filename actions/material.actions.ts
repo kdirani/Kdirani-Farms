@@ -589,7 +589,7 @@ export async function getMaterialInventory(
 }
 
 /**
- * Get materials summary statistics
+ * Get materials summary for dashboard
  */
 export async function getMaterialsSummary(): Promise<ActionResult<MaterialsSummary>> {
   try {
@@ -600,31 +600,171 @@ export async function getMaterialsSummary(): Promise<ActionResult<MaterialsSumma
       return { success: false, error: 'Unauthorized' };
     }
 
-    const { data: materials } = await supabase
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_role')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile || (profile.user_role !== 'admin' && profile.user_role !== 'sub_admin')) {
+      return { success: false, error: 'Unauthorized - Admin access required' };
+    }
+
+    // Get total materials count
+    const { count: totalMaterials } = await supabase
       .from('materials')
-      .select('current_balance');
+      .select('*', { count: 'exact', head: true });
 
-    const { data: warehouses } = await supabase
+    // Get low stock and out of stock counts
+    const { count: lowStockCount } = await supabase
+      .from('materials')
+      .select('*', { count: 'exact', head: true })
+      .lt('current_balance', 10)
+      .gt('current_balance', 0);
+
+    const { count: outOfStockCount } = await supabase
+      .from('materials')
+      .select('*', { count: 'exact', head: true })
+      .eq('current_balance', 0);
+
+    // Get total warehouses count
+    const { count: totalWarehouses } = await supabase
       .from('warehouses')
-      .select('id');
-
-    const totalMaterials = materials?.length || 0;
-    const lowStockCount = materials?.filter(m => m.current_balance > 0 && m.current_balance < 100).length || 0;
-    const outOfStockCount = materials?.filter(m => m.current_balance === 0).length || 0;
-    const totalWarehouses = warehouses?.length || 0;
+      .select('*', { count: 'exact', head: true });
 
     return {
       success: true,
       data: {
-        total_materials: totalMaterials,
-        total_value: 0, // Can be calculated if we add price tracking
-        low_stock_count: lowStockCount,
-        out_of_stock_count: outOfStockCount,
-        total_warehouses: totalWarehouses,
+        total_materials: totalMaterials || 0,
+        total_value: 0, // This would need to be calculated based on material prices
+        low_stock_count: lowStockCount || 0,
+        out_of_stock_count: outOfStockCount || 0,
+        total_warehouses: totalWarehouses || 0,
       },
     };
   } catch (error) {
     console.error('Error getting materials summary:', error);
     return { success: false, error: 'Failed to get materials summary' };
+  }
+}
+
+/**
+ * Get materials for farmers (filtered by their farm's warehouses)
+ */
+export async function getFarmerMaterials(): Promise<ActionResult<Material[]>> {
+  try {
+    const supabase = await createClient();
+
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Get user's farm and warehouses
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select(`
+        user_role,
+        farms!inner (
+          id,
+          name,
+          warehouses (
+            id,
+            name
+          )
+        )
+      `)
+      .eq('id', user.id)
+      .single();
+
+    if (!profile || profile.user_role !== 'farmer') {
+      return { success: false, error: 'Unauthorized - Farmer access required' };
+    }
+
+    if (!profile.farms || !Array.isArray(profile.farms) || profile.farms.length === 0) {
+      return { success: true, data: [] };
+    }
+
+    // Get all warehouses from all farms
+    const warehouseIds: any[] = [];
+    profile.farms.forEach((farm: any) => {
+      if (farm.warehouses && Array.isArray(farm.warehouses)) {
+        farm.warehouses.forEach((w: any) => warehouseIds.push(w.id));
+      }
+    });
+
+    // Get materials for farmer's warehouses
+    const { data: materials, error } = await supabase
+      .from('materials')
+      .select('*')
+      .in('warehouse_id', warehouseIds)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Enrich materials with warehouse, material name, and unit info
+    const enrichedMaterials: Material[] = [];
+    
+    for (const material of materials || []) {
+      let warehouseInfo = undefined;
+      let materialName = undefined;
+      let unitName = undefined;
+
+      // Get warehouse info
+      if (material.warehouse_id) {
+        const { data: warehouse } = await supabase
+          .from('warehouses')
+          .select(`
+            name,
+            farms (name)
+          `)
+          .eq('id', material.warehouse_id)
+          .single();
+
+        if (warehouse) {
+          warehouseInfo = {
+            name: warehouse.name || 'Unknown',
+            farm_name: warehouse.farms && warehouse.farms[0] ? warehouse.farms[0].name : 'Unknown Farm',
+          };
+        }
+      }
+
+      // Get material name
+      if (material.material_name_id) {
+        const { data: materialNameData } = await supabase
+          .from('materials_names')
+          .select('material_name')
+          .eq('id', material.material_name_id)
+          .single();
+
+        materialName = materialNameData && materialNameData.material_name ? materialNameData.material_name : 'Unknown';
+      }
+
+      // Get unit name
+      if (material.unit_id) {
+        const { data: unitData } = await supabase
+          .from('measurement_units')
+          .select('unit_name')
+          .eq('id', material.unit_id)
+          .single();
+
+        unitName = unitData?.unit_name;
+      }
+
+      enrichedMaterials.push({
+        ...material,
+        warehouse: warehouseInfo,
+        material_name: materialName,
+        unit_name: unitName,
+      });
+    }
+
+    return { success: true, data: enrichedMaterials };
+  } catch (error) {
+    console.error('Error getting farmer materials:', error);
+    return { success: false, error: 'Failed to get materials' };
   }
 }

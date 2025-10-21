@@ -5,7 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Calendar,
-  AlertCircle
+  AlertCircle,
+  ShoppingCart,
+  CreditCard,
+  Factory,
+  Pill
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -93,7 +97,7 @@ export default async function FarmerDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-1 max-w-2xl">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 max-w-5xl">
         <Card className="border-slate-200 hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-800">
@@ -110,6 +114,86 @@ export default async function FarmerDashboardPage() {
             <Link href="/farmer/daily-report">
               <Button className="w-full" variant={todayReport ? "outline" : "default"}>
                 {todayReport ? "عرض التقرير اليومي" : "إضافة تقرير يومي"}
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* فاتورة مبيع */}
+        <Card className="border-slate-200 hover:shadow-md transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-slate-800">
+              <CreditCard className="h-5 w-5 text-green-600" />
+              فاتورة مبيع
+            </CardTitle>
+            <CardDescription className="text-slate-600">
+              إنشاء فاتورة بيع جديدة للمنتجات
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/farmer/invoices/new?type=sales">
+              <Button className="w-full">
+                إنشاء فاتورة مبيع
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* فاتورة شراء */}
+        <Card className="border-slate-200 hover:shadow-md transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-slate-800">
+              <ShoppingCart className="h-5 w-5 text-blue-600" />
+              فاتورة شراء
+            </CardTitle>
+            <CardDescription className="text-slate-600">
+              إنشاء فاتورة شراء جديدة للمواد والمستلزمات
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/farmer/invoices/new?type=purchase">
+              <Button className="w-full">
+                إنشاء فاتورة شراء
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* فاتورة تصنيع */}
+        <Card className="border-slate-200 hover:shadow-md transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-slate-800">
+              <Factory className="h-5 w-5 text-amber-600" />
+              فاتورة تصنيع
+            </CardTitle>
+            <CardDescription className="text-slate-600">
+              إنشاء فاتورة تصنيع جديدة للمنتجات
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/farmer/manufacturing/new">
+              <Button className="w-full">
+                إنشاء فاتورة تصنيع
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* فاتورة أدوية */}
+        <Card className="border-slate-200 hover:shadow-md transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-slate-800">
+              <Pill className="h-5 w-5 text-red-600" />
+              فاتورة أدوية
+            </CardTitle>
+            <CardDescription className="text-slate-600">
+              تسجيل استهلاك الأدوية للدواجن
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/farmer/medicine-invoices/new">
+              <Button className="w-full">
+                إنشاء فاتورة أدوية
               </Button>
             </Link>
           </CardContent>

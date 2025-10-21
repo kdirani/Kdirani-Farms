@@ -371,6 +371,57 @@ export async function deleteWarehouse(warehouseId: string): Promise<ActionResult
 }
 
 /**
+ * Get warehouses for the current farmer
+ */
+export async function getFarmerWarehouses(): Promise<ActionResult<Warehouse[]>> {
+  try {
+    const supabase = await createClient();
+
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Get user's farm
+    const { data: farm } = await supabase
+      .from('farms')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!farm) {
+      return { success: false, error: 'No farm found for user' };
+    }
+
+    // Get warehouses for this farm
+    const { data: warehouses, error } = await supabase
+      .from('warehouses')
+      .select('*')
+      .eq('farm_id', farm.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Add farm info to each warehouse
+    const warehousesWithFarms: Warehouse[] = warehouses?.map(warehouse => ({
+      ...warehouse,
+      farm: {
+        name: 'Current Farm',
+        location: null,
+      },
+    })) || [];
+
+    return { success: true, data: warehousesWithFarms };
+  } catch (error) {
+    console.error('Error getting farmer warehouses:', error);
+    return { success: false, error: 'Failed to get warehouses' };
+  }
+}
+
+/**
  * Get farms without warehouses (for assignment)
  */
 export async function getFarmsWithoutWarehouses(): Promise<ActionResult<Array<{ id: string; name: string; location: string | null; is_active: boolean }>>> {

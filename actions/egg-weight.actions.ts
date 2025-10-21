@@ -218,3 +218,33 @@ export async function deleteEggWeight(id: string): Promise<ActionResult> {
     return { success: false, error: 'Failed to delete egg weight' };
   }
 }
+
+/**
+ * Get all egg weights for farmers (read-only access)
+ */
+export async function getFarmerEggWeights(): Promise<ActionResult<EggWeight[]>> {
+  try {
+    const supabase = await createClient();
+
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Farmers can read egg weights
+    const { data: eggWeights, error } = await supabase
+      .from('egg_weights')
+      .select('*')
+      .order('weight_range');
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: eggWeights || [] };
+  } catch (error) {
+    console.error('Error getting farmer egg weights:', error);
+    return { success: false, error: 'Failed to get egg weights' };
+  }
+}

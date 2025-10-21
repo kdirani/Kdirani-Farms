@@ -236,3 +236,33 @@ export async function deleteMedicine(id: string): Promise<ActionResult> {
     return { success: false, error: 'Failed to delete medicine' };
   }
 }
+
+/**
+ * Get all medicines for farmers (read-only access)
+ */
+export async function getFarmerMedicines(): Promise<ActionResult<Medicine[]>> {
+  try {
+    const supabase = await createClient();
+
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Farmers can read medicines
+    const { data: medicines, error } = await supabase
+      .from('medicines')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: medicines || [] };
+  } catch (error) {
+    console.error('Error getting farmer medicines:', error);
+    return { success: false, error: 'Failed to get medicines' };
+  }
+}

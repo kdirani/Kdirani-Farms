@@ -7,6 +7,8 @@ import {
   ClipboardList,
   Home,
   LogOut,
+  FileText,
+  Factory,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
@@ -22,6 +24,7 @@ const navItems = [
     href: "/farmer/daily-report",
     icon: ClipboardList,
   },
+
 ];
 
 export function FarmerNav() {

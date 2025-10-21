@@ -218,3 +218,33 @@ export async function deleteExpenseType(id: string): Promise<ActionResult> {
     return { success: false, error: 'Failed to delete expense type' };
   }
 }
+
+/**
+ * Get all expense types for farmers (read-only access)
+ */
+export async function getFarmerExpenseTypes(): Promise<ActionResult<ExpenseType[]>> {
+  try {
+    const supabase = await createClient();
+
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Farmers can read expense types
+    const { data: expenseTypes, error } = await supabase
+      .from('expense_types')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: expenseTypes || [] };
+  } catch (error) {
+    console.error('Error getting farmer expense types:', error);
+    return { success: false, error: 'Failed to get expense types' };
+  }
+}

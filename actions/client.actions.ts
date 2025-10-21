@@ -205,3 +205,32 @@ export async function deleteClient(id: string): Promise<ActionResult> {
     return { success: false, error: 'Failed to delete client' };
   }
 }
+
+/**
+ * Get all clients for farmers (read-only access)
+ */
+export async function getFarmerClients(): Promise<ActionResult<Client[]>> {
+  try {
+    const supabase = await createSupabaseClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Farmers can read clients but not modify them
+    const { data: clients, error } = await supabase
+      .from('clients')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: clients || [] };
+  } catch (error) {
+    console.error('Error getting farmer clients:', error);
+    return { success: false, error: 'Failed to get clients' };
+  }
+}
