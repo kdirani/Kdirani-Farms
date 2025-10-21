@@ -105,9 +105,13 @@ export function FarmerMedicineInvoiceForm() {
           name: w.name,
           farm_name: ''
         })));
-      if (warehousesResult.data.length === 1) {
+        if (warehousesResult.data.length === 1) {
           setValue('warehouse_id', warehousesResult.data[0].id);
         }
+      } else if (!warehousesResult.success) {
+        toast.error('لم يتم العثور على مزارع مرتبطة بحسابك. يرجى التواصل مع المسؤول لإضافة مزرعة لحسابك');
+        router.push('/farmer');
+        return;
       }
 
       // Load medicines
@@ -223,91 +227,97 @@ export function FarmerMedicineInvoiceForm() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full px-2 sm:px-4">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="invoice_number">رقم الفاتورة</Label>
-            <Input
-              id="invoice_number"
-              {...register('invoice_number')}
-              placeholder="رقم الفاتورة"
-              className={errors.invoice_number ? 'border-red-500' : ''}
-            />
-            {errors.invoice_number && (
-              <p className="text-red-500 text-sm">{errors.invoice_number.message}</p>
-            )}
-          </div>
+        <Card className="w-full">
+          <CardContent className="pt-6">
+            <h3 className="text-lg font-semibold mb-4 text-center sm:text-right">معلومات الفاتورة</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="invoice_number">رقم الفاتورة</Label>
+                <Input
+                  id="invoice_number"
+                  {...register('invoice_number')}
+                  placeholder="رقم الفاتورة"
+                  className={`w-full ${errors.invoice_number ? 'border-red-500' : ''}`}
+                />
+                {errors.invoice_number && (
+                  <p className="text-red-500 text-sm">{errors.invoice_number.message}</p>
+                )}
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="invoice_date">تاريخ الفاتورة</Label>
-            <Input
-              id="invoice_date"
-              type="date"
-              {...register('invoice_date')}
-              className={errors.invoice_date ? 'border-red-500' : ''}
-            />
-            {errors.invoice_date && (
-              <p className="text-red-500 text-sm">{errors.invoice_date.message}</p>
-            )}
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="invoice_date">تاريخ الفاتورة</Label>
+                <Input
+                  id="invoice_date"
+                  type="date"
+                  {...register('invoice_date')}
+                  className={`w-full ${errors.invoice_date ? 'border-red-500' : ''}`}
+                />
+                {errors.invoice_date && (
+                  <p className="text-red-500 text-sm">{errors.invoice_date.message}</p>
+                )}
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="invoice_time">وقت الفاتورة (اختياري)</Label>
-            <Input
-              id="invoice_time"
-              type="time"
-              {...register('invoice_time')}
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="invoice_time">وقت الفاتورة (اختياري)</Label>
+                <Input
+                  id="invoice_time"
+                  type="time"
+                  {...register('invoice_time')}
+                  className="w-full"
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="warehouse_id">المستودع</Label>
-            <Select
-              value={warehouseId}
-              onValueChange={(value) => setValue('warehouse_id', value)}
-            >
-              <SelectTrigger className={errors.warehouse_id ? 'border-red-500' : ''}>
-                <SelectValue placeholder="اختر المستودع" />
-              </SelectTrigger>
-              <SelectContent>
-                {warehouses.map((warehouse) => (
-                  <SelectItem key={warehouse.id} value={warehouse.id}>
-                    {warehouse.name} ({warehouse.farm_name})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.warehouse_id && (
-              <p className="text-red-500 text-sm">{errors.warehouse_id.message}</p>
-            )}
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="warehouse_id">المستودع</Label>
+                <Select
+                  value={warehouseId}
+                  onValueChange={(value) => setValue('warehouse_id', value)}
+                >
+                  <SelectTrigger className={`w-full ${errors.warehouse_id ? 'border-red-500' : ''}`}>
+                    <SelectValue placeholder="اختر المستودع" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {warehouses.map((warehouse) => (
+                      <SelectItem key={warehouse.id} value={warehouse.id}>
+                        {warehouse.name} ({warehouse.farm_name})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.warehouse_id && (
+                  <p className="text-red-500 text-sm">{errors.warehouse_id.message}</p>
+                )}
+              </div>
 
-          <div className="space-y-2 col-span-1 md:col-span-2">
-            <Label htmlFor="notes">ملاحظات (اختياري)</Label>
-            <Textarea
-              id="notes"
-              {...register('notes')}
-              placeholder="ملاحظات إضافية"
-              className="min-h-[100px]"
-            />
-          </div>
-        </div>
+              <div className="space-y-2 col-span-1 sm:col-span-2">
+                <Label htmlFor="notes">ملاحظات (اختياري)</Label>
+                <Textarea
+                  id="notes"
+                  {...register('notes')}
+                  placeholder="ملاحظات إضافية"
+                  className="min-h-[100px] w-full"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Medicine Items Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium">المواد الطبية</h3>
           
-          <Card>
+          <Card className="w-full">
             <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-4">
-                <div className="md:col-span-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                <div className="col-span-1 sm:col-span-2 lg:col-span-1">
                   <Label htmlFor="medicine_id">الدواء</Label>
                   <Select
                     value={newItem.medicine_id}
                     onValueChange={(value) => setNewItem({ ...newItem, medicine_id: value })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="اختر الدواء" />
                     </SelectTrigger>
                     <SelectContent>
@@ -326,7 +336,7 @@ export function FarmerMedicineInvoiceForm() {
                     value={newItem.unit_id}
                     onValueChange={(value) => setNewItem({ ...newItem, unit_id: value })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="اختر الوحدة" />
                     </SelectTrigger>
                     <SelectContent>
@@ -349,6 +359,7 @@ export function FarmerMedicineInvoiceForm() {
                     value={newItem.quantity}
                     onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) || 0 })}
                     placeholder="الكمية"
+                    className="w-full"
                   />
                 </div>
                 
@@ -362,6 +373,7 @@ export function FarmerMedicineInvoiceForm() {
                     value={newItem.price}
                     onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) || 0 })}
                     placeholder="السعر"
+                    className="w-full"
                   />
                 </div>
                 
@@ -375,28 +387,30 @@ export function FarmerMedicineInvoiceForm() {
               {items.length > 0 && (
                 <div className="border rounded-md p-4 mt-4">
                   <h4 className="font-medium mb-2">المواد المضافة</h4>
-                  <div className="space-y-2">
-                    {items.map((item, index) => {
-                      const medicineName = medicines.find(m => m.id === item.medicine_id)?.name || '';
-                      const unitName = units.find(u => u.id === item.unit_id)?.unit_name || '';
-                      
-                      return (
-                        <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
-                          <div>
-                            <span className="font-medium">{medicineName}</span>
-                            <span className="text-sm text-muted-foreground"> - {item.quantity} {unitName} × {item.price} = {item.quantity * item.price}</span>
+                  <div className="overflow-x-auto">
+                    <div className="space-y-2">
+                      {items.map((item, index) => {
+                        const medicineName = medicines.find(m => m.id === item.medicine_id)?.name || '';
+                        const unitName = units.find(u => u.id === item.unit_id)?.unit_name || '';
+                        
+                        return (
+                          <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
+                            <div className="flex-1 min-w-0">
+                              <span className="font-medium block text-sm">{medicineName}</span>
+                              <span className="text-xs text-muted-foreground"> {item.quantity} {unitName} × {item.price} = {item.quantity * item.price}</span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveItem(index)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveItem(index)}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                   <div className="mt-2 text-right">
                     <p className="font-medium">

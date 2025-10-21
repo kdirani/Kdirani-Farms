@@ -108,7 +108,17 @@ export function FarmerInvoiceForm() {
       // Load warehouses
       const warehousesResult = await getFarmerWarehouses();
       if (warehousesResult.success && warehousesResult.data) {
+        // تم إزالة الشرط الذي يتحقق من طول المصفوفة لأن المزارع موجودة بالفعل
         setWarehouses(warehousesResult.data);
+        
+        // تعيين المستودع تلقائيًا إذا كان هناك مستودع واحد فقط
+        if (warehousesResult.data.length === 1) {
+          setValue('warehouse_id', warehousesResult.data[0].id);
+        }
+      } else if (!warehousesResult.success) {
+        toast.error('لم يتم العثور على مزارع مرتبطة بحسابك. يرجى التواصل مع المسؤول لإضافة مزرعة لحسابك');
+        router.push('/farmer');
+        return;
       }
 
       // Load clients
@@ -267,24 +277,24 @@ export function FarmerInvoiceForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <Card>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-full max-w-full px-2 sm:px-4">
+      <Card className="w-full">
         <CardContent className="pt-6">
-          <h3 className="text-lg font-semibold mb-4">معلومات الفاتورة</h3>
+          <h3 className="text-lg font-semibold mb-4 text-center sm:text-right">معلومات الفاتورة</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 gap-4 mb-4">
             <div className="space-y-2">
               <Label>نوع الفاتورة *</Label>
               <RadioGroup
                 value={invoiceType}
                 onValueChange={(value) => setValue('invoice_type', value as 'buy' | 'sell')}
-                className="flex space-x-4"
+                className="flex flex-row-reverse sm:flex-row justify-center sm:justify-start gap-6 sm:gap-4"
               >
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <RadioGroupItem value="sell" id="sell" />
                   <Label htmlFor="sell" className="cursor-pointer">بيع</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <RadioGroupItem value="buy" id="buy" />
                   <Label htmlFor="buy" className="cursor-pointer">شراء</Label>
                 </div>
@@ -292,13 +302,14 @@ export function FarmerInvoiceForm() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="invoice_number">رقم الفاتورة *</Label>
               <Input
                 id="invoice_number"
                 {...register('invoice_number')}
                 disabled={isLoading}
+                className="w-full"
               />
               {errors.invoice_number && (
                 <p className="text-sm text-destructive">{errors.invoice_number.message}</p>
@@ -312,6 +323,7 @@ export function FarmerInvoiceForm() {
                 type="date"
                 {...register('invoice_date')}
                 disabled={isLoading}
+                className="w-full"
               />
               {errors.invoice_date && (
                 <p className="text-sm text-destructive">{errors.invoice_date.message}</p>
@@ -325,11 +337,12 @@ export function FarmerInvoiceForm() {
                 type="time"
                 {...register('invoice_time')}
                 disabled={isLoading}
+                className="w-full"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="warehouse_id">المستودع *</Label>
               <Combobox
@@ -343,6 +356,7 @@ export function FarmerInvoiceForm() {
                 searchPlaceholder="البحث عن المستودعات..."
                 emptyText="لم يتم العثور على مستودعات"
                 disabled={isLoading}
+                className="w-full"
               />
               {errors.warehouse_id && (
                 <p className="text-sm text-destructive">{errors.warehouse_id.message}</p>
@@ -362,6 +376,7 @@ export function FarmerInvoiceForm() {
                 searchPlaceholder="البحث عن العملاء..."
                 emptyText="لم يتم العثور على عملاء"
                 disabled={isLoading}
+                className="w-full"
               />
             </div>
           </div>
@@ -373,22 +388,24 @@ export function FarmerInvoiceForm() {
               placeholder="ملاحظات اختيارية"
               {...register('notes')}
               disabled={isLoading}
+              className="w-full"
             />
           </div>
         </CardContent>
       </Card>
 
       {/* Invoice Items Section */}
-      <Card>
+      <Card className="w-full">
         <CardContent className="pt-6">
-          <h3 className="text-lg font-semibold mb-4">العناصر ({items.length})</h3>
+          <h3 className="text-lg font-semibold mb-4 text-center sm:text-right">العناصر ({items.length})</h3>
           
-          <div className="flex space-x-4 mb-4">
+          <div className="flex flex-wrap justify-center sm:justify-start gap-2 mb-4">
             <Button
               type="button"
               variant={itemType === 'material' ? 'default' : 'outline'}
               onClick={() => setItemType('material')}
               disabled={isLoading}
+              className="flex-1 sm:flex-none min-w-[80px]"
             >
               مواد
             </Button>
@@ -397,6 +414,7 @@ export function FarmerInvoiceForm() {
               variant={itemType === 'medicine' ? 'default' : 'outline'}
               onClick={() => setItemType('medicine')}
               disabled={isLoading}
+              className="flex-1 sm:flex-none min-w-[80px]"
             >
               أدوية
             </Button>
@@ -405,13 +423,14 @@ export function FarmerInvoiceForm() {
               variant={itemType === 'egg' ? 'default' : 'outline'}
               onClick={() => setItemType('egg')}
               disabled={isLoading}
+              className="flex-1 sm:flex-none min-w-[80px]"
             >
               بيض
             </Button>
           </div>
           
           {/* Column Labels */}
-          <div className="grid grid-cols-6 gap-2 text-sm font-medium text-muted-foreground mb-2">
+          <div className="grid grid-cols-6 gap-2 text-sm font-medium text-muted-foreground mb-2 overflow-x-auto">
             <div className="col-span-2">العنصر</div>
             <div>الكمية</div>
             <div>الوحدة</div>
@@ -434,6 +453,7 @@ export function FarmerInvoiceForm() {
                     searchPlaceholder="البحث عن المواد..."
                     emptyText="لم يتم العثور على مواد"
                     disabled={isLoading}
+                    className="w-full"
                   />
                 )}
                 {itemType === 'medicine' && (
@@ -448,6 +468,7 @@ export function FarmerInvoiceForm() {
                     searchPlaceholder="البحث عن الأدوية..."
                     emptyText="لم يتم العثور على أدوية"
                     disabled={isLoading}
+                    className="w-full"
                   />
                 )}
                 {itemType === 'egg' && (
@@ -462,6 +483,7 @@ export function FarmerInvoiceForm() {
                     searchPlaceholder="البحث عن أوزان البيض..."
                     emptyText="لم يتم العثور على أوزان بيض"
                     disabled={isLoading}
+                    className="w-full"
                   />
                 )}
               </div>
@@ -472,6 +494,7 @@ export function FarmerInvoiceForm() {
                   value={newItem.quantity || ''}
                   onChange={(e) => setNewItem({ ...newItem, quantity: parseFloat(e.target.value) })}
                   disabled={isLoading}
+                  className="w-full"
                 />
               </div>
               <div>
@@ -486,6 +509,7 @@ export function FarmerInvoiceForm() {
                   searchPlaceholder="البحث..."
                   emptyText="لا توجد وحدات"
                   disabled={isLoading}
+                  className="w-full"
                 />
               </div>
               <div>
@@ -495,10 +519,11 @@ export function FarmerInvoiceForm() {
                   value={newItem.price || ''}
                   onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
                   disabled={isLoading}
+                  className="w-full"
                 />
               </div>
               <div className="flex items-center justify-between">
-                <span>{newItem.quantity && newItem.price ? formatCurrency(newItem.quantity * newItem.price) : '-'}</span>
+                <span className="text-xs sm:text-sm">{newItem.quantity && newItem.price ? formatCurrency(newItem.quantity * newItem.price) : '-'}</span>
                 <Button
                   type="button"
                   variant="outline"
@@ -511,39 +536,41 @@ export function FarmerInvoiceForm() {
               </div>
             </div>
             
-            {items.map((item, index) => {
-              let itemName = '';
-              if (item.material_name_id) {
-                itemName = materials.find(m => m.id === item.material_name_id)?.material_name || '';
-              } else if (item.medicine_id) {
-                itemName = medicines.find(m => m.id === item.medicine_id)?.name || '';
-              } else if (item.egg_weight_id) {
-                itemName = eggWeights.find(w => w.id === item.egg_weight_id)?.weight_range || '';
-              }
-              
-              const unitName = units.find(u => u.id === item.unit_id)?.unit_name || '';
-              
-              return (
-                <div key={index} className="grid grid-cols-6 gap-2 items-center border-t pt-2">
-                  <div className="col-span-2">{itemName}</div>
-                  <div>{item.quantity}</div>
-                  <div>{unitName}</div>
-                  <div>{formatCurrency(item.price)}</div>
-                  <div className="flex items-center justify-between">
-                    <span>{formatCurrency(item.quantity * item.price)}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveItem(index)}
-                      disabled={isLoading}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+            <div className="overflow-x-auto">
+              {items.map((item, index) => {
+                let itemName = '';
+                if (item.material_name_id) {
+                  itemName = materials.find(m => m.id === item.material_name_id)?.material_name || '';
+                } else if (item.medicine_id) {
+                  itemName = medicines.find(m => m.id === item.medicine_id)?.name || '';
+                } else if (item.egg_weight_id) {
+                  itemName = eggWeights.find(w => w.id === item.egg_weight_id)?.weight_range || '';
+                }
+                
+                const unitName = units.find(u => u.id === item.unit_id)?.unit_name || '';
+                
+                return (
+                  <div key={index} className="grid grid-cols-6 gap-2 items-center border-t pt-2">
+                    <div className="col-span-2 text-xs sm:text-base">{itemName}</div>
+                    <div className="text-xs sm:text-base">{item.quantity}</div>
+                    <div className="text-xs sm:text-base">{unitName}</div>
+                    <div className="text-xs sm:text-base">{formatCurrency(item.price)}</div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs sm:text-base">{formatCurrency(item.quantity * item.price)}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveItem(index)}
+                        disabled={isLoading}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </CardContent>
       </Card>

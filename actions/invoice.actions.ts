@@ -794,7 +794,7 @@ export async function createFarmerInvoice(input: CreateInvoiceInput): Promise<Ac
     }
 
     if (!profile.farms || !Array.isArray(profile.farms) || profile.farms.length === 0) {
-      return { success: false, error: 'No farms found for your profile' };
+      return { success: false, error: 'لم يتم العثور على مزارع مرتبطة بحسابك. يرجى التواصل مع المسؤول لإضافة مزرعة لحسابك' };
     }
 
     // Get all warehouses from all farms

@@ -97,6 +97,15 @@ export function FarmerManufacturingForm() {
       const warehousesResult = await getFarmerWarehouses();
       if (warehousesResult.success && warehousesResult.data) {
         setWarehouses(warehousesResult.data);
+        
+        // تعيين المستودع تلقائيًا إذا كان هناك مستودع واحد فقط
+        if (warehousesResult.data.length === 1) {
+          setValue('warehouse_id', warehousesResult.data[0].id);
+        }
+      } else if (!warehousesResult.success) {
+        toast.error('لم يتم العثور على مزارع مرتبطة بحسابك. يرجى التواصل مع المسؤول لإضافة مزرعة لحسابك');
+        router.push('/farmer');
+        return;
       }
 
       // تحميل أسماء المواد
@@ -219,18 +228,19 @@ export function FarmerManufacturingForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <Card>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-full max-w-full px-2 sm:px-4">
+      <Card className="w-full">
         <CardContent className="pt-6">
-          <h3 className="text-lg font-semibold mb-4">معلومات الفاتورة</h3>
+          <h3 className="text-lg font-semibold mb-4 text-center sm:text-right">معلومات الفاتورة</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="invoice_number">رقم الفاتورة *</Label>
               <Input
                 id="invoice_number"
                 {...register('invoice_number')}
                 disabled={isLoading}
+                className="w-full"
               />
               {errors.invoice_number && (
                 <p className="text-sm text-destructive">{errors.invoice_number.message}</p>
@@ -244,6 +254,7 @@ export function FarmerManufacturingForm() {
                 type="date"
                 {...register('manufacturing_date')}
                 disabled={isLoading}
+                className="w-full"
               />
               {errors.manufacturing_date && (
                 <p className="text-sm text-destructive">{errors.manufacturing_date.message}</p>
@@ -257,11 +268,12 @@ export function FarmerManufacturingForm() {
                 type="time"
                 {...register('manufacturing_time')}
                 disabled={isLoading}
+                className="w-full"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="warehouse_id">المستودع *</Label>
               <Combobox
@@ -275,6 +287,7 @@ export function FarmerManufacturingForm() {
                 searchPlaceholder="البحث عن المستودعات..."
                 emptyText="لم يتم العثور على مستودعات"
                 disabled={isLoading}
+                className="w-full"
               />
               {errors.warehouse_id && (
                 <p className="text-sm text-destructive">{errors.warehouse_id.message}</p>
@@ -286,12 +299,14 @@ export function FarmerManufacturingForm() {
               <Input
                 id="blend_name"
                 {...register('blend_name')}
+                placeholder="اسم الخلطة (اختياري)"
                 disabled={isLoading}
+                className="w-full"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="material_name_id">المادة المنتجة *</Label>
               <Combobox
@@ -301,10 +316,11 @@ export function FarmerManufacturingForm() {
                 }))}
                 value={watch('material_name_id')}
                 onValueChange={(value) => setValue('material_name_id', value)}
-                placeholder="اختر المادة"
+                placeholder="اختر المادة المنتجة"
                 searchPlaceholder="البحث عن المواد..."
                 emptyText="لم يتم العثور على مواد"
                 disabled={isLoading}
+                className="w-full"
               />
               {errors.material_name_id && (
                 <p className="text-sm text-destructive">{errors.material_name_id.message}</p>
@@ -320,10 +336,11 @@ export function FarmerManufacturingForm() {
                 }))}
                 value={watch('unit_id')}
                 onValueChange={(value) => setValue('unit_id', value)}
-                placeholder="اختر الوحدة"
+                placeholder="اختر وحدة القياس"
                 searchPlaceholder="البحث عن الوحدات..."
                 emptyText="لم يتم العثور على وحدات"
                 disabled={isLoading}
+                className="w-full"
               />
               {errors.unit_id && (
                 <p className="text-sm text-destructive">{errors.unit_id.message}</p>
@@ -331,13 +348,15 @@ export function FarmerManufacturingForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quantity">الكمية *</Label>
+              <Label htmlFor="quantity">الكمية المنتجة *</Label>
               <Input
                 id="quantity"
                 type="number"
+                min="0"
                 step="0.01"
                 {...register('quantity')}
                 disabled={isLoading}
+                className="w-full"
               />
               {errors.quantity && (
                 <p className="text-sm text-destructive">{errors.quantity.message}</p>
@@ -352,6 +371,7 @@ export function FarmerManufacturingForm() {
               placeholder="ملاحظات اختيارية"
               {...register('notes')}
               disabled={isLoading}
+              className="w-full"
             />
           </div>
         </CardContent>
