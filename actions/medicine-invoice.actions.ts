@@ -386,8 +386,8 @@ export async function getFarmerMedicineInvoices(): Promise<ActionResult<Medicine
 
         if (warehouse) {
           warehouseInfo = {
-            name: warehouse.name || 'Unknown',
-            farm_name: warehouse.farms && typeof warehouse.farms === 'object' && 'name' in warehouse.farms ? warehouse.farms.name : 'Unknown Farm',
+            name: warehouse?.name || 'Unknown',
+            farm_name: warehouse?.farms?.[0]?.name || 'Unknown Farm',
           };
         }
       }
@@ -454,17 +454,12 @@ export async function createFarmerMedicineInvoice(input: CreateMedicineInvoiceIn
       return { success: false, error: 'Unauthorized - Farmer access required' };
     }
 
-    if (!profile.farms || !Array.isArray(profile.farms) || profile.farms.length === 0) {
-      return { success: false, error: 'No farms found for your account' };
+    if (!profile.farms || !profile.farms[0] || !profile.farms[0].warehouses) {
+      return { success: false, error: 'No warehouses found for your farm' };
     }
 
-    // Get all warehouses from all farms
-    const warehouseIds: string[] = [];
-    profile.farms.forEach((farm: any) => {
-      if (farm.warehouses && Array.isArray(farm.warehouses)) {
-        farm.warehouses.forEach((w: any) => warehouseIds.push(w.id));
-      }
-    });
+    // Verify that the warehouse belongs to the farmer's farm
+    const warehouseIds = profile.farms[0].warehouses.map((w: any) => w.id);
     if (!warehouseIds.includes(input.warehouse_id)) {
       return { success: false, error: 'Unauthorized - Warehouse does not belong to your farm' };
     }
@@ -548,17 +543,11 @@ export async function getFarmerMedicineInvoiceById(invoiceId: string): Promise<A
       return { success: false, error: 'Unauthorized - Farmer access required' };
     }
 
-    if (!profile.farms || !Array.isArray(profile.farms) || profile.farms.length === 0) {
-      return { success: false, error: 'No farms found for your account' };
+    if (!profile.farms || !profile.farms[0] || !profile.farms[0].warehouses) {
+      return { success: false, error: 'No warehouses found for your farm' };
     }
 
-    // Get all warehouses from all farms
-    const warehouseIds: string[] = [];
-    profile.farms.forEach((farm: any) => {
-      if (farm.warehouses && Array.isArray(farm.warehouses)) {
-        farm.warehouses.forEach((w: any) => warehouseIds.push(w.id));
-      }
-    });
+    const warehouseIds = profile.farms[0].warehouses.map((w: any) => w.id);
 
     // Get the medicine invoice
     const { data: invoice, error } = await supabase
@@ -596,8 +585,8 @@ export async function getFarmerMedicineInvoiceById(invoiceId: string): Promise<A
 
       if (warehouse) {
         warehouseInfo = {
-          name: warehouse.name || 'Unknown',
-          farm_name: warehouse.farms && typeof warehouse.farms === 'object' && 'name' in warehouse.farms ? warehouse.farms.name : 'Unknown Farm',
+          name: warehouse?.name || 'Unknown',
+          farm_name: warehouse?.farms?.[0]?.name || 'Unknown Farm',
         };
       }
     }

@@ -97,11 +97,6 @@ export function FarmerManufacturingForm() {
       const warehousesResult = await getFarmerWarehouses();
       if (warehousesResult.success && warehousesResult.data) {
         setWarehouses(warehousesResult.data);
-        
-        // تعيين المستودع تلقائيًا إذا كان هناك مستودع واحد فقط
-        if (warehousesResult.data.length === 1) {
-          setValue('warehouse_id', warehousesResult.data[0].id);
-        }
       } else if (!warehousesResult.success) {
         toast.error('لم يتم العثور على مزارع مرتبطة بحسابك. يرجى التواصل مع المسؤول لإضافة مزرعة لحسابك');
         router.push('/farmer');

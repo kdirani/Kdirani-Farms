@@ -110,11 +110,6 @@ export function FarmerInvoiceForm() {
       if (warehousesResult.success && warehousesResult.data) {
         // تم إزالة الشرط الذي يتحقق من طول المصفوفة لأن المزارع موجودة بالفعل
         setWarehouses(warehousesResult.data);
-        
-        // تعيين المستودع تلقائيًا إذا كان هناك مستودع واحد فقط
-        if (warehousesResult.data.length === 1) {
-          setValue('warehouse_id', warehousesResult.data[0].id);
-        }
       } else if (!warehousesResult.success) {
         toast.error('لم يتم العثور على مزارع مرتبطة بحسابك. يرجى التواصل مع المسؤول لإضافة مزرعة لحسابك');
         router.push('/farmer');
