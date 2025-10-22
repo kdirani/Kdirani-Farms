@@ -27,14 +27,18 @@ import {
   Egg,
   Activity,
   TrendingUp,
-  Package
+  Package,
+  Edit,
+  FileText,
+  Download,
+  AlertCircle
 } from 'lucide-react';
 import { formatDate, formatNumber } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toggleDailyReportStatus } from '@/actions/daily-report.actions';
 import { getDailyReportAttachments, type DailyReportAttachment } from '@/actions/daily-report-attachment.actions';
 import { toast } from 'sonner';
-import { FileText, Download } from 'lucide-react';
+import { EditDailyReportDialog } from '@/components/admin/daily-reports/edit-daily-report-dialog';
 
 interface DailyReport {
   id: string;
@@ -54,11 +58,15 @@ interface DailyReport {
   chicks_dead: number;
   chicks_after: number;
   feed_daily_kg: number;
-  feed_monthly_kg: number;
-  feed_ratio: number;
+  feed_cumulative_kg: number;
+  feed_conversion_rate: number;
+  feed_conversion_ratio: number;
   production_droppings: number;
   notes: string | null;
   checked: boolean;
+  status: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Farm {
@@ -85,6 +93,7 @@ export function DailyReportsView({ reports, farms, selectedFarmId, pagination }:
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<Record<string, DailyReportAttachment[]>>({});
+  const [editingReport, setEditingReport] = useState<DailyReport | null>(null);
 
   const handleFarmChange = (farmId: string) => {
     router.push(`/admin/daily-reports?farm=${farmId}`);
@@ -129,6 +138,13 @@ export function DailyReportsView({ reports, farms, selectedFarmId, pagination }:
 
   return (
     <div className="space-y-4">
+      {editingReport && (
+        <EditDailyReportDialog
+          report={editingReport}
+          onClose={() => setEditingReport(null)}
+        />
+      )}
+      
       <div className="flex items-center justify-between">
         <Select value={selectedFarmId} onValueChange={handleFarmChange}>
           <SelectTrigger className="w-64">
@@ -217,7 +233,7 @@ export function DailyReportsView({ reports, farms, selectedFarmId, pagination }:
                         <div className="flex flex-col items-end">
                           <div>{formatNumber(report.feed_daily_kg)}</div>
                           <div className="text-xs text-muted-foreground">
-                            {formatNumber(report.feed_ratio)}
+                            {formatNumber(report.feed_conversion_rate)}
                           </div>
                         </div>
                       </TableCell>
@@ -243,13 +259,23 @@ export function DailyReportsView({ reports, farms, selectedFarmId, pagination }:
                         </Button>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => toggleExpand(report.id)}
-                        >
-                          {expandedRow === report.id ? 'إخفاء' : 'التفاصيل'}
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleExpand(report.id)}
+                          >
+                            {expandedRow === report.id ? 'إخفاء' : 'التفاصيل'}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setEditingReport(report)}
+                            className="h-8 w-8"
+                          >
+                            <Edit className="h-4 w-4 text-primary" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                     {expandedRow === report.id && (
@@ -327,12 +353,12 @@ export function DailyReportsView({ reports, farms, selectedFarmId, pagination }:
                                   <span className="font-medium">{formatNumber(report.feed_daily_kg)}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">شهري (كيلو):</span>
-                                  <span className="font-medium">{formatNumber(report.feed_monthly_kg)}</span>
+                                  <span className="text-muted-foreground">تراكمي (كيلو):</span>
+                                  <span className="font-medium">{formatNumber(report.feed_cumulative_kg)}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">نسبة العلف:</span>
-                                  <span className="font-medium">{formatNumber(report.feed_ratio)}</span>
+                                  <span className="text-muted-foreground">معدل تحويل العلف:</span>
+                                  <span className="font-medium">{formatNumber(report.feed_conversion_rate)}</span>
                                 </div>
                               </CardContent>
                             </Card>
