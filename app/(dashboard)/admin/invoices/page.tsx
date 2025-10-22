@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import { getInvoicesByFarm } from '@/actions/invoice.actions';
 import { getFarms } from '@/actions/farm.actions';
+import { getClients } from '@/actions/client.actions';
+import { getWarehouses } from '@/actions/warehouse.actions';
 import { InvoicesTable } from '@/components/admin/invoices/invoices-table';
 import { InvoicesTableSkeleton } from '@/components/admin/invoices/invoices-table-skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +20,11 @@ export const metadata = {
 
 async function InvoicesContent({ farmId }: { farmId?: string }) {
   // Get farms first
-  const farmsResult = await getFarms();
+  const [farmsResult, clientsResult, warehousesResult] = await Promise.all([
+    getFarms(),
+    getClients(),
+    getWarehouses()
+  ]);
   
   if (!farmsResult.success || !farmsResult.data || farmsResult.data.length === 0) {
     return (
@@ -26,6 +32,28 @@ async function InvoicesContent({ farmId }: { farmId?: string }) {
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           لم يتم العثور على مزارع. يرجى إنشاء مزرعة أولاً.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!clientsResult.success || !clientsResult.data) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          {clientsResult.error || 'فشل في تحميل بيانات العملاء'}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!warehousesResult.success || !warehousesResult.data) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          {warehousesResult.error || 'فشل في تحميل بيانات المستودعات'}
         </AlertDescription>
       </Alert>
     );
@@ -47,10 +75,23 @@ async function InvoicesContent({ farmId }: { farmId?: string }) {
     );
   }
 
+  const invoicesWithPaymentInfo = result.data.map(inv => {
+    const invoice: any = inv; // server type may differ; normalize optional fields
+    return {
+      ...invoice,
+      warehouse_id: invoice.warehouse_id ?? null,
+      client_id: invoice.client_id ?? null,
+      payment_status: (invoice.payment_status as any) ?? 'unpaid',
+      payment_method: (invoice.payment_method as any) ?? 'cash',
+    };
+  });
+
   return (
     <InvoicesTable 
-      invoices={result.data} 
+      invoices={invoicesWithPaymentInfo}
       farms={farmsResult.data}
+      clients={clientsResult.data}
+      warehouses={warehousesResult.data}
       selectedFarmId={selectedFarmId}
     />
   );

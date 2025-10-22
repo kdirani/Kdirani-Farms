@@ -33,6 +33,7 @@ import {
 import { FileText, MoreHorizontal, Search, Plus, CheckCircle, XCircle } from 'lucide-react';
 import { CreateInvoiceDialog } from './create-invoice-dialog';
 import { DeleteInvoiceDialog } from './delete-invoice-dialog';
+import { EditInvoiceDialog } from './edit-invoice-dialog';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -41,18 +42,33 @@ interface Farm {
   name: string;
 }
 
+interface Client {
+  id: string;
+  name: string;
+  type: string;
+}
+
+interface Warehouse {
+  id: string;
+  name: string;
+  farm_id: string | null;
+}
+
 interface InvoicesTableProps {
   invoices: Invoice[];
   farms: Farm[];
+  clients: Client[];
+  warehouses: Warehouse[];
   selectedFarmId: string;
 }
 
-export function InvoicesTable({ invoices, farms, selectedFarmId }: InvoicesTableProps) {
+export function InvoicesTable({ invoices, farms, clients, warehouses, selectedFarmId }: InvoicesTableProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'buy' | 'sell'>('all');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   const handleFarmChange = (farmId: string) => {
@@ -214,6 +230,14 @@ export function InvoicesTable({ invoices, farms, selectedFarmId }: InvoicesTable
                         <DropdownMenuItem asChild>
                           <Link href={`/admin/invoices/${invoice.id}`}>عرض التفاصيل</Link>
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedInvoice(invoice);
+                            setEditDialogOpen(true);
+                          }}
+                        >
+                          تعديل الفاتورة
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => {
@@ -237,11 +261,23 @@ export function InvoicesTable({ invoices, farms, selectedFarmId }: InvoicesTable
       <CreateInvoiceDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
 
       {selectedInvoice && (
-        <DeleteInvoiceDialog
-          invoice={selectedInvoice}
-          open={deleteDialogOpen}
-          onOpenChange={setDeleteDialogOpen}
-        />
+        <>
+          <DeleteInvoiceDialog
+            invoice={selectedInvoice}
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+          />
+          <EditInvoiceDialog
+            invoice={selectedInvoice}
+            open={editDialogOpen}
+            onClose={() => {
+              setEditDialogOpen(false);
+              setSelectedInvoice(null);
+            }}
+            clients={clients}
+            warehouses={warehouses}
+          />
+        </>
       )}
     </div>
   );

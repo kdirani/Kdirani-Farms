@@ -38,10 +38,13 @@ export type CreateInvoiceInput = {
 
 export type UpdateInvoiceInput = {
   id: string;
+  invoice_number?: string;
   invoice_type?: 'buy' | 'sell';
   invoice_date?: string;
   warehouse_id?: string;
   client_id?: string;
+  payment_status?: 'paid' | 'partially_paid' | 'unpaid';
+  payment_method?: 'cash' | 'bank_transfer' | 'check';
   checked?: boolean;
   notes?: string;
 };
@@ -332,10 +335,13 @@ export async function updateInvoice(input: UpdateInvoiceInput): Promise<ActionRe
 
     const updateData: any = {};
     
+    if (input.invoice_number !== undefined) updateData.invoice_number = input.invoice_number.trim();
     if (input.invoice_type !== undefined) updateData.invoice_type = input.invoice_type;
     if (input.invoice_date !== undefined) updateData.invoice_date = input.invoice_date;
     if (input.warehouse_id !== undefined) updateData.warehouse_id = input.warehouse_id;
     if (input.client_id !== undefined) updateData.client_id = input.client_id || null;
+    if (input.payment_status !== undefined) updateData.payment_status = input.payment_status;
+    if (input.payment_method !== undefined) updateData.payment_method = input.payment_method;
     if (input.checked !== undefined) updateData.checked = input.checked;
     if (input.notes !== undefined) updateData.notes = input.notes?.trim() || null;
 
