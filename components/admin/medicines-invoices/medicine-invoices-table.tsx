@@ -4,6 +4,7 @@ import { MedicineInvoice, deleteMedicineInvoice } from '@/actions/medicine-invoi
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { CreateMedicineInvoiceDialog } from './create-medicine-invoice-dialog';
+import { EditMedicineInvoiceDialog } from './edit-medicine-invoice-dialog';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -26,13 +27,18 @@ import {
 import { Search, Plus, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface MedicineInvoicesTableProps {
   invoices: MedicineInvoice[];
 }
+
 export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
 
   const filteredInvoices = invoices.filter((invoice) => {
     return (
@@ -47,9 +53,29 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
     const result = await deleteMedicineInvoice(id);
     if (result.success) {
       toast.success('تم حذف فاتورة الأدوية بنجاح');
-      window.location.reload();
+      router.refresh();
     } else {
       toast.error(result.error || 'فشل في حذف الفاتورة');
+    }
+  };
+
+  const handleEditClick = (invoiceId: string) => {
+    setSelectedInvoiceId(invoiceId);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditDialogClose = (open: boolean) => {
+    setEditDialogOpen(open);
+    if (!open) {
+      setSelectedInvoiceId(null);
+      router.refresh();
+    }
+  };
+
+  const handleCreateDialogClose = (open: boolean) => {
+    setCreateDialogOpen(open);
+    if (!open) {
+      router.refresh();
     }
   };
 
@@ -119,6 +145,9 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
                         <DropdownMenuItem asChild>
                           <Link href={`/admin/medicines-invoices/${invoice.id}`}>عرض التفاصيل</Link>
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEditClick(invoice.id)}>
+                          تعديل الفاتورة
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => handleDelete(invoice.id, invoice.invoice_number)}
@@ -136,7 +165,18 @@ export function MedicineInvoicesTable({ invoices }: MedicineInvoicesTableProps) 
         </Table>
       </div>
 
-      <CreateMedicineInvoiceDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
+      <CreateMedicineInvoiceDialog 
+        open={createDialogOpen} 
+        onOpenChange={handleCreateDialogClose} 
+      />
+      
+      {selectedInvoiceId && (
+        <EditMedicineInvoiceDialog 
+          invoiceId={selectedInvoiceId}
+          open={editDialogOpen} 
+          onOpenChange={handleEditDialogClose} 
+        />
+      )}
     </div>
   );
 }

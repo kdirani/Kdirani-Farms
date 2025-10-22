@@ -32,11 +32,96 @@ export type CreateMedicineInvoiceInput = {
   notes?: string;
 };
 
+export type UpdateMedicineInvoiceInput = {
+  id: string;
+  invoice_number: string;
+  invoice_date: string;
+  invoice_time?: string | null;
+  warehouse_id: string;
+  poultry_status_id?: string | null;
+  notes?: string | null;
+};
+
 export type ActionResult<T = void> = {
   success: boolean;
   error?: string;
   data?: T;
 };
+
+/**
+ * Update a medicine invoice
+ */
+export async function updateMedicineInvoice(input: UpdateMedicineInvoiceInput): Promise<ActionResult<MedicineInvoice>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    if (!input.id || !input.invoice_number || !input.invoice_date || !input.warehouse_id) {
+      return { success: false, error: 'Missing required fields' };
+    }
+
+    // Check if invoice exists
+    const { data: existingInvoice, error: checkError } = await supabase
+      .from('medicine_consumption_invoices')
+      .select('id')
+      .eq('id', input.id)
+      .single();
+
+    if (checkError || !existingInvoice) {
+      return { success: false, error: 'Invoice not found' };
+    }
+
+    // Check if invoice number already exists (excluding current invoice)
+    const { data: duplicateInvoices, error: duplicateError } = await supabase
+      .from('medicine_consumption_invoices')
+      .select('id')
+      .eq('invoice_number', input.invoice_number.trim())
+      .neq('id', input.id);
+
+    if (duplicateError) {
+      console.error('Error checking duplicate invoice:', duplicateError);
+    }
+    
+    if (duplicateInvoices && duplicateInvoices.length > 0) {
+      return { success: false, error: 'Invoice number already exists' };
+    }
+
+    // Update the medicine invoice
+    const { data: invoice, error } = await supabase
+      .from('medicine_consumption_invoices')
+      .update({
+        invoice_number: input.invoice_number.trim(),
+        invoice_date: input.invoice_date,
+        invoice_time: input.invoice_time || null,
+        warehouse_id: input.warehouse_id,
+        poultry_status_id: input.poultry_status_id || null,
+        notes: input.notes?.trim() || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', input.id)
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Revalidate both admin and farmer paths
+    revalidatePath('/admin/medicines-invoices');
+    revalidatePath(`/admin/medicines-invoices/${input.id}`);
+    revalidatePath('/farmer/medicine-invoices');
+    revalidatePath(`/farmer/medicine-invoices/${input.id}`);
+    
+    return { success: true, data: invoice };
+  } catch (error) {
+    console.error('Error updating medicine invoice:', error);
+    return { success: false, error: 'Failed to update medicine invoice' };
+  }
+}
 
 /**
  * Get all medicine consumption invoices
