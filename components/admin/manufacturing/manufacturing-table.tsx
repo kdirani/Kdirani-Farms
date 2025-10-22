@@ -3,8 +3,9 @@
 import { ManufacturingInvoice, deleteManufacturingInvoice } from '@/actions/manufacturing.actions';
 import { toast } from 'sonner';
 
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatNumber } from '@/lib/utils';
 import { CreateManufacturingDialog } from './create-manufacturing-dialog';
+import { EditManufacturingDialog } from './edit-manufacturing-dialog';
 import { MoreHorizontal, Search, Plus } from 'lucide-react';
 import {
   DropdownMenu,
@@ -31,6 +32,8 @@ interface ManufacturingTableProps {
   invoices: ManufacturingInvoice[];
 }
 export function ManufacturingTable({ invoices }: ManufacturingTableProps) {
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<ManufacturingInvoice | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
@@ -116,7 +119,7 @@ export function ManufacturingTable({ invoices }: ManufacturingTableProps) {
                     ) : '-'}
                   </TableCell>
                   <TableCell className="text-right font-semibold">
-                    {invoice.quantity.toLocaleString()}
+                    {formatNumber(invoice.quantity)}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -130,6 +133,14 @@ export function ManufacturingTable({ invoices }: ManufacturingTableProps) {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
                           <Link href={`/admin/manufacturing/${invoice.id}`}>عرض التفاصيل</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedInvoice(invoice);
+                            setEditDialogOpen(true);
+                          }}
+                        >
+                          تعديل الفاتورة
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -149,6 +160,20 @@ export function ManufacturingTable({ invoices }: ManufacturingTableProps) {
       </div>
 
       <CreateManufacturingDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
+
+      {selectedInvoice && (
+        <EditManufacturingDialog
+          invoice={selectedInvoice}
+          warehouses={[]}
+          materials={[]}
+          units={[]}
+          open={editDialogOpen}
+          onClose={() => {
+            setEditDialogOpen(false);
+            setSelectedInvoice(null);
+          }}
+        />
+      )}
     </div>
   );
 }

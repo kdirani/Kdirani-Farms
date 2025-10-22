@@ -413,6 +413,65 @@ export async function deleteManufacturingInvoice(id: string): Promise<ActionResu
 }
 
 /**
+ * Update manufacturing invoice
+ */
+export async function updateManufacturingInvoice(input: {
+  id: string;
+  invoice_number?: string;
+  warehouse_id?: string;
+  blend_name?: string | null;
+  material_name_id?: string | null;
+  unit_id?: string | null;
+  quantity?: number;
+  manufacturing_date?: string;
+  manufacturing_time?: string | null;
+  notes?: string | null;
+}): Promise<ActionResult<ManufacturingInvoice>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: 'Unauthorized' };
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_role')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile || profile.user_role !== 'admin') {
+      return { success: false, error: 'Unauthorized - Admin access required' };
+    }
+
+    const updateData: any = {};
+    if (input.invoice_number !== undefined) updateData.invoice_number = input.invoice_number.trim();
+    if (input.warehouse_id !== undefined) updateData.warehouse_id = input.warehouse_id;
+    if (input.blend_name !== undefined) updateData.blend_name = input.blend_name?.trim() || null;
+    if (input.material_name_id !== undefined) updateData.material_name_id = input.material_name_id || null;
+    if (input.unit_id !== undefined) updateData.unit_id = input.unit_id || null;
+    if (input.quantity !== undefined) updateData.quantity = input.quantity;
+    if (input.manufacturing_date !== undefined) updateData.manufacturing_date = input.manufacturing_date;
+    if (input.manufacturing_time !== undefined) updateData.manufacturing_time = input.manufacturing_time || null;
+    if (input.notes !== undefined) updateData.notes = input.notes?.trim() || null;
+
+    const { data: updatedInvoice, error } = await supabase
+      .from('manufacturing_invoices')
+      .update(updateData)
+      .eq('id', input.id)
+      .select()
+      .single();
+
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath('/admin/manufacturing');
+    return { success: true, data: updatedInvoice };
+  } catch (error) {
+    console.error('Error updating manufacturing invoice:', error);
+    return { success: false, error: 'Failed to update manufacturing invoice' };
+  }
+}
+
+/**
  * Add output material to warehouse inventory (called after all input items are added)
  * This is a public function that can be called from the client
  */
